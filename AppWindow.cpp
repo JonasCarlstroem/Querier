@@ -1,32 +1,53 @@
+#ifndef _APP_WINDOW_CPP
+    #define _APP_WINDOW_CPP
+
 #include "AppWindow.h"
 
 namespace app {
-    AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) : hInst(hInstance), nShow(nCmdShow) {
-        wcEx = WNDCLASSEX();
+    AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) : m_hInst(hInstance), m_nShow(nCmdShow) {
+        m_wcEx = WNDCLASSEX();
 
-        wcEx.cbSize = sizeof(WNDCLASSEX);
-        wcEx.style = CS_HREDRAW | CS_VREDRAW;
-        wcEx.lpfnWndProc = WndProc;
-        wcEx.cbClsExtra = 0;
-        wcEx.cbWndExtra = 0;
-        wcEx.hInstance = hInstance;
-        wcEx.hIcon = LoadIcon(wcEx.hInstance, IDI_APPLICATION);
-        wcEx.hCursor = LoadCursor(NULL, IDC_ARROW);
-        wcEx.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-        wcEx.lpszMenuName = NULL;
-        wcEx.lpszClassName = szWindowClass;
-        wcEx.hIconSm = LoadIcon(wcEx.hInstance, IDI_APPLICATION);
+        m_wcEx.cbSize = sizeof(WNDCLASSEX);
+        m_wcEx.style = CS_HREDRAW | CS_VREDRAW;
+        m_wcEx.lpfnWndProc = WndProc;
+        m_wcEx.cbClsExtra = 0;
+        m_wcEx.cbWndExtra = 0;
+        m_wcEx.hInstance = hInstance;
+        m_wcEx.hIcon = LoadIcon(m_wcEx.hInstance, IDI_APPLICATION);
+        m_wcEx.hCursor = LoadCursor(NULL, IDC_ARROW);
+        m_wcEx.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+        m_wcEx.lpszMenuName = NULL;
+        m_wcEx.lpszClassName = szWindowClass;
+        m_wcEx.hIconSm = LoadIcon(m_wcEx.hInstance, IDI_APPLICATION);
 
-        if (!RegisterClassExW(&wcEx)) {
+        if (!RegisterClassExW(&m_wcEx)) {
             MessageBox(NULL,
                        _T("Call to RegisterClassEx failed!"),
                        _T("ScriptPad Desktop Application"),
                        NULL);
 
-            THROW_EXCEPTION(exception_code);
+            throw std::exception("Error registering window class");
         }
 
-        hWnd = CreateWindowEx(
+        InitializeWindow();
+    }
+
+    AppWindow::~AppWindow() {
+        m_webViewEnv->Release();
+        m_webViewCtrl->Close();
+        m_webViewCtrl = nullptr;
+        m_webView = nullptr;
+
+        m_webViewEnv = nullptr;
+    }
+
+    void AppWindow::AddWebMessageReceivedHandler(HRESULT (*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args)) {
+        WebMessage = webMessage;
+        m_customWebMessageHandler = true;
+    }
+
+    bool AppWindow::InitializeWindow() {
+        m_mainWindow = CreateWindowEx(
             WS_EX_OVERLAPPEDWINDOW,
             szWindowClass,
             szTitle,
@@ -35,123 +56,186 @@ namespace app {
             1200, 900,
             NULL,
             NULL,
-            hInstance,
+            m_hInst,
             NULL
         );
 
-        if (!hWnd) {
+        if (!m_mainWindow) {
             MessageBox(NULL,
-                       _T("Call to CreateWindow failed!"),
-                       _T("ScriptPad Desktop Application"),
-                       NULL);
+                _T("Call to CreateWindow failed!"),
+                _T("ScriptPad Desktop Application"),
+                NULL);
 
-            THROW_EXCEPTION(exception_code);
+            throw std::exception("Error when creating window");
+        }
+
+        SetWindowLongPtr(m_mainWindow, GWLP_USERDATA, (LONG_PTR)this);
+
+        return true;
+    }
+
+    bool AppWindow::Show() {
+        ShowWindow(m_mainWindow,
+            m_nShow);
+        UpdateWindow(m_mainWindow);
+
+        InitializeWebview();
+        return true;
+    }
+
+    void AppWindow::InitializeWebview() {
+        HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, nullptr, 
+            Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
+            this, 
+            &AppWindow::OnCreateEnvironmentCompleted).Get());
+
+        if (!SUCCEEDED(hr)) {
+            if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+                MessageBox(
+                    m_mainWindow,
+                    L"Couldn't find Edge intallation. "
+                    "Do you have a version installed that's compatible with this "
+                    "WebView2 SDK version?",
+                    nullptr, MB_OK);
+            }
         }
     }
 
-    bool AppWindow::show() {
-        ShowWindow(hWnd,
-                   nShow);
-        UpdateWindow(hWnd);
+    void AppWindow::RegisterEventHandlers() {
+        EventRegistrationToken token;
 
-        create_webview();
+        if (m_customWebMessageHandler) {
+            m_webView->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(WebMessage).Get(), &token);
+        }
+        else {
+            m_webView->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
+                [this](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
+                wil::unique_cotaskmem_string message;
+                args->TryGetWebMessageAsString(&message);
+
+                webview->PostWebMessageAsString(message.get());
+
+                return S_OK;
+            }).Get(), &token);
+        }
+
+        //m_webView->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
+        //    [this](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
+        //    wil::unique_cotaskmem_string message;
+        //    args->TryGetWebMessageAsString(&message);
+
+        //    Message cmd = 
+        //    //Message cmd = ParseMessage(&json::parse((std::wstring)message.get()));
+
+        //    if (cmd.respond) {
+        //        std::wstring response = GetResponse(cmd);
+        //        webview->PostWebMessageAsJson(response.c_str());
+        //    }
+
+        //    return S_OK;
+        //}
+        //).Get(), &token);
     }
 
-    void AppWindow::create_webview() {
-        CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, nullptr,
-                                                 Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-                                                 [this](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
+    HRESULT AppWindow::OnCreateEnvironmentCompleted(HRESULT result, ICoreWebView2Environment* environment) {
+        m_webViewEnv = environment;
 
-                                                     // Create a CoreWebView2Controller and get the associated CoreWebView2 whose parent is the main window hWnd
-                                                     env->CreateCoreWebView2Controller(hWnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-                                                         [this](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
-                                                             if (controller != nullptr) {
-                                                                 webviewController = controller;
-                                                                 webviewController->get_CoreWebView2(&webview);
-                                                             }
+        m_webViewEnv->CreateCoreWebView2Controller(
+            m_mainWindow, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
+            this, &AppWindow::OnCreateCoreWebView2ControllerCompleted)
+            .Get());
 
-                                                             // Add a few settings for the webview
-                                                             // The demo step is redundant since the values are the default settings
-                                                             wil::com_ptr<ICoreWebView2Settings> settings;
-                                                             webview->get_Settings(&settings);
-                                                             settings->put_IsScriptEnabled(TRUE);
-                                                             settings->put_AreDefaultScriptDialogsEnabled(TRUE);
-                                                             settings->put_IsWebMessageEnabled(TRUE);
-
-                                                             // Resize WebView to fit the bounds of the parent window
-                                                             RECT bounds;
-                                                             GetClientRect(hWnd, &bounds);
-                                                             webviewController->put_Bounds(bounds);
-
-                                                             // Schedule an async task to navigate to Bing
-                                                             webview->Navigate(L"http://localhost:5173/");
-
-                                                             // Step 4 - Navigation events
-
-                                                             // Step 5 - Scripting
-
-                                                             // Step 6 - Communication between host and web content
-                                                             EventRegistrationToken token;
-                                                             webview->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
-                                                                 [this](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
-                                                                     wil::unique_cotaskmem_string message;
-                                                                     args->TryGetWebMessageAsString(&message);
-                                                                     std::wstring data = message.get();
-                                                                     Message cmd = parse_message(json::parse(data));
-
-                                                                     if (cmd.respond) {
-                                                                         std::wstring response = get_response(cmd);
-                                                                         webview->PostWebMessageAsJson(response.c_str());
-                                                                     }
-
-                                                                     return S_OK;
-                                                                 }
-                                                             ).Get(), &token);
-
-                                                             return S_OK;
-                                                         }).Get());
-                                                     return S_OK;
-                                                 }).Get());
+        return S_OK;
     }
 
-    Message AppWindow::parse_message(json data) {
-        return data.template get<Message>();
+    HRESULT AppWindow::OnCreateCoreWebView2ControllerCompleted(HRESULT result, ICoreWebView2Controller* controller) {
+        if (result == S_OK) {
+            m_webViewCtrl = controller;
+
+            m_webViewCtrl->get_CoreWebView2(&m_webView);
+
+            wil::com_ptr<ICoreWebView2Settings> settings;
+            m_webView->get_Settings(&settings);
+            settings->put_IsScriptEnabled(TRUE);
+            settings->put_AreDefaultScriptDialogsEnabled(TRUE);
+            settings->put_IsWebMessageEnabled(TRUE);
+
+            RECT bounds;
+            GetClientRect(m_mainWindow, &bounds);
+            m_webViewCtrl->put_Bounds(bounds);
+
+            // Schedule an async task to navigate to Bing
+            m_webView->Navigate(L"http://localhost:5173/");
+
+            RegisterEventHandlers();
+        }
+        return S_OK;
     }
 
-    std::wstring AppWindow::get_response(Message cmd) {
+    Message AppWindow::ParseMessage(json* data) {
+        Message m = data->template get<Message>();
+        switch (m.cmd) {
+            case INITIALIZE:
+                break;
+            case INVOKE:
+                std::string code = m.value;
+                m.respond = true;
+                break;
+        }
+        return m;
+    }
+
+    std::wstring AppWindow::GetResponse(Message cmd) {
         return std::wstring();
     }
 
-    LRESULT CALLBACK AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-        PAINTSTRUCT ps;
-        HDC hdc;
-
+    bool AppWindow::HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* result) {
         switch (message) {
             case WM_PAINT:
+                PAINTSTRUCT ps;
+                HDC hdc;
                 hdc = BeginPaint(hWnd, &ps);
 
                 /*TextOut(hdc,
                         5, 5,
                         greeting, _tcslen(greeting));*/
 
-                EndPaint(hWnd, &ps);
-                break;
+                return EndPaint(hWnd, &ps);
             case WM_DESTROY:
                 PostQuitMessage(0);
                 break;
             case WM_SIZE:
             case WM_SIZING:
-                if (webviewController != nullptr) {
+                if (m_webViewCtrl != nullptr) {
                     RECT bounds;
                     GetClientRect(hWnd, &bounds);
-                    webviewController->put_Bounds(bounds);
+                    m_webViewCtrl->put_Bounds(bounds);
+
+                    return true;
                 }
                 break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-                break;
         }
+        return false;
+    }
 
-        return 0;
+    LRESULT CALLBACK AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+        if (auto app = (AppWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA)) {
+            LRESULT result = 0;
+            if (app->HandleWindowMessage(hWnd, message, wParam, lParam, &result)) {
+                return result;
+            }
+        }
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
+    void to_json(json& j, const Message& m) {
+        j = json{ { "cmd", m.cmd }, { "value", m.value } };
+    }
+
+    void from_json(const json& j, Message& m) {
+        j.at("cmd").get_to(m.cmd);
+        j.at("value").get_to(m.value);
     }
 }
+
+#endif

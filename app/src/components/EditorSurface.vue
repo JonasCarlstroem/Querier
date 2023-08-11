@@ -25,7 +25,6 @@ export default {
         const state = reactive({
             code: props.language.value as string
         });
-
         console.log(state);
         const editorSurface = ref<HTMLElement | null>(null);
 

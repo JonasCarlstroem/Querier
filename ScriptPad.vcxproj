@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="App_old.cpp" />
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="IPC.cpp" />

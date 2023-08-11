@@ -46,7 +46,7 @@ export default {
         ];
         const defaultLanguage = availableLanguages[0];
         const currentLanguage = toRef(defaultLanguage);
-        let code: string = "";
+        let code: string = currentLanguage.value.value;
         return {
             availableLanguages,
             defaultLanguage,
@@ -66,14 +66,11 @@ export default {
             this.currentLanguage = language;
             console.log("Causes error");
         },
-        onInvoke(a:any, b:any, c:any, d:any) {
-            console.log(a);
-            console.log(b);
-            console.log(c);
-            console.log(d);
+        onInvoke() {
+            console.log(this.code);
             const msg = {
-                command: "test",
-                value: "text"
+                cmd: "invoke",
+                value: this.code
             };
             //@ts-ignore
             window.chrome.webview.postMessage(JSON.stringify(msg));
