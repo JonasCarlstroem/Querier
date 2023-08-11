@@ -22,6 +22,7 @@ namespace app {
     static TCHAR szTitle[] = _T("Script pad desktop application");
 
     enum Command { 
+        NONE,
         INITIALIZE, 
         INVOKE 
     };
@@ -32,7 +33,7 @@ namespace app {
         });
 
     struct Message {
-        Command cmd;
+        Command cmd{ NONE };
         std::string value;
         bool respond{ 0 };
     };

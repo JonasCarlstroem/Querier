@@ -1,8 +1,15 @@
+#ifndef _APP_MAIN
+    #define _APP_MAIN
+
 #include "AppWindow.h"
+#include "NodeJS.h"
+#include <locale>
+#include <codecvt>
 
 HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args);
 app::Message ParseMessage(json*);
 std::wstring GetResponse(app::Message);
+static nodejs::NodeJS node;
 
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
@@ -30,7 +37,9 @@ HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceiv
     wil::unique_cotaskmem_string message;
     args->TryGetWebMessageAsString(&message);
 
-    app::Message cmd = ParseMessage(&json::parse((std::wstring)message.get()));
+    json data = json::parse((std::wstring)message.get());
+
+    app::Message cmd = ParseMessage(&data);
 
     if (cmd.respond) {
         std::wstring response = GetResponse(cmd);
@@ -46,7 +55,13 @@ app::Message ParseMessage(json* data) {
         case app::Command::INITIALIZE:
             break;
         case app::Command::INVOKE:
-            std::string code = msg.value;
+            std::string code_ = msg.value;
+            std::wstring code = L"";
+            //int result = MultiByteToWideChar(CP_UTF8, 0, code_.c_str(), (int)code_.length(), code.c_str(), 0);
+            //std::string code = msg.value;
+
+            node.Invoke(code);
+
             msg.respond = true;
             break;
     }
@@ -56,3 +71,5 @@ app::Message ParseMessage(json* data) {
 std::wstring GetResponse(app::Message msg) {
     return std::wstring();
 }
+
+#endif

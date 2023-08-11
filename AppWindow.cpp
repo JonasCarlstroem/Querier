@@ -118,23 +118,6 @@ namespace app {
                 return S_OK;
             }).Get(), &token);
         }
-
-        //m_webView->add_WebMessageReceived(Callback<ICoreWebView2WebMessageReceivedEventHandler>(
-        //    [this](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
-        //    wil::unique_cotaskmem_string message;
-        //    args->TryGetWebMessageAsString(&message);
-
-        //    Message cmd = 
-        //    //Message cmd = ParseMessage(&json::parse((std::wstring)message.get()));
-
-        //    if (cmd.respond) {
-        //        std::wstring response = GetResponse(cmd);
-        //        webview->PostWebMessageAsJson(response.c_str());
-        //    }
-
-        //    return S_OK;
-        //}
-        //).Get(), &token);
     }
 
     HRESULT AppWindow::OnCreateEnvironmentCompleted(HRESULT result, ICoreWebView2Environment* environment) {
@@ -229,7 +212,7 @@ namespace app {
     }
 
     void to_json(json& j, const Message& m) {
-        j = json{ { "cmd", m.cmd }, { "value", m.value } };
+        j = json{ { "cmd", m.cmd }, { "value", m.value }, { "value", m.wvalue } };
     }
 
     void from_json(const json& j, Message& m) {
