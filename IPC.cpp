@@ -1,4 +1,5 @@
 #include "IPC.h"
+#include "Util.h"
 
 namespace ipc {
     void IPC::write(const char* data) {
@@ -31,6 +32,26 @@ namespace ipc {
                 ret.append(buffer, out.gcount());
 
                 printf_s("%s", ret.c_str());
+            }
+        }
+    }
+
+    void IPC::read(std::wstring* ret) {
+        if (outputFileDesc > -1) {
+            if (outputFile != NULL) {
+                std::string re2;
+
+                char buffer[BUFSIZE];
+                while (out.read(buffer, sizeof(buffer)))
+                    re2.append(buffer, sizeof(buffer));
+                re2.append(buffer, out.gcount());
+
+                try {
+                    util::string_to_wstring(re2, ret);
+                }
+                catch (std::exception ex) {
+                    error::PrintError(L"Error converting string");
+                }
             }
         }
     }

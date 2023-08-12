@@ -1,6 +1,8 @@
 #ifndef _UTIL_CPP
 #define _UTIL_CPP
 #include "Util.h"
+#include "Error.h"
+#include <Windows.h>
 
 namespace util {
     bool dup_quotes(std::wstring* str) {
@@ -17,6 +19,48 @@ namespace util {
         }
 
         return count > 0;
+    }
+
+    bool string_to_wstring(const std::string& source, std::wstring* target) {
+        int convertResult = MultiByteToWideChar(CP_UTF8, 0, source.c_str(), (int)source.length(), NULL, 0);
+        if (convertResult <= 0) {
+#ifdef _DEBUG
+            error::PrintError(L"MultiByteToWideChar");
+#endif
+            return false;
+        }
+        else {
+            target->resize(convertResult);
+            convertResult = MultiByteToWideChar(CP_UTF8, 0, source.c_str(), (int)source.length(), target->data(), (int)target->size());
+            if (convertResult <= 0) {
+#ifdef _DEBUG
+                error::PrintError(L"MultiByteToWideChar");
+#endif
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool wstring_to_string(const std::wstring& source, std::string* target) {
+        int convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, NULL, 0, NULL, NULL);
+        if (convertResult <= 0) {
+#ifdef _DEBUG
+            error::PrintError(L"WideCharToMultiByte");
+#endif
+            return false;
+        }
+        else {
+            target->resize(convertResult);
+            convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, target->data(), (int)target->size(), NULL, NULL);
+            if (convertResult <= 0) {
+#ifdef _DEBUG
+                error::PrintError(L"WideCharToMultiByte");
+#endif
+                return false;
+            }
+        }
+        return true;
     }
 }
 

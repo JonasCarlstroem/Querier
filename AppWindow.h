@@ -34,7 +34,9 @@ namespace app {
 
     struct Message {
         Command cmd{ NONE };
-        std::string value;
+        std::string code{ 0 };
+        std::string message{ 0 };
+        std::string error{ 0 };
         bool respond{ 0 };
     };
 
@@ -43,7 +45,7 @@ namespace app {
         AppWindow(HINSTANCE, int);
         ~AppWindow();
 
-        void AddWebMessageReceivedHandler(HRESULT (*webMessage)(ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs*));
+        void AddWebMessageReceivedHandler(HRESULT (*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args));
         bool Show();
     private:
         HINSTANCE m_hInst{ 0 };

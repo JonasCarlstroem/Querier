@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="editorSurface" ref="editorSurface">
+    <div class="editorSurface" ref="editorSurface" :height="editorHeight">
 
     </div>
 </template>
@@ -11,6 +11,7 @@ import { reactive } from 'vue';
 import { toRefs } from 'vue';
 
 export default {
+    expose: ["resizeEditor"],
     props: {
         language: {
             type: Object,
@@ -21,11 +22,10 @@ export default {
         "update:code"
     ],
     setup(props) {
-        console.log(props);
         const state = reactive({
-            code: props.language.value as string
+            code: props.language.value as string,
+            editorHeight: "100%" as string
         });
-        console.log(state);
         const editorSurface = ref<HTMLElement | null>(null);
 
         return {
@@ -39,12 +39,23 @@ export default {
             console.log(this.language);
             this.editor = monaco.editor.create(this.editorSurface, {
                 value: this.code,
-                language: this.language.id
+                language: this.language.id,
+                automaticLayout: true
             });
 
             this.editor.onDidChangeModelContent((e) => {
                 const value = this.editor?.getValue();
                 this.$emit('update:code', value);
+            });
+        }
+    },
+    methods: {
+        resizeEditor() {
+            this.$nextTick(() => {
+                this.editorHeight = "50%;";
+                this.editor?.layout();
+                console.log("Next tick");
+                console.log(this.editorSurface?.style.height);
             });
         }
     },

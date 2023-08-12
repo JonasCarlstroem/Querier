@@ -3,26 +3,31 @@
 
 #include "NodeJS.h"
 #include <format>
+#include <iomanip>
+#include <filesystem>
 
 using namespace process;
 
 namespace nodejs {
-    NodeJS::NodeJS() : m_procStartInfo() {
+    NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_procStartInfo() {
         m_procStartInfo.wFileName = m_appPath;
         m_procStartInfo.RedirectStdOutput = true;
     }
 
-    void NodeJS::Invoke(std::wstring code) {
-        std::wstring finalCode = std::format(L"{0} {1}", m_arg, code);
 
+    void NodeJS::Invoke(std::wstring code, std::wstring* ret) {
+        m_procStartInfo.wCommandLine  = std::format(L"{0} '{1}'", L"-e", code);
+         
         m_procNode = Process::Run(m_procStartInfo);
-        std::wstring result;
+        m_procNode->wRead(ret);
         
     }
 
-    void NodeJS::Invoke(std::string code) {
-        std::string finalCode = std::format("{0} {1}", '-e', code);
-        m_procStartInfo.CommandLine = finalCode;
+
+    void NodeJS::Invoke(std::wstring code, std::string* ret) {
+        std::wstring finalCode = std::format(L"{0} {1}", L"-e", code);
+
+        m_procStartInfo.wCommandLine = finalCode;
         m_procNode = Process::Run(m_procStartInfo);
         std::string result;
     }

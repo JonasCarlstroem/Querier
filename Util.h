@@ -11,6 +11,8 @@ namespace util {
     };
 
     bool dup_quotes(std::wstring*);
+    bool string_to_wstring(const std::string& source, std::wstring* target);
+    bool wstring_to_string(const std::wstring& source, std::string* target);
 }
 
 #endif

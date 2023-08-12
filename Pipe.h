@@ -3,7 +3,8 @@
 #ifndef _PIPE_H
 #define _PIPE_H
 
-#include "IPC.h"
+#include <Windows.h>
+#include <stdio.h>
 #include <string>
 #include <thread>
 #include <mutex>
@@ -23,35 +24,54 @@ namespace pipe {
         HANDLE write = NULL;
     };
 
-    class ProcessPipe {
+    class Pipe {
     public:
-        ProcessPipe(SECURITY_ATTRIBUTES&, PROCESS_INFORMATION&);
-        ~ProcessPipe();
+        Pipe(SECURITY_ATTRIBUTES&, PROCESS_INFORMATION&);
+        ~Pipe();
 
-        bool redirect_io(bool, bool, STARTUPINFO&);
+        bool RedirectIO(bool, bool, STARTUPINFO&);
 
-        void write(std::string data);
-        void read();
-        void start_read();
-        void stop_read();
-        void process_started();
+        void Write(std::string data);
+        bool wRead(std::wstring*);
+        bool Read(std::string*);
+        void ProcessStarted();
 
     private:
         unsigned long dataWritten = 0, dataRead = 0;
         bool reading = false;
-        std::wstring buffer;
+        std::wstring wRetBuffer;
+        std::string retBuffer;
         std::thread evThread;
         std::mutex mutex;
         SECURITY_ATTRIBUTES& saAttr;
         PROCESS_INFORMATION& piProcInfo;
         INPUT_HANDLES hInput;
         OUTPUT_HANDLES hOutput;
-        ipc::IPC ipc;
 
-        void _redirect_input();
-        void _redirect_output();
-        void _write(const char* data);
-        void _read_loop();
+        void _Write(const char*);
+        bool _Read(std::string*);
+
+        bool _InitInput();
+        bool _InitOutput();
+
+        struct Channel {
+            int inputFileDesc = -1;
+            int outputFileDesc = -1;
+            FILE* inputFile = NULL;
+            FILE* outputFile = NULL;
+            std::ofstream in;
+            std::ifstream out;
+        } ch;
+
+        struct INPUT_HANDLES {
+            HANDLE read = NULL;
+            HANDLE write = NULL;
+        } stdIn;
+
+        struct OUTPUT_HANDLES {
+            HANDLE read = NULL;
+            HANDLE write = NULL;
+        } stdOut;
     };
 }
 

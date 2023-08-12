@@ -161,7 +161,7 @@ namespace app {
             case INITIALIZE:
                 break;
             case INVOKE:
-                std::string code = m.value;
+                std::string code = m.code;
                 m.respond = true;
                 break;
         }
@@ -212,12 +212,17 @@ namespace app {
     }
 
     void to_json(json& j, const Message& m) {
-        j = json{ { "cmd", m.cmd }, { "value", m.value }, { "value", m.wvalue } };
+        j = json{
+            { "cmd", m.cmd }, 
+            { "code", m.code },
+            { "message", m.message },
+            { "error", m.error }
+        };
     }
 
     void from_json(const json& j, Message& m) {
         j.at("cmd").get_to(m.cmd);
-        j.at("value").get_to(m.value);
+        j.at("code").get_to(m.code);
     }
 }
 

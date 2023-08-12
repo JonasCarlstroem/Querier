@@ -16,6 +16,7 @@ namespace ipc {
     public:
         void write(const char*);
         void read();
+        void read(std::wstring*);
 
         bool init_input(HANDLE*);
         bool init_output(HANDLE*);

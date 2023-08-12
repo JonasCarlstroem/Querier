@@ -39,9 +39,8 @@ namespace process {
 
         bool Start();
         void Write(std::string data);
-        void Read();
-        void Read(std::wstring*);
-        void OnOutputReceived(const wchar_t* data);
+        bool wRead(std::wstring*);
+        bool Read(std::string*);
 
         static Process* Run(const ProcessStartInfo&);
 
@@ -49,7 +48,7 @@ namespace process {
         SECURITY_ATTRIBUTES secAttr;
         PROCESS_INFORMATION procInfo;
         STARTUPINFO startupInfo;
-        pipe::ProcessPipe pipe;
+        pipe::Pipe pipe;
         BOOL bSuccess = FALSE;
         BOOL hasRedirectedIO = FALSE;
         bool eventHooked{ 0 };
@@ -58,7 +57,7 @@ namespace process {
 
         static std::vector<Process*> _processes;
 
-        void init_members();
+        void InitMembers();
 
     };
 }
