@@ -9,9 +9,13 @@
 using namespace process;
 
 namespace nodejs {
-    NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_procStartInfo() {
+    NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_procStartInfo(), m_file(m_jsFileName) {
         m_procStartInfo.wFileName = m_appPath;
         m_procStartInfo.RedirectStdOutput = true;
+    }
+
+    NodeJS::~NodeJS() {
+        
     }
 
 
@@ -19,8 +23,7 @@ namespace nodejs {
         m_procStartInfo.wCommandLine  = std::format(L"{0} '{1}'", L"-e", code);
          
         m_procNode = Process::Run(m_procStartInfo);
-        m_procNode->wRead(ret);
-        
+        m_procNode->Read(ret);
     }
 
 
@@ -30,6 +33,16 @@ namespace nodejs {
         m_procStartInfo.wCommandLine = finalCode;
         m_procNode = Process::Run(m_procStartInfo);
         std::string result;
+    }
+
+
+    void NodeJS::SyncFileContent(std::wstring content) {
+        m_file.wWriteFile(content);
+    }
+
+
+    void NodeJS::SyncFileContent(std::string content) {
+        m_file.WriteFile(content);
     }
 }
 

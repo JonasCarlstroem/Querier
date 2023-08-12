@@ -55,6 +55,9 @@ app::Message ParseMessage(json* data) {
     switch (msg.cmd) {
         case app::Command::INITIALIZE:
             break;
+        case app::Command::CODESYNC:
+            node.SyncFileContent(msg.code);
+            break;
         case app::Command::INVOKE:
             msg.respond = true;
             std::wstring code;

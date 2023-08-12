@@ -89,6 +89,10 @@ namespace process {
     }
 
 
+    bool Process::Read(std::wstring* ret) {
+        return pipe.Read(ret);
+    }
+
     bool Process::Read(std::string* ret) {
         return pipe.Read(ret);
     }

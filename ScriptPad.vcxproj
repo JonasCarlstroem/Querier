@@ -135,7 +135,7 @@
     <ClCompile Include="App_old.cpp" />
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
-    <ClCompile Include="IPC.cpp" />
+    <ClCompile Include="File.cpp" />
     <ClCompile Include="NodeJS.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Process.cpp" />
@@ -148,7 +148,7 @@
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="Error.h" />
-    <ClInclude Include="IPC.h" />
+    <ClInclude Include="File.h" />
     <ClInclude Include="NodeJS.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Process.h" />

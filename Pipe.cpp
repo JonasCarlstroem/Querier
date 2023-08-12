@@ -1,5 +1,5 @@
 #ifndef _PIPE_CPP
-    #define _PIPE_CPP
+#define _PIPE_CPP
 
 #include "Pipe.h"
 #include "Util.h"
@@ -9,10 +9,10 @@ namespace pipe {
     Pipe::Pipe(SECURITY_ATTRIBUTES& sa, PROCESS_INFORMATION& pi) : saAttr(sa), piProcInfo(pi) {}
 
     Pipe::~Pipe() {
-        CloseHandle(hInput.write);
-        CloseHandle(hInput.read);
-        CloseHandle(hOutput.write);
-        CloseHandle(hOutput.read);
+        CloseHandle(stdIn.write);
+        CloseHandle(stdIn.read);
+        CloseHandle(stdOut.write);
+        CloseHandle(stdOut.read);
     }
 
 
@@ -23,14 +23,14 @@ namespace pipe {
 
         if (input) {
             saAttr.bInheritHandle = TRUE;
-            if (!CreatePipe(&hInput.read, &hInput.write, &saAttr, 0)) {
+            if (!CreatePipe(&stdIn.read, &stdIn.write, &saAttr, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"Error CreatePipe Input");
 #endif
                 return false;
             }
 
-            if (!SetHandleInformation(hInput.write, HANDLE_FLAG_INHERIT, 0)) {
+            if (!SetHandleInformation(stdIn.write, HANDLE_FLAG_INHERIT, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"ProcessPipe::redirect_io->SetHandleInformation");
 #endif
@@ -40,19 +40,19 @@ namespace pipe {
             if (!_InitInput())
                 return false;
 
-            si.hStdInput = hInput.read;
+            si.hStdInput = stdIn.read;
         }
 
         if (output) {
             saAttr.bInheritHandle = TRUE;
-            if (!CreatePipe(&hOutput.read, &hOutput.write, &saAttr, 0)) {
+            if (!CreatePipe(&stdOut.read, &stdOut.write, &saAttr, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"Error CreatePipe Output");
 #endif
                 return false;
             }
 
-            if (!SetHandleInformation(hOutput.read, HANDLE_FLAG_INHERIT, 0)) {
+            if (!SetHandleInformation(stdOut.read, HANDLE_FLAG_INHERIT, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"ProcessPipe::redirect_io->SetHandleInformation");
 #endif
@@ -62,63 +62,97 @@ namespace pipe {
             if (!_InitOutput())
                 return false;
 
-            si.hStdOutput = hOutput.write;
-            si.hStdError = hOutput.write;
+            si.hStdOutput = stdOut.write;
+            si.hStdError = stdOut.write;
         }
 
         return input || output;
     }
 
 
+    void Pipe::wWrite(std::wstring data) {
+        _wWrite(data.c_str(), data.length());
+    }
+
+
     void Pipe::Write(std::string data) {
-        _Write(data.c_str());
+        _Write(data.c_str(), data.length());
     }
 
-
-    void Pipe::_Write(const char* data) {
-        if (ch.inputFileDesc > -1) {
-            if (ch.inputFile != NULL) {
-                const int cbData = strlen(data);
-                ch.in = std::ofstream(ch.inputFile);
-
-                if (ch.in.is_open()) {
-                    ch.in.write(data, cbData);
-                    ch.in.close();
-                }
-            }
-        }
-    }
 
     //public
     bool Pipe::wRead(std::wstring* ret) {
-        _Read(&retBuffer);
-        return util::string_to_wstring(retBuffer, ret);
+        return _wRead(ret);
+    }
+
+
+    bool Pipe::Read(std::wstring* ret) {
+        std::string buf;
+        if (_Read(&buf)) {
+            return util::string_to_wstring(buf, ret);
+        }
     }
 
     //public
     bool Pipe::Read(std::string* ret) {
-        _Read(ret);
-        return true;
+        return _Read(ret);
     }
 
-    //private
-    bool Pipe::_Read(std::string* ret) {
-        if (ch.outputFileDesc > -1) {
-            if (ch.outputFile != NULL) {
-                std::string re2;
 
-                char buffer[BUFSIZE];
-                while (ch.out.read(buffer, sizeof(buffer)))
-                    ret->append(buffer, sizeof(buffer));
-                ret->append(buffer, ch.out.gcount());
+    void Pipe::_wWrite(const wchar_t* data, int len) {
+        if (ch.win) {
+            if (ch.win.is_open()) {
+                ch.win.write(data, len);
+                ch.win.close();
             }
         }
     }
 
 
+    void Pipe::_Write(const char* data, int len) {
+        if (ch.in) {
+            if (ch.in.is_open()) {
+                ch.in.write(data, len);
+                ch.in.close();
+            }
+        }
+    }
+
+
+    //private
+    bool Pipe::_wRead(std::wstring* ret) {
+        if (ch.wout) {
+            wchar_t buffer[BUFSIZE];
+
+            while (ch.wout.read(buffer, sizeof(buffer)))
+                ret->append(buffer, sizeof(buffer));
+            ret->append(buffer, ch.wout.gcount());
+
+            delete [] buffer;
+            return true;
+        }
+        return false;
+    }
+
+
+    //private
+    bool Pipe::_Read(std::string* ret) {
+        if (ch.out) {
+            char buffer[BUFSIZE];
+
+            while (ch.out.read(buffer, sizeof(buffer)))
+                ret->append(buffer, sizeof(buffer));
+            ret->append(buffer, ch.out.gcount());
+
+            return true;
+        }
+        return false;
+    }
+
+
     void Pipe::ProcessStarted() {
-        CloseHandle(hOutput.write);
-        CloseHandle(hInput.read);
+        CloseHandle(stdOut.write);
+        CloseHandle(stdIn.read);
     }
 
 
@@ -137,6 +171,7 @@ namespace pipe {
             return false;
         }
 
+        ch.win = std::wofstream(ch.inputFile);
         ch.in = std::ofstream(ch.inputFile);
         return true;
     }
@@ -157,6 +192,7 @@ namespace pipe {
             return false;
         }
 
+        ch.wout = std::wifstream(ch.outputFile);
         ch.out = std::ifstream(ch.outputFile);
         return true;
     }

@@ -101,7 +101,7 @@ export default {
         },
         setCode(code:string) {
             this.code = code;
-            console.log(this.code);
+            this.postWebMessage({cmd: "codesync", code: this.code});
         },
         postWebMessage(message: { cmd: string, code: string }) {
             //@ts-ignore

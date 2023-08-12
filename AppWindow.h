@@ -21,14 +21,16 @@ namespace app {
     static TCHAR szWindowClass[] = _T("DesktopApp");
     static TCHAR szTitle[] = _T("Script pad desktop application");
 
-    enum Command { 
+    enum Command {
         NONE,
-        INITIALIZE, 
+        INITIALIZE,
+        CODESYNC,
         INVOKE 
     };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(Command, {
         { INITIALIZE, "initialize" },
+        { CODESYNC, "codesync" },
         { INVOKE, "invoke" }
         });
 

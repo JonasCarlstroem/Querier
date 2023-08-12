@@ -40,6 +40,7 @@ namespace process {
         bool Start();
         void Write(std::string data);
         bool wRead(std::wstring*);
+        bool Read(std::wstring*);
         bool Read(std::string*);
 
         static Process* Run(const ProcessStartInfo&);

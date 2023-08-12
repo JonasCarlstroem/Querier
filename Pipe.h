@@ -14,15 +14,6 @@
 #define BUFSIZE 4096
 
 namespace pipe {
-    struct INPUT_HANDLES {
-        HANDLE read = NULL;
-        HANDLE write = NULL;
-    };
-
-    struct OUTPUT_HANDLES {
-        HANDLE read = NULL;
-        HANDLE write = NULL;
-    };
 
     class Pipe {
     public:
@@ -31,8 +22,10 @@ namespace pipe {
 
         bool RedirectIO(bool, bool, STARTUPINFO&);
 
+        void wWrite(std::wstring data);
         void Write(std::string data);
         bool wRead(std::wstring*);
+        bool Read(std::wstring*);
         bool Read(std::string*);
         void ProcessStarted();
 
@@ -44,11 +37,11 @@ namespace pipe {
         std::thread evThread;
         std::mutex mutex;
         SECURITY_ATTRIBUTES& saAttr;
-        PROCESS_INFORMATION& piProcInfo;
-        INPUT_HANDLES hInput;
-        OUTPUT_HANDLES hOutput;
+        PROCESS_INFORMATION& piProcInfo; 
 
-        void _Write(const char*);
+        void _wWrite(const wchar_t*, int len);
+        void _Write(const char*, int len);
+        bool _wRead(std::wstring*);
         bool _Read(std::string*);
 
         bool _InitInput();
@@ -61,6 +54,8 @@ namespace pipe {
             FILE* outputFile = NULL;
             std::ofstream in;
             std::ifstream out;
+            std::wofstream win;
+            std::wifstream wout;
         } ch;
 
         struct INPUT_HANDLES {
