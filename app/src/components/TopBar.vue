@@ -14,17 +14,22 @@
                 </v-btn>
             </v-col>
         
-            <v-spacer></v-spacer>
+            <!-- <v-spacer></v-spacer> -->
 
-            <v-col cols="2">
+            <!-- <v-col cols="2">
                 <v-text-field
                         readonly
                         single-line
                         variant="plain" 
                         density="compact" >Language</v-text-field>
-            </v-col>
-            <v-col cols="3">
-                <v-select
+            </v-col> -->
+            <v-col cols="1">
+                <select name="language" id="language-select" style="width: 50px;">
+                    <option value="">--Select Language--</option>
+                    <option v-for="lang of availableLanguages" :key="'id'">
+                    </option>
+                </select>
+                <!-- <v-select
                         ref="lang"
                         density="compact"
                         variant="outlined"
@@ -32,7 +37,7 @@
                         :items="availableLanguages"
                         :item-title="'name'"
                         :item-value="'id'"
-                        v-model="currentLanguage"></v-select>
+                        v-model="currentLanguage"></v-select> -->
             </v-col>
             </v-row>
         </v-container>

@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 const hej = { cmd: "Hello!", val: "no" };
 
 function init() {

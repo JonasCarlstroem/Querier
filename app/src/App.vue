@@ -34,6 +34,7 @@ import ResultSurface from './components/ResultSurface.vue';
 import { reactive } from 'vue';
 import { toRefs } from 'vue';
 import { ref } from 'vue';
+import type { ILanguage } from './interface/ILanguage'
 
 // const editorSurface = ref<HTMLElement | null>(null);
 
