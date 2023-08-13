@@ -4,7 +4,21 @@
     #define _NODE_JS_H
 #include "Process.h"
 #include "File.h"
+#include <nlohmann/json.hpp>
+
 namespace nodejs {
+    using json = nlohmann::json;
+    enum JavaScriptType {
+        DEFAULT,
+        ESM,
+        CJS
+    };
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(JavaScriptType, {
+        {DEFAULT, "default"},
+        {ESM, "esm"},
+        {CJS, "cjs"}
+        })
     class NodeJS {
     public:
         NodeJS(std::wstring appPath);
@@ -16,6 +30,7 @@ namespace nodejs {
         void SyncFileContent(std::string);
 
     private:
+        JavaScriptType m_type{ ESM };
         std::string m_jsFileName{ "langs\\NodeJS\\_eval_.js" };
         std::wstring m_wjsFileName{ L"langs\\NodeJS\\_eval_.js" };
         file::FileHandler m_file;
