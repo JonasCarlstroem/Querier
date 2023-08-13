@@ -9,9 +9,10 @@
 using namespace process;
 
 namespace nodejs {
-    NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_procStartInfo(), m_file(m_jsFileName) {
-        m_procStartInfo.wFileName = m_appPath;
-        m_procStartInfo.RedirectStdOutput = true;
+    NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_file(m_jsFileName) {
+        m_procNode.StartInfo.wEnvironment = L"NODE_OPTIONS='--import \"./langs/NodeJS/_dump_.mjs\"'";
+        m_procNode.StartInfo.wCommandLine = std::format(L"{0} {1}", m_appPath, m_wjsFileName);
+        m_procNode.StartInfo.RedirectStdOutput = true;
     }
 
     NodeJS::~NodeJS() {
@@ -20,18 +21,16 @@ namespace nodejs {
 
 
     void NodeJS::Invoke(std::wstring code, std::wstring* ret) {
-        m_procStartInfo.wCommandLine  = std::format(L"{0} '{1}'", L"-e", code);
-         
-        m_procNode = Process::Run(m_procStartInfo);
-        m_procNode->Read(ret);
+        if (m_procNode.Start()) {
+            m_procNode.Read(ret);
+        }
     }
 
 
     void NodeJS::Invoke(std::wstring code, std::string* ret) {
-        std::wstring finalCode = std::format(L"{0} {1}", L"-e", code);
+        m_procNode.StartInfo.wCommandLine = std::format(L"{0} {1}", L"-e", code);
 
-        m_procStartInfo.wCommandLine = finalCode;
-        m_procNode = Process::Run(m_procStartInfo);
+        m_procNode.Start();
         std::string result;
     }
 

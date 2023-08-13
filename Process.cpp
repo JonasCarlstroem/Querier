@@ -25,6 +25,7 @@ namespace process {
 
 
     Process::~Process() {
+        CloseHandle(procInfo.hProcess);
         for (auto proc : _processes) {
             delete proc;
         }
@@ -40,18 +41,20 @@ namespace process {
         const wchar_t* file = StartInfo.wFileName.c_str();
         wchar_t* cmd = StartInfo.wCommandLine.data();
         const wchar_t* wd = StartInfo.wWorkingDirectory.c_str();
+        const wchar_t* env = StartInfo.wEnvironment.c_str();
 
         size_t fileLen = StartInfo.wFileName.length();
         size_t cmdLen = StartInfo.wCommandLine.length();
         size_t wdLen = StartInfo.wWorkingDirectory.length();
-        
+        size_t envLen = StartInfo.wEnvironment.length();
+
         bSuccess = CreateProcess(fileLen > 0 ? file : NULL,
             cmdLen > 0 ? cmd : NULL,
             NULL,
             NULL,
             hasRedirectedIO,
-            CREATE_NO_WINDOW,
-            NULL,
+            CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+            envLen > 0 ? (LPVOID)env : NULL,
             wdLen > 0 ? wd : NULL,
             &startupInfo,
             &procInfo);
@@ -70,10 +73,13 @@ namespace process {
             return false;
         }
         else {
-            CloseHandle(procInfo.hProcess);
+            //CloseHandle(procInfo.hProcess);
             CloseHandle(procInfo.hThread);
 
             pipe.ProcessStarted();
+
+            //WaitForSingleObject(procInfo.hProcess, INFINITE);
+
             return true;
         }
     }

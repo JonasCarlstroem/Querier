@@ -19,10 +19,10 @@ namespace pipe {
     bool Pipe::RedirectIO(bool input, bool output, STARTUPINFO& si) {
         if (input || output) {
             si.dwFlags |= STARTF_USESTDHANDLES;
+            saAttr.bInheritHandle = TRUE;
         }
 
         if (input) {
-            saAttr.bInheritHandle = TRUE;
             if (!CreatePipe(&stdIn.read, &stdIn.write, &saAttr, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"Error CreatePipe Input");
@@ -44,7 +44,6 @@ namespace pipe {
         }
 
         if (output) {
-            saAttr.bInheritHandle = TRUE;
             if (!CreatePipe(&stdOut.read, &stdOut.write, &saAttr, 0)) {
 #ifdef _DEBUG
                 error::PrintError(L"Error CreatePipe Output");
@@ -128,7 +127,6 @@ namespace pipe {
                 ret->append(buffer, sizeof(buffer));
             ret->append(buffer, ch.wout.gcount());
 
-            delete [] buffer;
             return true;
         }
         return false;
@@ -153,6 +151,7 @@ namespace pipe {
     void Pipe::ProcessStarted() {
         CloseHandle(stdOut.write);
         CloseHandle(stdIn.read);
+        CloseHandle(stdIn.write);
     }
 
 

@@ -85,6 +85,8 @@ export default {
                 }
             }
         });
+
+        this.postWebMessage({cmd: "codesync", code: this.code});
     },
     methods: {
         listen(language: { name: string, id: string, value: string }) {

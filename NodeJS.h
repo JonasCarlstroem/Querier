@@ -16,12 +16,12 @@ namespace nodejs {
         void SyncFileContent(std::string);
 
     private:
-        std::string m_jsFileName{ "_eval_.js" };
+        std::string m_jsFileName{ "langs\\NodeJS\\_eval_.js" };
+        std::wstring m_wjsFileName{ L"langs\\NodeJS\\_eval_.js" };
         file::FileHandler m_file;
         const std::wstring m_appPath{ L"C:\\Program Files\\nodejs\\node.exe" };
         const wchar_t* m_arg{ L"- e" };
-        process::Process* m_procNode{ 0 };
-        process::ProcessStartInfo m_procStartInfo{ 0 };
+        process::Process m_procNode;
 
         bool FindNodeJSInstallation();
     };

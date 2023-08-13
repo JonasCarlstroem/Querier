@@ -22,6 +22,8 @@ namespace process {
         std::vector<std::wstring> vwCommandArguments;
         std::string CommandLine;
         std::wstring wCommandLine;
+        std::string Environment;
+        std::wstring wEnvironment;
         bool RedirectStdInput = false;
         bool RedirectStdOutput = false;
         bool RedirectStdError = false;
@@ -33,6 +35,7 @@ namespace process {
     public:
         ProcessStartInfo StartInfo;
 
+        Process();
         Process(std::wstring FileName);
         Process(ProcessStartInfo startInfo);
         ~Process();
@@ -53,8 +56,6 @@ namespace process {
         BOOL bSuccess = FALSE;
         BOOL hasRedirectedIO = FALSE;
         bool eventHooked{ 0 };
-
-        Process();
 
         static std::vector<Process*> _processes;
 

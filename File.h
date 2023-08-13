@@ -33,6 +33,8 @@ namespace file {
         void WriteFile(std::string);
 
     private:
+        std::wstring m_wFileName;
+        std::string m_fileName;
         std::wofstream m_wFile;
         std::ofstream m_file;
     };
