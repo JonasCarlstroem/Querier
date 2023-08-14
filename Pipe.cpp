@@ -90,11 +90,22 @@ namespace pipe {
         if (_Read(&buf)) {
             return util::string_to_wstring(buf, ret);
         }
+        return false;
     }
 
     //public
     bool Pipe::Read(std::string* ret) {
         return _Read(ret);
+    }
+
+    void Pipe::BeginOutputRead() {
+        outputReading = true;
+        evThread = std::thread(&Pipe::_read_loop, this);
+    }
+
+    void Pipe::EndOutputRead() {
+        outputReading = false;
+        evThread.join();
     }
 
 
@@ -137,12 +148,13 @@ namespace pipe {
     bool Pipe::_Read(std::string* ret) {
         if (ch.out) {
             char buffer[BUFSIZE];
-
+            
+            ret->clear();
             while (ch.out.read(buffer, sizeof(buffer)))
                 ret->append(buffer, sizeof(buffer));
             ret->append(buffer, ch.out.gcount());
 
-            return true;
+            return ch.out.gcount() > 0;
         }
         return false;
     }
@@ -154,6 +166,17 @@ namespace pipe {
         CloseHandle(stdIn.write);
     }
 
+    void Pipe::_read_loop() {
+        std::string ret;
+        int count = 0;
+        while (outputReading) {
+            if (_Read(&ret)) {
+                OnOutputReceived(ret, &evThread);
+            }
+            count++;
+        }
+        util::print_message(std::to_wstring(count));
+    }
 
     bool Pipe::_InitInput() {
         if ((ch.inputFileDesc = _open_osfhandle((intptr_t)stdIn.write, 0)) == -1) {

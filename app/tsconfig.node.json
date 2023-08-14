@@ -7,7 +7,6 @@
     "nightwatch.conf.*",
     "playwright.config.*"
   ],
-  "files": ["src/interface/ILanguage.ts"],
   "compilerOptions": {
     "composite": true,
     "target": "ESNext",

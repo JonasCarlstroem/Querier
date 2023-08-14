@@ -9,19 +9,21 @@ import { ref } from 'vue';
 import * as monaco from 'monaco-editor';
 import { reactive } from 'vue';
 import { toRefs } from 'vue';
+import { postWebMessage } from '@/WebMessage';
 
 export default {
-    expose: ["resizeEditor"],
+    expose: ["resizeEditor", "updateCode"],
     props: {
         language: {
             type: Object,
-            default: { },
+            default: {},
         }
     },
     emits: [
         "update:code"
     ],
     setup(props) {
+        // monaco.languages.typescript.javascriptDefaults.addExtraLib()
         const state = reactive({
             code: props.language.value as string,
             editorHeight: "100%" as string
@@ -34,20 +36,49 @@ export default {
             editor: null as monaco.editor.IStandaloneCodeEditor | null
         }
     },
-    mounted() {
-        if(this.editorSurface !== null) {
-            console.log(this.language);
-            this.editor = monaco.editor.create(this.editorSurface, {
-                value: this.code,
+    async mounted() {
+        if (this.editorSurface !== null) {
+            const editorOptions = {
+                automaticLayout: true,
                 language: this.language.id,
-                automaticLayout: true
-            });
+                model: null
+            };
+
+            monaco.languages.typescript.javascriptDefaults.addExtraLib([
+                "function dump(obj: any): void {",
+                "   console.log(obj);",
+                "   return obj;",
+                "};",
+                "Object.prototype.dump = function() {",
+                "   console.log(this);",
+                "};"
+            ].join('\n'));
+
+            monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+
+            const model = monaco.editor.createModel([
+                "function dump(obj: any): any {",
+                "   console.log(obj);",
+                "   return obj",
+                "};"].join('\n'),
+                this.language.id);
+
+
+            this.editor = monaco.editor.create(this.editorSurface, editorOptions);
+
+            this.editor.setModel(model);
 
             this.editor.onDidChangeModelContent((e) => {
-                const value = this.editor?.getValue();
-                this.$emit('update:code', value);
+                if (!e.isFlush) {
+                    const value = this.editor?.getValue();
+                    this.$emit('update:code', value);
+                }
             });
+
+            console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
         }
+
+        postWebMessage({ cmd: "initialize" });
     },
     methods: {
         resizeEditor() {
@@ -57,18 +88,21 @@ export default {
                 console.log("Next tick");
                 console.log(this.editorSurface?.style.height);
             });
+        },
+        updateCode(code: string) {
+            this.editor?.setValue(code);
         }
     },
     computed: {
-        
+
     },
     watch: {
         language: {
             handler() {
                 console.log("language");
-                if(!this.editor) return;
+                if (!this.editor) return;
                 const model = this.editor.getModel();
-                if(model !== null) {
+                if (model !== null) {
                     monaco.editor.setModelLanguage(model, this.language.id);
                 }
                 this.editor.getModel()

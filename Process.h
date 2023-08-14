@@ -27,8 +27,6 @@ namespace process {
         bool RedirectStdInput = false;
         bool RedirectStdOutput = false;
         bool RedirectStdError = false;
-
-
     };
 
     class Process {
@@ -47,6 +45,9 @@ namespace process {
         bool Read(std::string*);
 
         static Process* Run(const ProcessStartInfo&);
+
+        void (*OnOutputReceived)(std::string, std::thread*);
+        void (*OnOutputRececivedWv)(ICoreWebView2*, std::string);
 
     private:
         SECURITY_ATTRIBUTES secAttr;

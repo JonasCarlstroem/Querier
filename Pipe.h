@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string>
 #include <thread>
+#include <future>
 #include <mutex>
 #include <fstream>
 #include <io.h>
@@ -21,17 +22,20 @@ namespace pipe {
         ~Pipe();
 
         bool RedirectIO(bool, bool, STARTUPINFO&);
-
         void wWrite(std::wstring data);
         void Write(std::string data);
         bool wRead(std::wstring*);
         bool Read(std::wstring*);
         bool Read(std::string*);
         void ProcessStarted();
+        void BeginOutputRead();
+        void EndOutputRead();
+
+        void (*OnOutputReceived)(std::string, std::thread*) { 0 };
 
     private:
         unsigned long dataWritten = 0, dataRead = 0;
-        bool reading = false;
+        bool outputReading = false;
         std::wstring wRetBuffer;
         std::string retBuffer;
         std::thread evThread;
@@ -43,6 +47,8 @@ namespace pipe {
         void _Write(const char*, int len);
         bool _wRead(std::wstring*);
         bool _Read(std::string*);
+
+        void _read_loop();
 
         bool _InitInput();
         bool _InitOutput();

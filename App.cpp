@@ -7,10 +7,43 @@
 #include <codecvt>
 #include "Util.h"
 
+enum Command;
+struct Message;
+
 HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args);
-app::Message ParseMessage(json*);
-std::wstring GetResponse(app::Message);
+void OnOutputReceived(std::string, std::thread*);
+void OnWebViewCreated(ICoreWebView2* webview);
+
+Message ParseMessage(json*);
+std::wstring GetResponse(Message);
+
 static nodejs::NodeJS node(L"C:\\Program Files\\nodejs\\node.exe");
+static ICoreWebView2* webview;
+
+void to_json(json&, const Message&);
+void from_json(const json&, Message&);
+
+enum Command {
+    NONE,
+    INITIALIZE,
+    CONFIG,
+    CODESYNC,
+    INVOKE
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(Command, {
+    { INITIALIZE, "initialize" },
+    { CONFIG, "config" },
+    { CODESYNC, "codesync" },
+    { INVOKE, "invoke" },
+});
+
+struct Message {
+    Command cmd{ NONE };
+    std::string message{ 0 };
+    std::string error{ 0 };
+    bool respond{ 0 };
+};
 
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
@@ -21,7 +54,8 @@ int WINAPI WinMain(
     app::AppWindow App{ hInstance, nCmdShow };
 
     App.AddWebMessageReceivedHandler(WebMessageReceived);
-
+    App.AddOnWebViewCreatedHandler(OnWebViewCreated);
+    node.SetOutputReceivedEvent(OnOutputReceived);
     if(!App.Show())
         return 0;
 
@@ -40,7 +74,7 @@ HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceiv
 
     json data = json::parse((std::wstring)message.get());
 
-    app::Message msg = ParseMessage(&data);
+    Message msg = ParseMessage(&data);
 
     if (msg.respond) {
         std::wstring response = GetResponse(msg);
@@ -50,30 +84,43 @@ HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceiv
     return S_OK;
 }
 
-app::Message ParseMessage(json* data) {
-    app::Message msg = data->template get<app::Message>();
+void OnOutputReceived(std::string ret, std::thread* th) {
+    th->join();
+    Message msg = Message{ INVOKE, ret };
+    std::wstring response = GetResponse(msg);
+    util::print_message(response);
+    webview->PostWebMessageAsJson(response.c_str());
+    util::print_message(util::string_to_wstring(ret));
+    th->detach();
+}
+
+void OnWebViewCreated(ICoreWebView2* wv) {
+    webview = wv;
+}
+
+Message ParseMessage(json* data) {
+    Message msg = data->template get<Message>();
+    std::wstring wret;
+    std::string ret;
     switch (msg.cmd) {
-        case app::Command::INITIALIZE:
-            break;
-        case app::Command::CODESYNC:
-            node.SyncFileContent(msg.code);
-            break;
-        case app::Command::INVOKE:
+        case Command::INITIALIZE:
             msg.respond = true;
-            std::wstring code;
-            if (util::string_to_wstring(msg.code, &code)) {
-                std::wstring ret;
-                node.Invoke(code, &ret);
-                if (!util::wstring_to_string(ret, &msg.message)) {
-                    msg.message = "There was an error";
-                }
-            }
+            node.GetInitialFileContent(&msg.message);
+            break;
+        case Command::CONFIG:
+            break;
+        case Command::CODESYNC:
+            node.SyncFileContent(msg.message);
+            break;
+        case Command::INVOKE:
+            //msg.respond = true;
+            node.Invoke(&msg.message);
             break;
     }
     return msg;
 }
 
-std::wstring GetResponse(app::Message msg) {
+std::wstring GetResponse(Message msg) {
     json cont = json(msg);
     std::string src = cont.dump();
     std::wstring ret;
@@ -81,6 +128,21 @@ std::wstring GetResponse(app::Message msg) {
         return ret;
 
     return std::wstring();
+}
+
+void to_json(json& j, const Message& m) {
+    j = json{
+            { "cmd", m.cmd },
+            { "message", m.message },
+            { "error", m.error }
+    };
+}
+
+void from_json(const json& j, Message& m) {
+    j.at("cmd").get_to(m.cmd);
+    if (m.cmd != INITIALIZE) {
+        j.at("message").get_to(m.message);
+    }
 }
 
 #endif

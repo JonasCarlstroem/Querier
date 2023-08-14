@@ -1,0 +1,1 @@
+﻿export declare function dump(obj: any): void;

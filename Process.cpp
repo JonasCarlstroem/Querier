@@ -54,7 +54,7 @@ namespace process {
             NULL,
             hasRedirectedIO,
             CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-            envLen > 0 ? (LPVOID)env : NULL,
+            /*envLen > 0 ? (LPVOID)env : */NULL,
             wdLen > 0 ? wd : NULL,
             &startupInfo,
             &procInfo);
@@ -78,8 +78,9 @@ namespace process {
 
             pipe.ProcessStarted();
 
-            //WaitForSingleObject(procInfo.hProcess, INFINITE);
-
+            WaitForSingleObject(procInfo.hProcess, INFINITE);
+            CloseHandle(procInfo.hProcess);
+            pipe.EndOutputRead();
             return true;
         }
     }
@@ -117,9 +118,10 @@ namespace process {
         ZeroMemory(&startupInfo, sizeof(STARTUPINFO));
 
         startupInfo.cb = sizeof(STARTUPINFO);
-
         if (pipe.RedirectIO(StartInfo.RedirectStdInput, StartInfo.RedirectStdOutput, startupInfo)) {
+            pipe.OnOutputReceived = OnOutputReceived;
             hasRedirectedIO = true;
+            pipe.BeginOutputRead();
         }
     }
 

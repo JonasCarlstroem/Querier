@@ -34,7 +34,9 @@ import ResultSurface from './components/ResultSurface.vue';
 import { reactive } from 'vue';
 import { toRefs } from 'vue';
 import { ref } from 'vue';
-import type { ILanguage } from './interface/ILanguage'
+//@ts-ignore
+import type { ILanguage } from '@/interface/ILanguage';
+import { postWebMessage } from './WebMessage';
 
 // const editorSurface = ref<HTMLElement | null>(null);
 
@@ -48,7 +50,7 @@ export default {
     setup() {
         const editorRef = ref<InstanceType<typeof EditorSurface> | null>(null);
         const resultRef = ref<InstanceType<typeof ResultSurface> | null>(null);
-        const availableLanguages = [
+        const availableLanguages: ILanguage[] = [
             { name: "JavaScript", id: "javascript", value: "function init() {\n\tconsole.log('hello')\n}" },
             { name: "TypeScript", id: "typescript", value: "function init(): void {\n\tconsole.log('hello')\n}" },
             { name: "HTML", id: "html", value: "<html>\n\t<head>\n\n</head>\n\r<body>\n\n</body>" },
@@ -73,21 +75,37 @@ export default {
             ...toRefs(state)
         };
     },
-    mounted() {
+    beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
+            console.log("Received");
+            console.log(e.data);
             const msg = e.data;
-            if(msg.message) {
-                this.result = msg.message;
+            const {cmd, message, error} = e.data;
+            switch(cmd) {
+                case "initialize":
+                    if(message) {
+                        this.code = message;
 
-                if(this.editorRef) {
-                    console.log(this.editorRef);
-                    this.editorRef.resizeEditor();
-                }
+                        if(this.editorRef) {
+                            this.editorRef.updateCode(this.code);
+                        }
+                    }
+                    break;
+                case "invoke":
+                    if(msg.message) {
+                        console.log("invoke");
+                        this.result = message;
+                        console.log(this.result);
+
+                        if(this.editorRef) {
+                            console.log(this.editorRef);
+                            this.editorRef.resizeEditor();
+                        }
+                    }
+                    break;
             }
         });
-
-        this.postWebMessage({cmd: "codesync", code: this.code});
     },
     methods: {
         listen(language: { name: string, id: string, value: string }) {
@@ -99,14 +117,14 @@ export default {
             console.log(this.code);
             this.showResult = true;
             this.editorHeight = 50;
-            this.postWebMessage({cmd: "invoke", code: this.code});
+            postWebMessage({ cmd: "invoke", message: this.code });
             this.editorRef?.resizeEditor();
         },
         setCode(code:string) {
             this.code = code;
-            this.postWebMessage({cmd: "codesync", code: this.code});
+            postWebMessage({cmd: "codesync", message: this.code});
         },
-        postWebMessage(message: { cmd: string, code: string }) {
+        postWebMessage(message: { cmd: string, message?: string }) {
             //@ts-ignore
             window.chrome.webview.postMessage(JSON.stringify(message));
         }

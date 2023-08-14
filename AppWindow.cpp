@@ -46,6 +46,19 @@ namespace app {
         m_customWebMessageHandler = true;
     }
 
+    void AppWindow::AddOnWebViewCreatedHandler(void (*OnWebViewCreatedHandler)(ICoreWebView2* webview)) {
+        OnWebViewCreated = OnWebViewCreatedHandler;
+    }
+
+    bool AppWindow::Show() {
+        ShowWindow(m_mainWindow,
+            m_nShow);
+        UpdateWindow(m_mainWindow);
+
+        InitializeWebview();
+        return true;
+    }
+
     bool AppWindow::InitializeWindow() {
         m_mainWindow = CreateWindowEx(
             WS_EX_OVERLAPPEDWINDOW,
@@ -71,15 +84,6 @@ namespace app {
 
         SetWindowLongPtr(m_mainWindow, GWLP_USERDATA, (LONG_PTR)this);
 
-        return true;
-    }
-
-    bool AppWindow::Show() {
-        ShowWindow(m_mainWindow,
-            m_nShow);
-        UpdateWindow(m_mainWindow);
-
-        InitializeWebview();
         return true;
     }
 
@@ -151,6 +155,8 @@ namespace app {
             m_webView->Navigate(L"http://localhost:5173/");
 
             RegisterEventHandlers();
+            if (OnWebViewCreated)
+                OnWebViewCreated(m_webView.get());
         }
         return S_OK;
     }

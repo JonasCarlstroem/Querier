@@ -42,6 +42,14 @@ namespace util {
         return true;
     }
 
+    std::wstring string_to_wstring(const std::string& source) {
+        std::wstring ret;
+        if (!util::string_to_wstring(source, &ret)) {
+            throw std::exception("Error converting string");
+        }
+        return ret;
+    }
+
     bool wstring_to_string(const std::wstring& source, std::string* target) {
         int convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, NULL, 0, NULL, NULL);
         if (convertResult <= 0) {
@@ -61,6 +69,22 @@ namespace util {
             }
         }
         return true;
+    }
+
+    std::string wstring_to_string(const std::wstring& source) {
+        std::string ret;
+        if (!util::wstring_to_string(source, &ret)) {
+            throw std::exception("Error converting string");
+        }
+        return ret;
+    }
+
+    void print_message(std::wstring message) {
+        MessageBox(NULL, message.c_str(), NULL, MB_OK);
+    }
+
+    void print_message(std::wstring title, std::wstring message) {
+        MessageBox(NULL, message.c_str(), title.c_str(), MB_OK);
     }
 }
 

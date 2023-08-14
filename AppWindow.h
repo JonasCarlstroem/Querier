@@ -32,7 +32,7 @@ namespace app {
         { INITIALIZE, "initialize" },
         { CODESYNC, "codesync" },
         { INVOKE, "invoke" }
-        });
+    });
 
     struct Message {
         Command cmd{ NONE };
@@ -48,7 +48,11 @@ namespace app {
         ~AppWindow();
 
         void AddWebMessageReceivedHandler(HRESULT (*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args));
+        void AddOnWebViewCreatedHandler(void (*OnWebViewCreatedHandler)(ICoreWebView2* webview));
         bool Show();
+        ICoreWebView2* get_WebView() {
+            return m_webView.get();
+        }
     private:
         HINSTANCE m_hInst{ 0 };
         WNDCLASSEX m_wcEx{ 0 };
@@ -56,6 +60,7 @@ namespace app {
         int m_nShow{ 0 };
 
         HRESULT(*WebMessage)(ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs*);
+        void (*OnWebViewCreated)(ICoreWebView2* webview);
         bool m_customWebMessageHandler{ 0 };
 
         wil::com_ptr<ICoreWebView2Environment> m_webViewEnv;
