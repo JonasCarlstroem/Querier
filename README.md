@@ -2,10 +2,10 @@
 
 Scratch pad for common programming languages.
 
-Implemented stack:
-    - Node.js
+- Implemented stack:
+    * Node.js
 
-Planned implementations:
+- Planned implementations:
     - C#
     - C++
     - Web stack (HTML, CSS, JS)
