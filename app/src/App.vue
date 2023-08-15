@@ -36,7 +36,7 @@ import { toRefs } from 'vue';
 import { ref } from 'vue';
 //@ts-ignore
 import type { ILanguage } from '@/interface/ILanguage';
-import { postWebMessage } from './WebMessage';
+import { postWebMessage, split } from './Utils';
 
 // const editorSurface = ref<HTMLElement | null>(null);
 
@@ -63,7 +63,8 @@ export default {
         const state = reactive({
             code: currentLanguage.value.value as string,
             showResult: false as boolean,
-            result: "" as string,
+            isRunning: false as boolean,
+            result: {} as any,
             editorHeight: 100 as number
         });
         return {
@@ -78,9 +79,6 @@ export default {
     beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
-            console.log("Received");
-            console.log(e.data);
-            const msg = e.data;
             const {cmd, message, error} = e.data;
             switch(cmd) {
                 case "initialize":
@@ -92,14 +90,26 @@ export default {
                         }
                     }
                     break;
-                case "invoke":
-                    if(msg.message) {
-                        console.log("invoke");
-                        this.result = message;
-                        console.log(this.result);
+                case "result":
+                    if(message) {
+                        const arr = split(message, "\n");
+                        if(this.result.strings === undefined || this.result.strings === null) {
+                            this.result.strings = [];
+                        }
+                        for(const item of arr) {
+                            try {
+                                const obj = JSON.parse(item);
+                                Object.assign(this.result, obj);
+                            }
+                            catch(ex) {
+                                console.log(ex);
+                                this.result.strings.push(item);
+                                // Object.assign(this.result, { value: item });
+                            }
+                        }
 
+                        console.log(this.result);
                         if(this.editorRef) {
-                            console.log(this.editorRef);
                             this.editorRef.resizeEditor();
                         }
                     }
@@ -114,19 +124,16 @@ export default {
             console.log("Causes error");
         },
         onInvoke() {
-            console.log(this.code);
             this.showResult = true;
             this.editorHeight = 50;
+            this.result = {};
             postWebMessage({ cmd: "invoke", message: this.code });
+            this.isRunning = true;
             this.editorRef?.resizeEditor();
         },
         setCode(code:string) {
             this.code = code;
             postWebMessage({cmd: "codesync", message: this.code});
-        },
-        postWebMessage(message: { cmd: string, message?: string }) {
-            //@ts-ignore
-            window.chrome.webview.postMessage(JSON.stringify(message));
         }
     },
     computed: {

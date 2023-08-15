@@ -27,26 +27,52 @@ namespace nodejs {
         {CLASSIC, "classic"},
         {ESM, "esm"},
         {CJS, "cjs"}
-        })
+        });
 
-    class NodeJS {
+
+    class NodeJS : public process::Process {
     public:
-        NodeJS(std::wstring appPath);
-        ~NodeJS();
-        void Initialize(app::AppWindow* mainWin);
-        void Invoke(std::wstring* ret);
-        void Invoke(std::string* ret);
+        NodeJS(std::wstring appPath) : m_appPath(appPath), m_file(m_esmFileName, std::fstream::in | std::fstream::out), mainWindow(0) {};
+        ~NodeJS() {};
 
-        void SyncFileContent(std::wstring);
-        void SyncFileContent(std::string);
+        void Initialize(app::AppWindow* mainWin) {
+            mainWindow = mainWin;
+            m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
+            SetEnv();
+            StartInfo.RedirectStdOutput = true;
 
-        void SetNodeType(NodeJSType);
+            OnOutputReceived = [this](std::string ret) {
+                app::Message* response = new app::Message{ app::AppCommand::RESULT, ret };
+                PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
+            };
+        };
 
-        void AddNodeOption(std::wstring);
+        void Invoke() {
+            StartInfo.wCommandLine = std::format(L"{0} {1}", m_appPath, *m_activeFileName);
+            Start();
+        };
 
-        bool GetInitialFileContent(std::string*);
+        void SyncFileContent(std::wstring content) {
+            m_file.wWriteFile(content);
+        };
 
-        void SetOutputReceivedEvent(void (*OnOutputReceived)(std::string ret, std::thread*));
+        void SyncFileContent(std::string content) {
+            m_file.WriteFile(content);
+        };
+
+        void SetNodeType(NodeJSType) {
+        
+        };
+
+        void AddNodeOption(std::wstring option) {
+            if (!SetEnvironmentVariable(L"NODE_OPTIONS", option.c_str())) {
+                error::PrintError(L"SetEnvironmentVariable");
+            }
+        };
+
+        bool GetInitialFileContent(std::string* ret) {
+            return m_file.ReadFile(ret);
+        };
 
     private:
         app::AppWindow* mainWindow;
@@ -58,11 +84,17 @@ namespace nodejs {
         std::wstring* m_activeFileName = &m_esmFileName;
         file::FileHandler m_file;
         std::wstring m_appPath{ L"C:\\Program Files\\nodejs\\node.exe" };
-        process::Process m_procNode;
 
         std::vector<Env> m_nodeEnv;
 
-        void SetEnv();
+        void SetEnv() {
+            for (auto it = m_nodeEnv.begin(); it < m_nodeEnv.end(); it++) {
+                if (!SetEnvironmentVariable(it->key.c_str(), it->value.c_str())) {
+                    error::PrintError(L"SetEnvironmentVariable");
+                }
+            }
+        };
+
         bool FindNodeJSInstallation();
     };
 }

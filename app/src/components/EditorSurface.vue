@@ -9,7 +9,7 @@ import { ref } from 'vue';
 import * as monaco from 'monaco-editor';
 import { reactive } from 'vue';
 import { toRefs } from 'vue';
-import { postWebMessage } from '@/WebMessage';
+import { postWebMessage } from '@/Utils';
 
 export default {
     expose: ["resizeEditor", "updateCode"],
@@ -45,13 +45,8 @@ export default {
             };
 
             monaco.languages.typescript.javascriptDefaults.addExtraLib([
-                "function dump(obj: any): void {",
-                "   console.log(obj);",
-                "   return obj;",
-                "};",
-                "Object.prototype.dump = function() {",
-                "   console.log(this);",
-                "};"
+                "function dump(obj: any): void;",
+                "function sleep(ms: Number): void;"
             ].join('\n'));
 
             monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
@@ -83,11 +78,11 @@ export default {
     methods: {
         resizeEditor() {
             this.$nextTick(() => {
-                this.editorHeight = "50%;";
-                this.editor?.layout();
                 console.log("Next tick");
                 console.log(this.editorSurface?.style.height);
             });
+            // this.editorHeight = "50%;";
+            this.editor?.layout();
         },
         updateCode(code: string) {
             this.editor?.setValue(code);

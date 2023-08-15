@@ -2,8 +2,10 @@
     #define _APP_WINDOW_CPP
 
 #include "AppWindow.h"
+#include <memory>
 
 namespace app {
+    using json = nlohmann::json;
     AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) : m_hInst(hInstance), m_nShow(nCmdShow) {
         m_wcEx = WNDCLASSEX();
 
@@ -161,7 +163,7 @@ namespace app {
         return S_OK;
     }
 
-    Message AppWindow::ParseMessage(json* data) {
+    /*Message AppWindow::ParseMessage(json* data) {
         Message m = data->template get<Message>();
         switch (m.cmd) {
             case INITIALIZE:
@@ -172,11 +174,7 @@ namespace app {
                 break;
         }
         return m;
-    }
-
-    std::wstring AppWindow::GetResponse(Message cmd) {
-        return std::wstring();
-    }
+    }*/
 
     bool AppWindow::HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* result) {
         switch (message) {
@@ -184,10 +182,6 @@ namespace app {
                 PAINTSTRUCT ps;
                 HDC hdc;
                 hdc = BeginPaint(hWnd, &ps);
-
-                /*TextOut(hdc,
-                        5, 5,
-                        greeting, _tcslen(greeting));*/
 
                 return EndPaint(hWnd, &ps);
             case WM_DESTROY:
@@ -203,6 +197,12 @@ namespace app {
                     return true;
                 }
                 break;
+            case WM_WEBVIEW: 
+                Message* data = (Message*)wParam;
+                std::wstring response = GetResponse(*data);
+                m_webView->PostWebMessageAsJson(response.c_str());
+                return true;
+
         }
         return false;
     }
@@ -220,7 +220,6 @@ namespace app {
     void to_json(json& j, const Message& m) {
         j = json{
             { "cmd", m.cmd }, 
-            { "code", m.code },
             { "message", m.message },
             { "error", m.error }
         };
@@ -228,7 +227,9 @@ namespace app {
 
     void from_json(const json& j, Message& m) {
         j.at("cmd").get_to(m.cmd);
-        j.at("code").get_to(m.code);
+        if (m.cmd != INITIALIZE) {
+            j.at("message").get_to(m.message);
+        }
     }
 }
 

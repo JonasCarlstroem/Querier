@@ -4,7 +4,11 @@
             Result
 
             <div class="result" v-if="_hasResult">
-                {{ result }}
+                <!-- <span style="white-space: pre">{{ result }}</span> -->
+
+                <div v-for="(value, key) of _items">
+                    {{ key }}: {{ value }}
+                </div>
             </div>
         </div>
     </div>
@@ -18,13 +22,33 @@ export default {
             default: false
         },
         result: {
-            type: String,
+            type: Object,
             default: null
         }
     },
     computed: {
         _hasResult() {
             return this.hasResult;
+        },
+
+        _items() {
+            return this.result ?? null;
+        },
+
+        resultObject() {
+            if(this.result) {
+                try {
+                    console.log(this.result);
+                    // const obj = JSON.parse(this.result.substring(0, this.result.indexOf("\n")));
+                    // console.log(obj);
+                    return null;
+                }
+                catch(exception) {
+                    console.log("Error");
+                    console.log(exception);
+                }
+            }
+            return null;
         }
     }
 }

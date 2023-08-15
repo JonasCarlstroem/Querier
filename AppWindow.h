@@ -1,9 +1,11 @@
 #pragma once
 
 #ifndef _APP_WINDOW_H
-    #define _APP_WINDOW_H
+#define _APP_WINDOW_H
 
-#define JSON_DISABLE_ENUM_SERIALIZATION 0
+#define WM_WEBVIEW (WM_USER + 100)
+
+#include "Util.h"
 #include <Windows.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,41 +15,47 @@
 #include "WebView2.h"
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
 using namespace Microsoft::WRL;
 
 namespace app {
+    using json = nlohmann::json;
 
     static TCHAR szWindowClass[] = _T("DesktopApp");
     static TCHAR szTitle[] = _T("Script pad desktop application");
 
-    enum Command {
+    enum AppCommand {
         NONE,
         INITIALIZE,
+        CONFIG,
         CODESYNC,
-        INVOKE 
+        INVOKE,
+        RESULT
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(Command, {
+    NLOHMANN_JSON_SERIALIZE_ENUM(AppCommand, {
         { INITIALIZE, "initialize" },
+        { CONFIG, "config" },
         { CODESYNC, "codesync" },
-        { INVOKE, "invoke" }
+        { INVOKE, "invoke" },
+        { RESULT, "result" }
     });
 
     struct Message {
-        Command cmd{ NONE };
-        std::string code{ 0 };
+        AppCommand cmd{ NONE };
         std::string message{ 0 };
         std::string error{ 0 };
         bool respond{ 0 };
     };
+
+    void to_json(json&, const Message&);
+    void from_json(const json&, Message&);
 
     class AppWindow {
     public:
         AppWindow(HINSTANCE, int);
         ~AppWindow();
 
-        void AddWebMessageReceivedHandler(HRESULT (*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args));
+        void AddWebMessageReceivedHandler(HRESULT(*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args));
         void AddOnWebViewCreatedHandler(void (*OnWebViewCreatedHandler)(ICoreWebView2* webview));
         bool Show();
         ICoreWebView2* get_WebView() {
@@ -55,6 +63,16 @@ namespace app {
         }
         HWND get_MainWindow() {
             return m_mainWindow;
+        }
+
+        static std::wstring GetResponse(app::Message msg) {
+            json cont = json(msg);
+            std::string src = cont.dump();
+            std::wstring ret;
+            if (util::string_to_wstring(src, &ret))
+                return ret;
+
+            return std::wstring();
         }
     private:
         HINSTANCE m_hInst{ 0 };
@@ -75,15 +93,14 @@ namespace app {
         void RegisterEventHandlers();
         HRESULT OnCreateEnvironmentCompleted(HRESULT result, ICoreWebView2Environment* environment);
         HRESULT OnCreateCoreWebView2ControllerCompleted(HRESULT result, ICoreWebView2Controller* controller);
-        Message ParseMessage(json*);
-        std::wstring GetResponse(Message);
+        //Message ParseMessage(json*);
+        //std::wstring GetResponse(Message);
 
         bool HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* result);
         static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
     };
 
-    void to_json(json&, const Message&);
-    void from_json(const json&, Message&);
+    
 } //namespace app
 
 #endif
