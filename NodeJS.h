@@ -4,6 +4,7 @@
     #define _NODE_JS_H
 #include "Process.h"
 #include "File.h"
+#include "AppWindow.h"
 #include "WebView2.h"
 #include <nlohmann/json.hpp>
 
@@ -32,6 +33,7 @@ namespace nodejs {
     public:
         NodeJS(std::wstring appPath);
         ~NodeJS();
+        void Initialize(app::AppWindow* mainWin);
         void Invoke(std::wstring* ret);
         void Invoke(std::string* ret);
 
@@ -47,6 +49,8 @@ namespace nodejs {
         void SetOutputReceivedEvent(void (*OnOutputReceived)(std::string ret, std::thread*));
 
     private:
+        app::AppWindow* mainWindow;
+
         NodeJSType m_type{ ESM };
         std::wstring m_esmFileName{ L"langs\\NodeJS\\_eval_.mjs" };
         std::wstring m_cjsFileName{ L"langs\\NodeJS\\_eval_.cjs" };

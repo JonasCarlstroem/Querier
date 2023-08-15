@@ -53,6 +53,9 @@ namespace app {
         ICoreWebView2* get_WebView() {
             return m_webView.get();
         }
+        HWND get_MainWindow() {
+            return m_mainWindow;
+        }
     private:
         HINSTANCE m_hInst{ 0 };
         WNDCLASSEX m_wcEx{ 0 };

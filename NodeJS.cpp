@@ -11,13 +11,18 @@ using namespace process;
 
 namespace nodejs {
     NodeJS::NodeJS(std::wstring appPath) : m_appPath(appPath), m_file(m_esmFileName, std::fstream::in | std::fstream::out) {
-        m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
-        SetEnv();
-        m_procNode.StartInfo.RedirectStdOutput = true;
+        
     }
 
     NodeJS::~NodeJS() {
         
+    }
+
+    void NodeJS::Initialize(app::AppWindow* mainWin) {
+        mainWindow = mainWin;
+        m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
+        SetEnv();
+        m_procNode.StartInfo.RedirectStdOutput = true;
     }
 
     void NodeJS::Invoke(std::wstring* ret) {
