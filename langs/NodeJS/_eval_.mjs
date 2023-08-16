@@ -8,7 +8,7 @@ function init(obj) {
 } 
 
 init.dump();
-// sleep(2000);
+sleep(2000);
 dump("Hello!");
 "Hello!".dump();
 a.dump();

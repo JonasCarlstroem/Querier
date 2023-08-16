@@ -80,6 +80,28 @@ export default {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
             const {cmd, message, error} = e.data;
+            this.handleCommand(cmd, message, error);
+        });
+    },
+    methods: {
+        listen(language: { name: string, id: string, value: string }) {
+            console.log("Listener from App");
+            this.currentLanguage = language;
+            console.log("Causes error");
+        },
+        onInvoke() {
+            this.showResult = true;
+            this.editorHeight = 50;
+            this.result = {};
+            postWebMessage({ cmd: "invoke", message: this.code });
+            this.isRunning = true;
+            this.editorRef?.resizeEditor();
+        },
+        setCode(code:string) {
+            this.code = code;
+            postWebMessage({cmd: "codesync", message: this.code});
+        },
+        handleCommand(cmd: string, message: string, error: string) {
             switch(cmd) {
                 case "initialize":
                     if(message) {
@@ -115,25 +137,6 @@ export default {
                     }
                     break;
             }
-        });
-    },
-    methods: {
-        listen(language: { name: string, id: string, value: string }) {
-            console.log("Listener from App");
-            this.currentLanguage = language;
-            console.log("Causes error");
-        },
-        onInvoke() {
-            this.showResult = true;
-            this.editorHeight = 50;
-            this.result = {};
-            postWebMessage({ cmd: "invoke", message: this.code });
-            this.isRunning = true;
-            this.editorRef?.resizeEditor();
-        },
-        setCode(code:string) {
-            this.code = code;
-            postWebMessage({cmd: "codesync", message: this.code});
         }
     },
     computed: {

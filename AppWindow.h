@@ -32,6 +32,12 @@ namespace app {
         RESULT
     };
 
+    enum ResultType {
+        NORESULT,
+        ISSUCCESS,
+        ISERROR
+    };
+
     NLOHMANN_JSON_SERIALIZE_ENUM(AppCommand, {
         { INITIALIZE, "initialize" },
         { CONFIG, "config" },
@@ -40,8 +46,15 @@ namespace app {
         { RESULT, "result" }
     });
 
+    NLOHMANN_JSON_SERIALIZE_ENUM(ResultType, {
+        { NORESULT, "noresult" },
+        { ISSUCCESS, "success" },
+        { ISERROR, "error" }
+    });
+
     struct Message {
         AppCommand cmd{ NONE };
+        ResultType resultType{ NORESULT };
         std::string message{ 0 };
         std::string error{ 0 };
         bool respond{ 0 };
@@ -100,7 +113,7 @@ namespace app {
         static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
     };
 
-    
+
 } //namespace app
 
 #endif

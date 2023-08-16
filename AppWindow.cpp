@@ -220,6 +220,7 @@ namespace app {
     void to_json(json& j, const Message& m) {
         j = json{
             { "cmd", m.cmd }, 
+            { "resultType", m.resultType },
             { "message", m.message },
             { "error", m.error }
         };

@@ -40,15 +40,27 @@ namespace nodejs {
             m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
             SetEnv();
             StartInfo.RedirectStdOutput = true;
+            StartInfo.RedirectStdError = true;
 
             OnOutputReceived = [this](std::string ret) {
-                app::Message* response = new app::Message{ app::AppCommand::RESULT, ret };
+                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISSUCCESS, ret };
+                PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
+            };
+
+            OnErrorReceived = [this](std::string ret) {
+                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISERROR, ret };
                 PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
             };
         };
 
         void Invoke() {
             StartInfo.wCommandLine = std::format(L"{0} {1}", m_appPath, *m_activeFileName);
+            OnProcessExited = [this]() -> void {
+                EndOutputRead();
+                EndErrorRead();
+            };
+            BeginOutputRead();
+            BeginErrorRead();
             Start();
         };
 

@@ -7,6 +7,7 @@
 
 #include "Pipe.h"
 #include "Error.h"
+#include "Stopwatch.h"
 #include <Windows.h>
 #include <tchar.h>
 #include <string>
@@ -31,36 +32,36 @@ namespace process {
         bool RedirectStdError = false;
     };
 
-    class Process {
+    class Process : public pipe::Pipe {
     public:
         ProcessStartInfo StartInfo;
+        bool ProcessHasExited;
 
-        Process() : secAttr(), procInfo(), pipe(secAttr, procInfo), startupInfo(), StartInfo() {
-            secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-            secAttr.lpSecurityDescriptor = NULL;
-            secAttr.bInheritHandle = FALSE;
+        Process() : m_secAttr(), m_procInfo(), m_startupInfo(), StartInfo(), Pipe(m_secAttr, m_procInfo) {
+            m_secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+            m_secAttr.lpSecurityDescriptor = NULL;
+            m_secAttr.bInheritHandle = FALSE;
         };
 
         Process(std::wstring FileName) : Process() {
             StartInfo.wFileName = FileName;
         };
 
-        Process(ProcessStartInfo startInfo) : secAttr(), procInfo(), pipe(secAttr, procInfo), startupInfo(), StartInfo(startInfo) {
-            secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-            secAttr.lpSecurityDescriptor = NULL;
-            secAttr.bInheritHandle = FALSE;
+        Process(ProcessStartInfo startInfo) : m_secAttr(), m_procInfo(), m_startupInfo(), StartInfo(startInfo), Pipe(m_secAttr, m_procInfo) {
+            m_secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+            m_secAttr.lpSecurityDescriptor = NULL;
+            m_secAttr.bInheritHandle = FALSE;
         };
 
         ~Process() {
-            CloseHandle(procInfo.hProcess);
+            //CloseHandle(m_procInfo.hProcess);
             for (auto proc : _processes) {
                 delete proc;
             }
         };
 
         bool Start() {
-            if (&StartInfo.wFileName == nullptr)
-                return false;
+            _processes.push_back(this);
 
             InitMembers();
 
@@ -74,86 +75,108 @@ namespace process {
             size_t wdLen = StartInfo.wWorkingDirectory.length();
             size_t envLen = StartInfo.wEnvironment.length();
 
-            bSuccess = CreateProcess(fileLen > 0 ? file : NULL,
-                cmdLen > 0 ? cmd : NULL,
-                NULL,
-                NULL,
-                hasRedirectedIO,
-                CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-                /*envLen > 0 ? (LPVOID)env : */NULL,
-                wdLen > 0 ? wd : NULL,
-                &startupInfo,
-                &procInfo);
+            stopWatch.Start();
 
+            if (CreateProcess(fileLen > 0 ? file : NULL,
+                              cmdLen > 0 ? cmd : NULL,
+                              NULL,
+                              NULL,
+                              m_hasRedirectedIO,
+                              CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                              /*envLen > 0 ? (LPVOID)env : */NULL,
+                              wdLen > 0 ? wd : NULL,
+                              &m_startupInfo,
+                              &m_procInfo)) {
+                m_isRunning = true;
+                HANDLE hWait = NULL;
+                HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+                struct CTX {
+                    HANDLE hEv;
+                    HANDLE hProc;
+                    Process* proc;
+                    stopwatch::Stopwatch sw;
+                } *ctx = new CTX{ hEvent, m_procInfo.hProcess, this, stopWatch };
+
+                if (!RegisterWaitForSingleObject(&hWait, m_procInfo.hProcess, [](void* ctx, BOOLEAN timerOrWait) -> void {
+                    CTX* context = (CTX*)ctx;
+                    context->sw.Stop();
+                    CloseHandle(context->hProc);
+                    context->proc->ProcessHasExited = true;
+                    context->proc->OnProcessExited();
+
+                    delete ctx;
+
+                }, ctx, INFINITE, WT_EXECUTEONLYONCE)) {
+                    stopWatch.Stop();
 #ifdef _DEBUG
-            DWORD eCode;
-            if (!GetExitCodeProcess(procInfo.hProcess, &eCode))
-                error::PrintError(L"GetExitCodeProcess");
+                    error::PrintError(L"RegisterWaitForSingleObject");
 #endif
+                    return false;
+                }
 
-
-            if (!bSuccess) {
-#ifdef _DEBUG
-                error::PrintError(_T("Error creating process"));
-#endif
-                return false;
+                CloseHandle(m_procInfo.hThread);
+                ProcessStarted();
+                return true;
             }
             else {
-                //CloseHandle(procInfo.hProcess);
-                CloseHandle(procInfo.hThread);
-
-                pipe.ProcessStarted();
-
-                WaitForSingleObject(procInfo.hProcess, INFINITE);
-                CloseHandle(procInfo.hProcess);
-                pipe.EndOutputRead();
-                return true;
+#ifdef _DEBUG
+                DWORD eCode;
+                if (!GetExitCodeProcess(m_procInfo.hProcess, &eCode))
+                    error::PrintError(L"GetExitCodeProcess");
+#endif
+                return false;
             }
         };
 
         void Write(std::string data) {
-            pipe.Write(data);
+            Pipe::WriteInput(data);
         };
-        bool wRead(std::wstring* ret) {
-            return pipe.wRead(ret);
-        };
+
         bool Read(std::wstring* ret) {
-            return pipe.Read(ret);
+            return Pipe::ReadOutput(ret);
         };
+
         bool Read(std::string* ret) {
-            return pipe.Read(ret);
+            return Pipe::ReadOutput(ret);
         };
+
+        double get_ElapsedTimeInMilliseconds() {
+            return stopWatch.elapsedMilliSeconds();
+        }
+
+        double get_ElapsedTimeInSeconds() {
+            return stopWatch.elapsedSeconds();
+        }
 
         static Process* Run(const ProcessStartInfo& startInfo) {
             Process* proc = new Process(startInfo);
-            _processes.push_back(proc);
             proc->Start();
             return proc;
         };
 
-        std::function<void(std::string)> OnOutputReceived;
+        std::function<void()> OnProcessExited{ 0 };
 
     private:
-        SECURITY_ATTRIBUTES secAttr;
-        PROCESS_INFORMATION procInfo;
-        STARTUPINFO startupInfo;
-        pipe::Pipe pipe;
-        BOOL bSuccess = FALSE;
-        BOOL hasRedirectedIO = FALSE;
-        bool eventHooked{ 0 };
+        stopwatch::Stopwatch stopWatch;
+        SECURITY_ATTRIBUTES m_secAttr;
+        PROCESS_INFORMATION m_procInfo;
+        STARTUPINFO m_startupInfo;
+        bool m_bSuccess = FALSE,
+             m_hasRedirectedIO = FALSE,
+             m_isRunning = FALSE;
 
         static std::vector<Process*> _processes;
 
         void InitMembers() {
-            ZeroMemory(&procInfo, sizeof(PROCESS_INFORMATION));
-            ZeroMemory(&startupInfo, sizeof(STARTUPINFO));
+            ZeroMemory(&m_procInfo, sizeof(PROCESS_INFORMATION));
+            ZeroMemory(&m_startupInfo, sizeof(STARTUPINFO));
 
-            startupInfo.cb = sizeof(STARTUPINFO);
-            if (pipe.RedirectIO(StartInfo.RedirectStdInput, StartInfo.RedirectStdOutput, startupInfo)) {
-                pipe.OnOutputReceived = OnOutputReceived;
-                hasRedirectedIO = true;
-                pipe.BeginOutputRead();
-            }
+            m_startupInfo.cb = sizeof(STARTUPINFO);
+            m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
+                                         StartInfo.RedirectStdOutput,
+                                         StartInfo.RedirectStdError,
+                                         m_startupInfo);
         };
 
     };
