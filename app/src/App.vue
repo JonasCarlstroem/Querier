@@ -4,21 +4,18 @@
             <ActionBar />
         </div>
         <div class="main">
-            <TopBar
-                :available-languages="availableLanguages" 
-                v-model:active-language="currentLanguage"
-                @update:active-language="listen"
-                @invoke="onInvoke"/>
+            <TopBar :available-languages="availableLanguages" v-model:active-language="currentLanguage"
+                @update:active-language="listen" @invoke="onInvoke" />
             <div class="surface">
                 <div class="editor" v-bind:style="`height: ${editorHeight}%;`">
-                    <EditorSurface ref="editorRef"
-                        :language="currentLanguage"
-                        v-on:update:code="setCode"/>
+                    <EditorSurface ref="editorRef" :language="currentLanguage" v-on:update:code="setCode" />
                 </div>
                 <div class="result" v-if="showResult">
-                    <ResultSurface ref="resultRef"
+                    <ResultSurface ref="resultRef" 
                         :hasResult="showResult" 
-                        :result="result"/>
+                        :result="result"
+                        :hasError="hasError"
+                        :error="error" />
                 </div>
             </div>
         </div>
@@ -65,6 +62,8 @@ export default {
             showResult: false as boolean,
             isRunning: false as boolean,
             result: {} as any,
+            hasError: false as boolean,
+            error: {} as any,
             editorHeight: 100 as number
         });
         return {
@@ -79,8 +78,8 @@ export default {
     beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
-            const {cmd, message, error} = e.data;
-            this.handleCommand(cmd, message, error);
+            const { cmd, resultType, message, error } = e.data;
+            this.handleCommand(cmd, resultType, message, error);
         });
     },
     methods: {
@@ -93,55 +92,122 @@ export default {
             this.showResult = true;
             this.editorHeight = 50;
             this.result = {};
+            this.error = {};
             postWebMessage({ cmd: "invoke", message: this.code });
             this.isRunning = true;
             this.editorRef?.resizeEditor();
         },
-        setCode(code:string) {
+        setCode(code: string) {
             this.code = code;
-            postWebMessage({cmd: "codesync", message: this.code});
+            postWebMessage({ cmd: "codesync", message: this.code });
         },
-        handleCommand(cmd: string, message: string, error: string) {
-            switch(cmd) {
+        handleCommand(cmd: string, resultType: string, message: string, error: string) {
+            switch (cmd) {
                 case "initialize":
-                    if(message) {
+                    if (message) {
                         this.code = message;
 
-                        if(this.editorRef) {
+                        if (this.editorRef) {
                             this.editorRef.updateCode(this.code);
                         }
                     }
                     break;
                 case "result":
-                    if(message) {
-                        const arr = split(message, "\n");
-                        if(this.result.strings === undefined || this.result.strings === null) {
-                            this.result.strings = [];
-                        }
-                        for(const item of arr) {
-                            try {
-                                const obj = JSON.parse(item);
-                                Object.assign(this.result, obj);
-                            }
-                            catch(ex) {
-                                console.log(ex);
-                                this.result.strings.push(item);
-                                // Object.assign(this.result, { value: item });
-                            }
-                        }
+                    this.handleResult(resultType, message, error);
+                    break;
+            }
+        },
 
-                        console.log(this.result);
-                        if(this.editorRef) {
+        handleResult(resultType: string, message: string, error: string) {
+            switch (resultType) {
+                case "success":
+                    if (message) {
+                        console.log(message);
+                        // this.result = message;
+                        if(this.result.strings === undefined || this.result.strings === null)
+                            this.result.strings = [];
+
+                        if(this.result.functions === undefined || this.result.functions === null)
+                            this.result.functions = [];
+
+                        if(this.result.objects === undefined || this.result.functions === null)
+                            this.result.objects = [];
+
+                        this.setResult(message);
+
+                        if (this.editorRef) {
                             this.editorRef.resizeEditor();
                         }
                     }
                     break;
+                case "error":
+                    if (error) {
+                        this.hasError = true;
+                        if(this.error.strings === undefined || this.error.strings === null)
+                            this.error.strings = [];
+
+                        if(this.error.functions === undefined || this.error.functions === null)
+                            this.error.functions = [];
+
+                        if(this.error.objects === undefined || this.error.objects === null)
+                            this.error.objects = [];
+
+                        this.setError(error);
+                    }
+                    break;
+            }
+        },
+
+        setResult(message: string) {
+            const arr = split(message, "\n");
+            for(const item of arr) {
+                console.log(item);
+                const obj = JSON.parse(item);
+
+                if(obj.hasOwnProperty("object")) {
+                    this.result.objects.push(obj.object);
+                }
+                else if(obj.hasOwnProperty("function")) {
+                    this.result.functions.push(obj.function);
+                }
+                else if(obj.hasOwnProperty("string")) {
+                    this.result.strings.push(obj.string);
+                }
+                console.log(obj);
+            }
+            // const msg = JSON.parse(message);
+            console.log(this.result);
+            
+            // for (const item of arr) {
+            //     try {
+            //         const obj = JSON.parse(item);
+            //         Object.assign(this.result, { objects: obj });
+            //     }
+            //     catch (ex) {
+            //         this.result.strings.push(item);
+            //         // Object.assign(this.result, { value: item });
+            //     }
+            // }
+        },
+        setError(error: string) {
+            const arr = split(error, "\n");
+            for(const item of arr) {
+                try {
+                    const obj = JSON.parse(item);
+                    Object.assign(this.error, obj);
+                }
+                catch(ex) {
+                    this.error.strings.push(item);
+                }
             }
         }
     },
     computed: {
         _hasResult() {
             return this.showResult;
+        },
+        _hasError() {
+            return this.hasError;
         }
     }
 }
@@ -155,11 +221,13 @@ export default {
     display: flex;
     flex-flow: row;
 }
+
 .main {
     width: 100%;
     display: flex;
     flex-direction: column;
 }
+
 .surface {
     height: 100%;
     width: 100%;
@@ -167,10 +235,12 @@ export default {
     display: flex;
     flex-direction: column;
 }
+
 .editor {
     height: 100%;
     width: 100%;
 }
+
 .result {
     height: 100%;
     width: 100%;

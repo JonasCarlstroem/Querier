@@ -54,7 +54,6 @@ namespace process {
         };
 
         ~Process() {
-            //CloseHandle(m_procInfo.hProcess);
             for (auto proc : _processes) {
                 delete proc;
             }

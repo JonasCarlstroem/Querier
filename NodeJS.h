@@ -43,12 +43,14 @@ namespace nodejs {
             StartInfo.RedirectStdError = true;
 
             OnOutputReceived = [this](std::string ret) {
-                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISSUCCESS, ret };
+                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISSUCCESS };
+                response->message = ret;
                 PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
             };
 
             OnErrorReceived = [this](std::string ret) {
-                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISERROR, ret };
+                app::Message* response = new app::Message{ app::AppCommand::RESULT, app::ResultType::ISERROR };
+                response->error = ret;
                 PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
             };
         };
