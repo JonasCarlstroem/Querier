@@ -27,10 +27,10 @@ namespace pipe {
                 CloseHandle(m_stdIn.write);
 
             if(m_redirectedOutput)
-                CloseHandle(m_stdOut.write);
+                CloseHandle(m_stdOut.read);
 
             if(m_redirectedError)
-                CloseHandle(m_stdErr.write);
+                CloseHandle(m_stdErr.read);
         };
 
         bool RedirectIO(bool input, bool output, bool error, STARTUPINFO& si) {
@@ -44,6 +44,7 @@ namespace pipe {
             }
 
             if (input) {
+                
                 if (!CreatePipe(&m_stdIn.read, &m_stdIn.write, &m_saAttr, 0)) {
 #ifdef _DEBUG
                     error::PrintError(L"Error CreatePipe Input");
@@ -111,10 +112,10 @@ namespace pipe {
 
 
         void WriteInput(std::string data) {
-            if (m_ch.in) {
-                if (m_ch.in.is_open()) {
-                    m_ch.in.write(data.c_str(), data.length());
-                    m_ch.in.close();
+            if (m_stdIn.in) {
+                if (m_stdIn.in.is_open()) {
+                    m_stdIn.in.write(data.c_str(), data.length());
+                    m_stdIn.in.close();
                 }
             }
         };
@@ -128,8 +129,8 @@ namespace pipe {
         };
 
         bool ReadOutput(std::string* ret) {
-            if (m_ch.out) {
-                return Read(&m_ch.out, ret);
+            if (m_stdOut.out) {
+                return Read(&m_stdOut.out, ret);
             }
             return false;
         };
@@ -143,8 +144,8 @@ namespace pipe {
         }
 
         bool ReadError(std::string* ret) {
-            if (m_ch.err) {
-                return Read(&m_ch.err, ret);
+            if (m_stdErr.err) {
+                return Read(&m_stdErr.err, ret);
             }
             return false;
         }
@@ -233,27 +234,26 @@ namespace pipe {
         }
 
         bool _InitInput() {
-            if ((m_ch.inputFileDesc = _open_osfhandle((intptr_t)m_stdIn.write, 0)) == -1) {
+            if ((m_stdIn.inputFileDesc = _open_osfhandle((intptr_t)m_stdIn.write, 0)) == -1) {
 #ifdef _DEBUG
                 error::PrintError(L"IPC::init_input->_open_osfhandle");
 #endif
                 return false;
             }
 
-            if ((m_ch.inputFile = _fdopen(m_ch.inputFileDesc, "w")) == NULL) {
+            if ((m_stdIn.inputFile = _fdopen(m_stdIn.inputFileDesc, "w")) == NULL) {
 #ifdef _DEBUG
                 error::PrintError(L"IPC::init_input->_fdopen");
 #endif
                 return false;
             }
 
-            m_ch.win = std::wofstream(m_ch.inputFile);
-            m_ch.in = std::ofstream(m_ch.inputFile);
+            m_stdIn.in = std::ofstream(m_stdIn.inputFile);
             return true;
         };
 
         bool _InitOutput() {
-            if ((m_ch.outputFileDesc = _open_osfhandle((intptr_t)m_stdOut.read, 0)) == -1) {
+            if ((m_stdOut.outputFileDesc = _open_osfhandle((intptr_t)m_stdOut.read, 0)) == -1) {
 #ifdef _DEBUG
                 error::PrintError(L"IPC::init_output->_open_osfhandle");
 #endif
@@ -261,67 +261,58 @@ namespace pipe {
             }
 
 
-            if ((m_ch.outputFile = _fdopen(m_ch.outputFileDesc, "r")) == NULL) {
+            if ((m_stdOut.outputFile = _fdopen(m_stdOut.outputFileDesc, "r")) == NULL) {
 #ifdef _DEBUG
                 error::PrintError(L"IPC::init_output->_fdopen");
 #endif
                 return false;
             }
 
-            m_ch.wout = std::wifstream(m_ch.outputFile);
-            m_ch.out = std::ifstream(m_ch.outputFile);
+            m_stdOut.out = std::ifstream(m_stdOut.outputFile);
             return true;
         };
 
         bool _InitError() {
-            if ((m_ch.errorFileDesc = _open_osfhandle((intptr_t)m_stdErr.read, 0)) == -1) {
+            if ((m_stdErr.errorFileDesc = _open_osfhandle((intptr_t)m_stdErr.read, 0)) == -1) {
 #ifdef _DEBUG
                 error::PrintError(L"PIPE::_InitError->_open_osfhandle");
 #endif
                 return false;
             }
 
-            if ((m_ch.errorFile = _fdopen(m_ch.errorFileDesc, "r")) == NULL) {
+            if ((m_stdErr.errorFile = _fdopen(m_stdErr.errorFileDesc, "r")) == NULL) {
 #ifdef _DEBUG
                 error::PrintError(L"Pipe::_InitError->_fdopen");
 #endif
                 return false;
             }
 
-            m_ch.werr = std::wifstream(m_ch.errorFile);
-            m_ch.err = std::ifstream(m_ch.errorFile);
+            m_stdErr.err = std::ifstream(m_stdErr.errorFile);
             return true;
         }
 
-        struct Channel {
+        struct STD_INPUT {
+            HANDLE read;
+            HANDLE write;
             int inputFileDesc = -1;
-            int outputFileDesc = -1;
-            int errorFileDesc = -1;
             FILE* inputFile = NULL;
-            FILE* outputFile = NULL;
-            FILE* errorFile = NULL;
             std::ofstream in;
-            std::wofstream win;
-            std::ifstream out;
-            std::wifstream wout;
-            std::ifstream err;
-            std::wifstream werr;
-
-        } m_ch;
-
-        struct INPUT_HANDLES {
-            HANDLE read = NULL;
-            HANDLE write = NULL;
         } m_stdIn;
 
-        struct OUTPUT_HANDLES {
-            HANDLE read = NULL;
-            HANDLE write = NULL;
+        struct STD_OUTPUT {
+            HANDLE read;
+            HANDLE write;
+            int outputFileDesc = -1;
+            FILE* outputFile = NULL;
+            std::ifstream out;
         } m_stdOut;
 
-        struct ERROR_HANDLES {
-            HANDLE read = NULL;
-            HANDLE write = NULL;
+        struct STD_ERROR {
+            HANDLE read;
+            HANDLE write;
+            int errorFileDesc = -1;
+            FILE* errorFile = NULL;
+            std::ifstream err;
         } m_stdErr;
     };
 }

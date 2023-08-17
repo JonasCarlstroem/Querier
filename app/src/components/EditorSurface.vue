@@ -51,11 +51,7 @@ export default {
 
             monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
-            const model = monaco.editor.createModel([
-                "function dump(obj: any): any {",
-                "   console.log(obj);",
-                "   return obj",
-                "};"].join('\n'),
+            const model = monaco.editor.createModel([].join('\n'),
                 this.language.id);
 
 

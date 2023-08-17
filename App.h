@@ -13,7 +13,7 @@ using json = nlohmann::json;
 
 HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args);
 
-app::Message ParseMessage(json*);
+std::wstring HandleWebMessage(app::Message* msg);
 
 static nodejs::NodeJS node(L"C:\\Program Files\\nodejs\\node.exe");
 static ICoreWebView2* webview;

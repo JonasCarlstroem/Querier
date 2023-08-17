@@ -6,6 +6,7 @@
 #include "File.h"
 #include "AppWindow.h"
 #include "WebView2.h"
+#include <functional>
 #include <nlohmann/json.hpp>
 
 
@@ -53,6 +54,9 @@ namespace nodejs {
                 response->error = ret;
                 PostMessage(mainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
             };
+
+            mainWindow->AddWebMessageHandler(std::bind(&NodeJS::HandleWebMessage, this, std::placeholders::_1));
+            //mainWindow->HandleWebMessage = std::bind(&NodeJS::HandleWebMessage, this, std::placeholders::_1);
         };
 
         void Invoke() {
@@ -87,6 +91,24 @@ namespace nodejs {
         bool GetInitialFileContent(std::string* ret) {
             return m_file.ReadFile(ret);
         };
+
+        std::wstring HandleWebMessage(app::Message* msg) {
+            switch (msg->cmd) {
+                case app::AppCommand::INITIALIZE:
+                    msg->respond = true;
+                    GetInitialFileContent(&msg->message);
+                    break;
+                case app::AppCommand::CONFIG:
+                    break;
+                case app::AppCommand::CODESYNC:
+                    SyncFileContent(msg->message);
+                    break;
+                case app::AppCommand::INVOKE:
+                    Invoke();
+                    break;
+            }
+            return util::string_to_wstring(json(*msg).dump());
+        }
 
     private:
         app::AppWindow* mainWindow;

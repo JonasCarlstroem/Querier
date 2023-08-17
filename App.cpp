@@ -14,7 +14,7 @@ int WINAPI WinMain(
     app::AppWindow App{ hInstance, nCmdShow };
 
     node.Initialize(&App);
-    App.AddWebMessageReceivedHandler(WebMessageReceived);
+    //App.AddWebMessageReceivedHandler(WebMessageReceived);
 
     if(!App.Show())
         return 0;
@@ -28,41 +28,40 @@ int WINAPI WinMain(
     return (int)msg.wParam;
 }
 
-HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args) {
-    wil::unique_cotaskmem_string message;
-    args->TryGetWebMessageAsString(&message);
+//HRESULT WebMessageReceived(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args) {
+//    wil::unique_cotaskmem_string message;
+//    args->TryGetWebMessageAsString(&message);
+//
+//    json data = json::parse((std::wstring)message.get());
+//
+//    app::Message msg = HandleWebMessage(&data);
+//
+//    if (msg.respond) {
+//        std::wstring response = app::AppWindow::GetResponse(msg);
+//        webView->PostWebMessageAsJson(response.c_str());
+//    }
+//
+//    return S_OK;
+//}
 
-    json data = json::parse((std::wstring)message.get());
-
-    app::Message msg = ParseMessage(&data);
-
-    if (msg.respond) {
-        std::wstring response = app::AppWindow::GetResponse(msg);
-        webView->PostWebMessageAsJson(response.c_str());
-    }
-
-    return S_OK;
-}
-
-app::Message ParseMessage(json* data) {
-    app::Message msg = data->template get<app::Message>();
+std::wstring HandleWebMessage(app::Message* msg) {
     std::wstring wret;
     std::string ret;
-    switch (msg.cmd) {
+    switch (msg->cmd) {
         case app::AppCommand::INITIALIZE:
-            msg.respond = true;
-            node.GetInitialFileContent(&msg.message);
+            msg->respond = true;
+            node.GetInitialFileContent(&msg->message);
             break;
         case app::AppCommand::CONFIG:
             break;
         case app::AppCommand::CODESYNC:
-            node.SyncFileContent(msg.message);
+            node.SyncFileContent(msg->message);
             break;
         case app::AppCommand::INVOKE:
             node.Invoke();
             break;
     }
-    return msg;
+    return json(*msg);
 }
 
 #endif

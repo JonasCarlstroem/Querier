@@ -45,6 +45,8 @@ export default {
         'ResultSurface': ResultSurface
     },
     setup() {
+        const actionBar = ref<InstanceType<typeof ActionBar> | null>(null);
+        const topBar = ref<InstanceType<typeof TopBar> | null>(null);
         const editorRef = ref<InstanceType<typeof EditorSurface> | null>(null);
         const resultRef = ref<InstanceType<typeof ResultSurface> | null>(null);
         const availableLanguages: ILanguage[] = [
@@ -123,7 +125,6 @@ export default {
                 case "success":
                     if (message) {
                         console.log(message);
-                        // this.result = message;
                         if(this.result.strings === undefined || this.result.strings === null)
                             this.result.strings = [];
 
@@ -175,19 +176,8 @@ export default {
                 }
                 console.log(obj);
             }
-            // const msg = JSON.parse(message);
-            console.log(this.result);
             
-            // for (const item of arr) {
-            //     try {
-            //         const obj = JSON.parse(item);
-            //         Object.assign(this.result, { objects: obj });
-            //     }
-            //     catch (ex) {
-            //         this.result.strings.push(item);
-            //         // Object.assign(this.result, { value: item });
-            //     }
-            // }
+            console.log(this.result);
         },
         setError(error: string) {
             const arr = split(error, "\n");

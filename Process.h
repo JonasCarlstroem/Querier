@@ -35,7 +35,7 @@ namespace process {
     class Process : public pipe::Pipe {
     public:
         ProcessStartInfo StartInfo;
-        bool ProcessHasExited;
+        bool ProcessHasExited{ 0 };
 
         Process() : m_secAttr(), m_procInfo(), m_startupInfo(), StartInfo(), Pipe(m_secAttr, m_procInfo) {
             m_secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -54,9 +54,9 @@ namespace process {
         };
 
         ~Process() {
-            for (auto proc : _processes) {
+            /*for (auto proc : _processes) {
                 delete proc;
-            }
+            }*/
         };
 
         bool Start() {

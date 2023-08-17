@@ -1,12 +1,14 @@
 ﻿<template>
     <div class="resultSurface">
         <div class="frame">
+            <v-tabs 
+                density="compact"
+                :hide-slider="true"
+                v-model="tab">
+                <v-tab v-for="_tab in _tabs" :value="_tab.value" variant="plain">{{ _tab.title }}</v-tab>
+            </v-tabs>
             <div class="result" v-if="_hasResult" :style="`width: ${(_hasError ? 50 : 100)}%;`">
                 <!-- <span style="white-space: pre">{{ result }}</span> -->
-                <v-tabs
-                    v-model="tab">
-                    <v-tab v-for="_tab in _tabs" :value="_tab.value">{{ _tab.title }}</v-tab>
-                </v-tabs>
                 <v-window v-model="tab">
                     <template v-if="tab === 'strings' && _strings !== null">
                         <div v-for="value of _strings">
@@ -164,8 +166,10 @@ export default {
 
 .frame {
     display: flex;
-    flex-direction: row;
+    /* flex-flow: row; */
+    flex-direction: column;
     padding: 10px;
+    padding-top: 0;
     border: 1px solid white;
     height: 100%;
 }
