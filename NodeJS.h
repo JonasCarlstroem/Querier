@@ -38,6 +38,7 @@ namespace nodejs {
         NodeJS(std::wstring appPath) : m_appPath(appPath), m_file(m_esmFileName, std::fstream::in | std::fstream::out), mainWindow(0) {};
         ~NodeJS() {};
 
+        //make virtual in base class
         void Initialize(app::AppWindow* mainWin) {
             mainWindow = mainWin;
             m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
