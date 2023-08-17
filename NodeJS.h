@@ -33,6 +33,8 @@ namespace nodejs {
 
     class NodeJS : public process::Process {
     public:
+    
+        //rename to modulePath
         NodeJS(std::wstring appPath) : m_appPath(appPath), m_file(m_esmFileName, std::fstream::in | std::fstream::out), mainWindow(0) {};
         ~NodeJS() {};
 
