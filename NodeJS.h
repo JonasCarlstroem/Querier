@@ -30,7 +30,7 @@ namespace nodejs {
         {CJS, "cjs"}
         });
 
-
+    //make base class for modules
     class NodeJS : public process::Process {
     public:
     
