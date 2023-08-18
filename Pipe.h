@@ -46,16 +46,12 @@ namespace pipe {
             if (input) {
                 
                 if (!CreatePipe(&m_stdIn.read, &m_stdIn.write, &m_saAttr, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"Error CreatePipe Input");
-#endif
+                    PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
                     return false;
                 }
 
                 if (!SetHandleInformation(m_stdIn.write, HANDLE_FLAG_INHERIT, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"ProcessPipe::redirect_io->SetHandleInformation");
-#endif
+                    PRINT_ERROR(L"Pipe::RedirectIO->SetHandleInformation");
                     return false;
                 }
 
@@ -67,16 +63,12 @@ namespace pipe {
 
             if (output) {
                 if (!CreatePipe(&m_stdOut.read, &m_stdOut.write, &m_saAttr, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"Error CreatePipe Output");
-#endif
+                    PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
                     return false;
                 }
 
                 if (!SetHandleInformation(m_stdOut.read, HANDLE_FLAG_INHERIT, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"ProcessPipe::redirect_io->SetHandleInformation");
-#endif
+                    PRINT_ERROR(L"ProcessPipe::redirect_io->SetHandleInformation");
                     return false;
                 }
 
@@ -88,16 +80,12 @@ namespace pipe {
 
             if (error) {
                 if (!CreatePipe(&m_stdErr.read, &m_stdErr.write, &m_saAttr, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"Pipe::RedirectIO->CreatePipe");
-#endif
+                    PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
                     return false;
                 }
 
                 if (!SetHandleInformation(m_stdErr.read, HANDLE_FLAG_INHERIT, 0)) {
-#ifdef _DEBUG
-                    error::PrintError(L"Pipe::RedirectIO->SetHandleInformation");
-#endif
+                    PRINT_ERROR(L"Pipe::RedirectIO->SetHandleInformation");
                     return false;
                 }
 
@@ -235,16 +223,12 @@ namespace pipe {
 
         bool _InitInput() {
             if ((m_stdIn.inputFileDesc = _open_osfhandle((intptr_t)m_stdIn.write, 0)) == -1) {
-#ifdef _DEBUG
-                error::PrintError(L"IPC::init_input->_open_osfhandle");
-#endif
+                PRINT_ERROR(L"Pipe::_InitInput->_open_osfhandle");
                 return false;
             }
 
             if ((m_stdIn.inputFile = _fdopen(m_stdIn.inputFileDesc, "w")) == NULL) {
-#ifdef _DEBUG
-                error::PrintError(L"IPC::init_input->_fdopen");
-#endif
+                PRINT_ERROR(L"Pipe::_InitInput->_fdopen");
                 return false;
             }
 
@@ -254,17 +238,13 @@ namespace pipe {
 
         bool _InitOutput() {
             if ((m_stdOut.outputFileDesc = _open_osfhandle((intptr_t)m_stdOut.read, 0)) == -1) {
-#ifdef _DEBUG
-                error::PrintError(L"IPC::init_output->_open_osfhandle");
-#endif
+                PRINT_ERROR(L"Pipe::_InitOutput->_open_osfhandle");
                 return false;
             }
 
 
             if ((m_stdOut.outputFile = _fdopen(m_stdOut.outputFileDesc, "r")) == NULL) {
-#ifdef _DEBUG
-                error::PrintError(L"IPC::init_output->_fdopen");
-#endif
+                PRINT_ERROR(L"Pipe::_InitOutput->_fdopen");
                 return false;
             }
 
@@ -274,16 +254,12 @@ namespace pipe {
 
         bool _InitError() {
             if ((m_stdErr.errorFileDesc = _open_osfhandle((intptr_t)m_stdErr.read, 0)) == -1) {
-#ifdef _DEBUG
-                error::PrintError(L"PIPE::_InitError->_open_osfhandle");
-#endif
+                PRINT_ERROR(L"Pipe::_InitError->_open_osfhandle");
                 return false;
             }
 
             if ((m_stdErr.errorFile = _fdopen(m_stdErr.errorFileDesc, "r")) == NULL) {
-#ifdef _DEBUG
-                error::PrintError(L"Pipe::_InitError->_fdopen");
-#endif
+                PRINT_ERROR(L"Pipe::_InitError->_fdopen");
                 return false;
             }
 

@@ -84,7 +84,6 @@ namespace app {
     class AppWindow {
     public:
         AppWindow(HINSTANCE hInstance, int nCmdShow) : m_hInst(hInstance), m_nShow(nCmdShow) {
-            OleInitialize(NULL);
             g_appInstance = hInstance;
             InitializeWindow();
         };

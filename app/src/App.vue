@@ -35,7 +35,8 @@ import { ref } from 'vue';
 import type { ILanguage } from '@/interface/ILanguage';
 import { postWebMessage, split } from './Utils';
 
-// const editorSurface = ref<HTMLElement | null>(null);
+//####TODO
+// wait for init message before creating editor
 
 export default {
     components: {
@@ -49,6 +50,7 @@ export default {
         const topBar = ref<InstanceType<typeof TopBar> | null>(null);
         const editorRef = ref<InstanceType<typeof EditorSurface> | null>(null);
         const resultRef = ref<InstanceType<typeof ResultSurface> | null>(null);
+
         const availableLanguages: ILanguage[] = [
             { name: "JavaScript", id: "javascript", value: "function init() {\n\tconsole.log('hello')\n}" },
             { name: "TypeScript", id: "typescript", value: "function init(): void {\n\tconsole.log('hello')\n}" },
@@ -57,8 +59,10 @@ export default {
             { name: "C#", id: "csharp", value: "void main()\n{\n}" },
             { name: "C++", id: "cplusplus", value: "int main(int argc, const** argv) {\nstd::cout << \"Hello, world!\"}" }
         ];
+
         const defaultLanguage = availableLanguages[0];
         const currentLanguage = toRef(defaultLanguage);
+
         const state = reactive({
             code: currentLanguage.value.value as string,
             showResult: false as boolean,
@@ -68,6 +72,7 @@ export default {
             error: {} as any,
             editorHeight: 100 as number
         });
+
         return {
             editorRef,
             resultRef,
@@ -95,7 +100,7 @@ export default {
             this.editorHeight = 50;
             this.result = {};
             this.error = {};
-            postWebMessage({ cmd: "invoke", message: this.code });
+            postWebMessage({ cmd: "invoke" });
             this.isRunning = true;
             this.editorRef?.resizeEditor();
         },
@@ -110,7 +115,8 @@ export default {
                         this.code = message;
 
                         if (this.editorRef) {
-                            this.editorRef.updateCode(this.code);
+                            // this.editorRef.updateCode(this.code);
+                            this.editorRef.initEditor(this.code);
                         }
                     }
                     break;

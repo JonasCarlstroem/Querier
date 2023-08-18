@@ -30,6 +30,7 @@ namespace process {
         bool RedirectStdInput = false;
         bool RedirectStdOutput = false;
         bool RedirectStdError = false;
+        bool RunInCmd = false;
     };
 
     class Process : public pipe::Pipe {
@@ -54,79 +55,83 @@ namespace process {
         };
 
         ~Process() {
-            /*for (auto proc : _processes) {
-                delete proc;
-            }*/
+    
         };
 
-        bool Start() {
-            _processes.push_back(this);
-
+        void InitProcess() {
             InitMembers();
+            if (StartInfo.RedirectStdInput || StartInfo.RedirectStdOutput || StartInfo.RedirectStdError)
+                InitPipe();
+        }
 
-            const wchar_t* file = StartInfo.wFileName.c_str();
-            wchar_t* cmd = StartInfo.wCommandLine.data();
-            const wchar_t* wd = StartInfo.wWorkingDirectory.c_str();
-            const wchar_t* env = StartInfo.wEnvironment.c_str();
+        void SetFileName(std::wstring file) {
+            StartInfo.wFileName = file;
+        }
 
-            size_t fileLen = StartInfo.wFileName.length();
-            size_t cmdLen = StartInfo.wCommandLine.length();
-            size_t wdLen = StartInfo.wWorkingDirectory.length();
-            size_t envLen = StartInfo.wEnvironment.length();
+        void SetCommandLine(std::wstring s) {
+            StartInfo.wCommandLine = s;
+        }
+
+        void AddCommandLineArgument(std::wstring key, std::wstring value) {
+            StartInfo.wCommandLine = std::format(L"{0} {1} {2}", StartInfo.wCommandLine, key, value);
+        }
+
+        bool Start() {
+            if (!m_isMembersInitialized)
+                InitMembers();
+
+            if (!m_isPipeInitialized)
+                InitPipe();
 
             stopWatch.Start();
 
-            if (CreateProcess(fileLen > 0 ? file : NULL,
-                              cmdLen > 0 ? cmd : NULL,
-                              NULL,
-                              NULL,
-                              m_hasRedirectedIO,
-                              CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-                              /*envLen > 0 ? (LPVOID)env : */NULL,
-                              wdLen > 0 ? wd : NULL,
-                              &m_startupInfo,
-                              &m_procInfo)) {
-                m_isRunning = true;
-                HANDLE hWait = NULL;
-                HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+            if (StartInfo.RunInCmd) {
+                if (CreateProcess(NULL,
+                                  StartInfo.wCommandLine.data(),
+                                  NULL,
+                                  NULL,
+                                  m_hasRedirectedIO,
+                                  CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                                  StartInfo.wEnvironment.length() > 0 ? (LPVOID)StartInfo.wEnvironment.c_str() : NULL,
+                                  StartInfo.wWorkingDirectory.length() > 0 ? StartInfo.wWorkingDirectory.c_str() : NULL,
+                                  &m_startupInfo,
+                                  &m_procInfo)) {
+                    m_isRunning = true;
 
-                struct CTX {
-                    HANDLE hEv;
-                    HANDLE hProc;
-                    Process* proc;
-                    stopwatch::Stopwatch sw;
-                } *ctx = new CTX{ hEvent, m_procInfo.hProcess, this, stopWatch };
-
-                if (!RegisterWaitForSingleObject(&hWait, m_procInfo.hProcess, [](void* ctx, BOOLEAN timerOrWait) -> void {
-                    CTX* context = (CTX*)ctx;
-                    context->sw.Stop();
-                    CloseHandle(context->hProc);
-                    context->proc->ProcessHasExited = true;
-                    context->proc->OnProcessExited();
-
-                    delete ctx;
-
-                }, ctx, INFINITE, WT_EXECUTEONLYONCE)) {
-                    stopWatch.Stop();
-#ifdef _DEBUG
-                    error::PrintError(L"RegisterWaitForSingleObject");
-#endif
+                    CreateProcessSuccess();
+                    return true;
+                }
+                else {
+                    PRINT_ERROR(L"CreateProcess");
                     return false;
                 }
-
-                CloseHandle(m_procInfo.hThread);
-                ProcessStarted();
-                return true;
             }
             else {
-#ifdef _DEBUG
-                DWORD eCode;
-                if (!GetExitCodeProcess(m_procInfo.hProcess, &eCode))
-                    error::PrintError(L"GetExitCodeProcess");
-#endif
-                return false;
+                if (CreateProcess(StartInfo.wFileName.c_str(),
+                                  StartInfo.wCommandLine.length() > 0 ? StartInfo.wCommandLine.data() : NULL,
+                                  NULL,
+                                  NULL,
+                                  m_hasRedirectedIO,
+                                  CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                                  StartInfo.wEnvironment.length() > 0 ? (LPVOID)StartInfo.wEnvironment.c_str() : NULL,
+                                  StartInfo.wWorkingDirectory.length() > 0 ? StartInfo.wWorkingDirectory.c_str() : NULL,
+                                  &m_startupInfo,
+                                  &m_procInfo)) {
+                    m_isRunning = true;
+
+                    CreateProcessSuccess();
+                    return true;
+                }
+                else {
+                    PRINT_ERROR(L"CreateProcess");
+                    return false;
+                }
             }
-        };
+        }
+
+        void WaitForExit() {
+            WaitForSingleObject(m_procInfo.hProcess, INFINITE);
+        }
 
         void Write(std::string data) {
             Pipe::WriteInput(data);
@@ -161,21 +166,70 @@ namespace process {
         SECURITY_ATTRIBUTES m_secAttr;
         PROCESS_INFORMATION m_procInfo;
         STARTUPINFO m_startupInfo;
-        bool m_bSuccess = FALSE,
-             m_hasRedirectedIO = FALSE,
-             m_isRunning = FALSE;
+        bool m_bSuccess = false,
+             m_hasRedirectedIO = false,
+             m_isRunning = false,
+             m_isMembersInitialized = false,
+             m_isPipeInitialized = false,
+             m_isExecInfoInitialized = false;
 
         static std::vector<Process*> _processes;
 
         void InitMembers() {
             ZeroMemory(&m_procInfo, sizeof(PROCESS_INFORMATION));
             ZeroMemory(&m_startupInfo, sizeof(STARTUPINFO));
-
             m_startupInfo.cb = sizeof(STARTUPINFO);
+            m_isMembersInitialized = true;
+        };
+
+        void InitPipe() {
             m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
-                                         StartInfo.RedirectStdOutput,
-                                         StartInfo.RedirectStdError,
-                                         m_startupInfo);
+                                           StartInfo.RedirectStdOutput,
+                                           StartInfo.RedirectStdError,
+                                           m_startupInfo);
+            m_isPipeInitialized = true;
+        }
+
+        bool RegisterWaitCallback() {
+            HANDLE hWait = NULL;
+            HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+            WAIT_CONTEXT* ctx = new WAIT_CONTEXT{ hEvent, m_procInfo.hProcess, this, stopWatch };
+            struct WCTX {
+                HANDLE hEv;
+                HANDLE hProc;
+                Process* proc;
+                stopwatch::Stopwatch sw;
+            } *wctx = new WCTX{ hEvent, m_procInfo.hProcess, this, stopWatch };
+
+            return RegisterWaitForSingleObject(&hWait, m_procInfo.hProcess, [](void* ctx, BOOLEAN timerOrWait) -> void {
+                WAIT_CONTEXT* context = (WAIT_CONTEXT*)ctx;
+                context->sw.Stop();
+                CloseHandle(context->hProc);
+                context->proc->ProcessHasExited = true;
+
+                if (context->proc->OnProcessExited)
+                    context->proc->OnProcessExited();
+
+                delete ctx;
+
+            }, wctx, INFINITE, WT_EXECUTEONLYONCE);
+        }
+
+        void CreateProcessSuccess() {
+            if (!RegisterWaitCallback()) {
+                PRINT_ERROR(L"RegisterWaitForSingleObject");
+            }
+
+            CloseHandle(m_procInfo.hThread);
+            ProcessStarted();
+        }
+
+        struct WAIT_CONTEXT {
+            HANDLE hEv;
+            HANDLE hProc;
+            Process* proc;
+            stopwatch::Stopwatch sw;
         };
 
     };

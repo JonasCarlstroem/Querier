@@ -29,7 +29,14 @@ namespace error {
 
         LocalFree(lpMsgBuf);
         LocalFree(lpDisplayBuf);
-        //ExitProcess(1);
+    }
+
+    void PrintExitCode(HANDLE hProcess, LPCTSTR sMsg) {
+        DWORD dCode;
+        if (!GetExitCodeProcess(hProcess, &dCode))
+            error::PrintError(L"GetExitCodeProcess");
+        else
+            error::PrintError(sMsg);
     }
 }
 

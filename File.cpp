@@ -1,5 +1,5 @@
-#ifndef _FILE_CPP
-    #define _FILE_CPP
+#ifndef _SCRIPT_PAD_FILE_CPP
+    #define _SCRIPT_PAD_FILE_CPP
 
 #include "File.h"
 #include "Util.h"
@@ -8,19 +8,6 @@
 #define BUFSIZE 4096
 
 namespace file {
-    File FileFinder::FindFile(std::wstring file) {
-        WIN32_FIND_DATA wfData;
-        HANDLE hFind;
-
-        hFind = FindFirstFile(file.c_str(), &wfData);
-        if (hFind == INVALID_HANDLE_VALUE) {
-            return File();
-        }
-
-        FindClose(hFind);
-
-        return File();
-    }
 
     FileHandler::FileHandler(std::wstring fileName) : m_fileName(util::wstring_to_string(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
         if (m_ioFile.bad()) {
