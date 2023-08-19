@@ -20,7 +20,7 @@ namespace npm {
             file::File fileInfo;
             if (FindNpmInstallation(&fileInfo)) {
                 m_isNpmInstalled = true;
-                m_npmVersion = util::string_to_wstring(Run(L"-v"));
+                m_npmVersion = util::str_to_wstr(Run(L"-v"));
             }
 
         }
@@ -59,7 +59,7 @@ namespace npm {
         file::FileFinder m_FileFinder;
 
         template<class T>
-        std::wstring _FormatCommandLine_(std::initializer_list<T>&& cmds) {
+        std::wstring _FormatCommandLine_(std::initializer_list<std::wstring>&& cmds) {
             std::wstring ret;
             for (auto it = cmds.begin(); it < cmds.end(); it++) {
                 ret.append(*it);
@@ -74,6 +74,21 @@ namespace npm {
         template<class... T>
         std::wstring FormatCommandLine(T&&... cmd) {
             return _FormatCommandLine_({ std::forward<T>(cmd)... });
+        }
+
+        template<wchar_t* ...T>
+        void Func() {
+            auto m = T;
+        }
+
+        void test(std::same_as<std::wstring> auto&&...cmds) {
+            std::wstring ret;
+            for (std::wstring it : { std::wstring(cmds)... }) {
+                ret.append(it);
+                ret.append(L" ");
+            }
+
+            std::trim
         }
 
         bool FindNpmInstallation(file::File* pFile) {

@@ -9,7 +9,7 @@
 
 namespace file {
 
-    FileHandler::FileHandler(std::wstring fileName) : m_fileName(util::wstring_to_string(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
+    FileHandler::FileHandler(std::wstring fileName) : m_fileName(util::wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
@@ -18,7 +18,7 @@ namespace file {
         }
     }
 
-    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(util::wstring_to_string(fileName)), m_ioFile(m_fileName, mode) {
+    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(util::wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }

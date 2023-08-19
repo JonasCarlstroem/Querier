@@ -111,7 +111,7 @@ namespace pipe {
         bool ReadOutput(std::wstring* ret) {
             std::string buf;
             if (ReadOutput(&buf)) {
-                return util::string_to_wstring(buf, ret);
+                return util::str_to_wstr(buf, ret);
             }
             return false;
         };
@@ -126,7 +126,7 @@ namespace pipe {
         bool ReadError(std::wstring* ret) {
             std::string buf;
             if (ReadError(&buf)) {
-                return util::string_to_wstring(buf, ret);
+                return util::str_to_wstr(buf, ret);
             }
             return false;
         }

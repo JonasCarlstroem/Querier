@@ -133,7 +133,7 @@ namespace app {
             json cont = json(msg);
             std::string src = cont.dump();
             std::wstring ret;
-            if (util::string_to_wstring(src, &ret))
+            if (util::str_to_wstr(src, &ret))
                 return ret;
 
             return std::wstring();
@@ -327,7 +327,7 @@ namespace app {
                         case VK_F5:
                         {
                             std::string* key = (std::string*)wParam;
-                            util::print_message(util::string_to_wstring(*key));
+                            util::print_msg(util::str_to_wstr(*key));
                         }
                     }
                 }
@@ -337,7 +337,7 @@ namespace app {
                         case VK_F5:
                         {
                             std::string* key = (std::string*)wParam;
-                            util::print_message(util::string_to_wstring(*key));
+                            util::print_msg(util::str_to_wstr(*key));
                         }
                     }
                     return true;
@@ -348,7 +348,7 @@ namespace app {
                         case VK_F5:
                         {
                             std::string* key = (std::string*)wParam;
-                            util::print_message(util::string_to_wstring(*key));
+                            util::print_msg(util::str_to_wstr(*key));
                         }
                     }
                 }

@@ -41,7 +41,7 @@ namespace nodejs {
             file::File fileInfo;
             if (FindNodeJSInstallation(&fileInfo)) {
                 m_isNodeInstalled = true;
-                m_nodeVersion = util::string_to_wstring(Run(L"- v"));
+                m_nodeVersion = util::str_to_wstr(Run(L"- v"));
             }
         }
 
@@ -127,7 +127,7 @@ namespace nodejs {
                     Invoke();
                     break;
             }
-            return util::string_to_wstring(json(*msg).dump());
+            return util::str_to_wstr(json(*msg).dump());
         }
 
         void HandleOutputReceived(std::string ret) {
