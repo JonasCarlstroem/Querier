@@ -6,19 +6,17 @@
 
 //####Todo####
 //###General###
-// base module class (abstract)
 // module handler
 // support for multiple queries (mod handler)
 // integrate http library
 //
 //###Node###
-// make module class out of current state of this class then make this class a module
+// make module class out of current state of this class 
 // implement npm with gui
 // implement version checking (including check to see if nvm is installed)
 // 
 //###CSharp###
 // imolement as module
-// split module into type of either interpreter or compiler
 
 using json = nlohmann::json;
 
