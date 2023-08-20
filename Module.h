@@ -8,6 +8,9 @@
 #include "Process.h"
 
 namespace mod {
+    
+    // implement Nodejs and Npm constructor functionality into base class
+
     class IModule : public IBaseModule, public process::Process {
     public:
         IModule() {};
