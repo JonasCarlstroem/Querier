@@ -7,6 +7,8 @@
 #include <string>
 
 namespace mod {
+    
+    // rename to IModule
     class IBaseModule {
     public:
         IBaseModule() : m_ModulePath{ 0 } {}
