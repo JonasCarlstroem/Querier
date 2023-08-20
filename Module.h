@@ -10,7 +10,7 @@
 namespace mod {
     
     // implement Nodejs and Npm constructor functionality into base class
-
+    // rename to BaseModule (abstract)
     class IModule : public IBaseModule, public process::Process {
     public:
         IModule() {};
