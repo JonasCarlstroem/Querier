@@ -15,6 +15,8 @@ namespace npm {
             StartInfo.RedirectStdOutput = true;
             StartInfo.RedirectStdError = true;
             
+            
+            // move implementation to base class
             std::wstring tmp = FormatCommandLine(L"-v", L"-e");
 
             file::File fileInfo;
