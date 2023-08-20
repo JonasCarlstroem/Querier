@@ -38,6 +38,7 @@ namespace nodejs {
             StartInfo.RedirectStdError = true;
             StartInfo.RunInCmd = true;
 
+            // move implementation to base class
             file::File fileInfo;
             if (FindNodeJSInstallation(&fileInfo)) {
                 m_isNodeInstalled = true;
