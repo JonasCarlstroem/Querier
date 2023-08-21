@@ -7,9 +7,35 @@
 
 #define BUFSIZE 4096
 
-namespace file {
+namespace scriptpad {
 
-    FileHandler::FileHandler(std::wstring fileName) : m_fileName(util::wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
+    File FileFinder::FindFile(std::wstring file) {
+        WIN32_FIND_DATA wfData;
+        HANDLE hFind;
+
+        hFind = FindFirstFile(file.c_str(), &wfData);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            return File();
+        }
+
+        FindClose(hFind);
+
+        return File();
+    }
+
+    bool FileFinder::SearchFile(std::wstring sFile, File* pFile) {
+        LPWSTR lpFilePart;
+        std::wstring ret;
+        ret.resize(MAX_PATH);
+        if (!SearchPath(NULL, sFile.c_str(), NULL, MAX_PATH, ret.data(), &lpFilePart)) {
+            PRINT_ERROR(L"SearchPath");
+            return false;
+        }
+        pFile = new File{ sFile, ret, lpFilePart };
+        return true;
+    }
+
+    FileHandler::FileHandler(std::wstring fileName) : m_fileName(scriptpad::wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
@@ -18,7 +44,7 @@ namespace file {
         }
     }
 
-    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(util::wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
+    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(scriptpad::wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
@@ -77,6 +103,6 @@ namespace file {
         }
         return false;
     }
-}
+}   //namespace scriptpad
 
-#endif
+#endif  //_SCRIPT_PAD_FILE_CPP

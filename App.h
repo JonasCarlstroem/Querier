@@ -3,10 +3,9 @@
 #ifndef _APP_H
     #define _APP_H
 
-#include "NodeJS.h"
+#include "Node.h"
 #include "Npm.h"
 
-static npm::NPM npmjs;
-static nodejs::NodeJS node(L"C:\\Program Files\\nodejs\\node.exe");
+static scriptpad::Nodejs nodejs(L"C:\\Program Files\\nodejs\\node.exe");
 
 #endif

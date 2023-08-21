@@ -135,6 +135,12 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="File.cpp" />
+    <ClCompile Include="Module.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Npm.cpp" />
+    <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="Process.cpp" />
+    <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,7 +154,7 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="IModule.h" />
     <ClInclude Include="Module.h" />
-    <ClInclude Include="NodeJS.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Npm.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Process.h" />

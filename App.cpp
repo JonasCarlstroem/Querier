@@ -1,5 +1,5 @@
-#ifndef _APP_MAIN
-    #define _APP_MAIN
+#ifndef _SCRIPT_PAD_APP_MAIN
+    #define _SCRIPT_PAD_APP_MAIN
 
 #include "App.h"
 #include "AppWindow.h"
@@ -19,6 +19,7 @@
 // imolement as module
 
 using json = nlohmann::json;
+using namespace scriptpad;
 
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
@@ -28,9 +29,9 @@ int WINAPI WinMain(
 ) {
 
 
-    app::AppWindow App{ hInstance, nCmdShow };
+    AppWindow App{ hInstance, nCmdShow };
 
-    node.Initialize(&App);
+    nodejs.Initialize(&App);
     //node.Run()
 
     if(!App.Show())
@@ -45,4 +46,4 @@ int WINAPI WinMain(
     return (int)msg.wParam;
 }
 
-#endif
+#endif  //_SCRIPT_PAD_APP_MAIN

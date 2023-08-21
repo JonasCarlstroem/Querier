@@ -1,8 +1,8 @@
-#ifndef _ERROR_CPP
-#define _ERROR_CPP
+#ifndef _SCRIPT_PAD_ERROR_CPP
+#define _SCRIPT_PAD_ERROR_CPP
 #include "Error.h"
 
-namespace error {
+namespace scriptpad {
     void PrintError(LPCTSTR lpszFunction) {
         LPVOID lpMsgBuf;
         LPVOID lpDisplayBuf;
@@ -34,10 +34,10 @@ namespace error {
     void PrintExitCode(HANDLE hProcess, LPCTSTR sMsg) {
         DWORD dCode;
         if (!GetExitCodeProcess(hProcess, &dCode))
-            error::PrintError(L"GetExitCodeProcess");
+            scriptpad::PrintError(L"GetExitCodeProcess");
         else
-            error::PrintError(sMsg);
+            scriptpad::PrintError(sMsg);
     }
-}
+}   //namespace scriptpad
 
-#endif
+#endif  //_SCRIPT_PAD_ERROR_CPP

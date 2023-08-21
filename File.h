@@ -9,7 +9,7 @@
 #include <string>
 #include <fstream>
 
-namespace file {
+namespace scriptpad {
 
     struct File {
         std::wstring Name;
@@ -19,32 +19,8 @@ namespace file {
 
     class FileFinder {
     public:
-
-        File FindFile(std::wstring file) {
-            WIN32_FIND_DATA wfData;
-            HANDLE hFind;
-
-            hFind = FindFirstFile(file.c_str(), &wfData);
-            if (hFind == INVALID_HANDLE_VALUE) {
-                return File();
-            }
-
-            FindClose(hFind);
-
-            return File();
-        };
-
-        bool SearchFile(std::wstring sFile, File* pFile) {
-            LPWSTR lpFilePart;
-            std::wstring ret;
-            ret.resize(MAX_PATH);
-            if (!SearchPath(NULL, sFile.c_str(), NULL, MAX_PATH, ret.data(), &lpFilePart)) {
-                PRINT_ERROR(L"SearchPath");
-                return false;
-            }
-            pFile = new File{ sFile, ret, lpFilePart };
-            return true;
-        }
+        File FindFile(std::wstring file);
+        bool SearchFile(std::wstring sFile, File* pFile);
 
     private:
 
@@ -75,6 +51,6 @@ namespace file {
     class ProductFinder {
 
     };
-}
+}   //namespace scriptpad
 
-#endif
+#endif  //_SCRIPT_PAD_FILE_H

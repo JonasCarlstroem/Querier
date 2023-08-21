@@ -6,17 +6,18 @@
 #include <concepts>
 #include <string>
 
-namespace mod {
+namespace scriptpad {
     
-    // rename to IModule
-    class IBaseModule {
+    class IModule {
     public:
-        IBaseModule() : m_ModulePath{ 0 } {}
-        IBaseModule(std::wstring path) : m_ModulePath(path) {};
+        IModule() : m_wszModulePath{ 0 }, m_bIsModuleInstalled{ 0 }, m_wszModuleVersion{ 0 } {};
+        IModule(std::wstring path) : m_wszModulePath(path), m_bIsModuleInstalled{ 0 }, m_wszModuleVersion{ 0 } {};
 
-        virtual std::string Run(std::wstring) = 0;
     protected:
-        std::wstring m_ModulePath;
+        std::wstring m_wszModulePath;
+        bool m_bIsModuleInstalled;
+        std::wstring m_wszModuleVersion;
+
     };
 
     class IBaseType {
@@ -40,6 +41,6 @@ namespace mod {
 
 
 
-}
+}   //namespace scriptpad
 
-#endif
+#endif  //_SCRIPT_PAD_IMODULE_H
