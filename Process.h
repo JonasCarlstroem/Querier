@@ -61,7 +61,7 @@ namespace scriptpad {
         std::function<void()> OnProcessExited{ 0 };
 
     private:
-        scriptpad::Stopwatch stopWatch;
+        Stopwatch stopWatch;
         SECURITY_ATTRIBUTES m_secAttr;
         PROCESS_INFORMATION m_procInfo;
         STARTUPINFO m_startupInfo;
@@ -86,7 +86,7 @@ namespace scriptpad {
             HANDLE hEv;
             HANDLE hProc;
             Process* proc;
-            scriptpad::Stopwatch sw;
+            Stopwatch sw;
         };
 
     };

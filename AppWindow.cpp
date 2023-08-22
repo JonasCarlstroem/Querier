@@ -5,7 +5,7 @@
 
 namespace scriptpad {
 
-    void to_json(json& j, const scriptpad::Message& m) {
+    void to_json(json& j, const Message& m) {
         j = json{
             { "cmd", m.cmd },
             { "resultType", m.resultType },
@@ -14,7 +14,7 @@ namespace scriptpad {
         };
     }
 
-    void from_json(const json& j, scriptpad::Message& m) {
+    void from_json(const json& j, Message& m) {
         j.at("cmd").get_to(m.cmd);
         if (m.cmd != INITIALIZE && m.cmd != INVOKE) {
             j.at("message").get_to(m.message);
@@ -59,11 +59,11 @@ namespace scriptpad {
         return true;
     };
 
-    std::wstring AppWindow::GetResponse(scriptpad::Message msg) {
+    std::wstring AppWindow::GetResponse(Message msg) {
         json cont = json(msg);
         std::string src = cont.dump();
         std::wstring ret;
-        if (scriptpad::str_to_wstr(src, &ret))
+        if (str_to_wstr(src, &ret))
             return ret;
 
         return std::wstring();
@@ -240,7 +240,7 @@ namespace scriptpad {
                     case VK_F5:
                     {
                         std::string* key = (std::string*)wParam;
-                        scriptpad::print_msg(scriptpad::str_to_wstr(*key));
+                        print_msg(str_to_wstr(*key));
                     }
                 }
             }
@@ -250,7 +250,7 @@ namespace scriptpad {
                     case VK_F5:
                     {
                         std::string* key = (std::string*)wParam;
-                        scriptpad::print_msg(scriptpad::str_to_wstr(*key));
+                        print_msg(str_to_wstr(*key));
                     }
                 }
                 return true;
@@ -261,7 +261,7 @@ namespace scriptpad {
                     case VK_F5:
                     {
                         std::string* key = (std::string*)wParam;
-                        scriptpad::print_msg(scriptpad::str_to_wstr(*key));
+                        print_msg(str_to_wstr(*key));
                     }
                 }
             }
@@ -287,7 +287,7 @@ namespace scriptpad {
         args->TryGetWebMessageAsString(&message);
 
         json data = json::parse((std::wstring)message.get());
-        scriptpad::Message cmd = data.template get<scriptpad::Message>();
+        Message cmd = data.template get<Message>();
         std::wstring response = HandleWebMessage(&cmd);
 
         if (cmd.respond) {

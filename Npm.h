@@ -3,12 +3,12 @@
 #ifndef _SCRIPT_PAD_NPM_H
 #define _SCRIPT_PAD_NPM_H
 
-#include "Module.h"
+#include "CmdModule.h"
 #include "File.h"
 #include <utility>
 
 namespace scriptpad {
-    class NPM : public scriptpad::CmdModule {
+    class NPM : public CmdModule {
     public:
         NPM();
 
@@ -20,7 +20,7 @@ namespace scriptpad {
         const std::wstring m_baseArg = L"/C npm";
         const std::wstring m_localInstallArg = L"install";
         const std::wstring m_globalInstallArg = L"install -g";
-        scriptpad::FileFinder m_FileFinder;
+        FileFinder m_FileFinder;
     };
 
 }   //namespace scriptpad

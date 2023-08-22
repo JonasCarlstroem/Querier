@@ -97,7 +97,7 @@ namespace scriptpad {
     bool Pipe::ReadOutput(std::wstring* ret) {
         std::string buf;
         if (ReadOutput(&buf)) {
-            return scriptpad::str_to_wstr(buf, ret);
+            return str_to_wstr(buf, ret);
         }
         return false;
     };
@@ -112,7 +112,7 @@ namespace scriptpad {
     bool Pipe::ReadError(std::wstring* ret) {
         std::string buf;
         if (ReadError(&buf)) {
-            return scriptpad::str_to_wstr(buf, ret);
+            return str_to_wstr(buf, ret);
         }
         return false;
     }

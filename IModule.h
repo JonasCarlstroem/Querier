@@ -3,7 +3,6 @@
 #ifndef _SCRIPT_PAD_IMODULE_H
 #define _SCRIPT_PAD_IMODULE_H
 
-#include <concepts>
 #include <string>
 
 namespace scriptpad {
@@ -19,28 +18,6 @@ namespace scriptpad {
         std::wstring m_wszModuleVersion;
 
     };
-
-    class IBaseType {
-    public:
-        virtual void Invoke() = 0;
-    };
-
-    class Interpreter : public IBaseType {
-
-    };
-
-    class Compiler : public IBaseType {
-    public:
-        virtual void Compile() = 0;
-    };
-
-    template<class T>
-    concept IType = requires(T Sub) {
-        std::derived_from<T, IBaseType>;
-    };
-
-
-
 }   //namespace scriptpad
 
 #endif  //_SCRIPT_PAD_IMODULE_H

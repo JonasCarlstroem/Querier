@@ -34,9 +34,9 @@ namespace scriptpad {
     void PrintExitCode(HANDLE hProcess, LPCTSTR sMsg) {
         DWORD dCode;
         if (!GetExitCodeProcess(hProcess, &dCode))
-            scriptpad::PrintError(L"GetExitCodeProcess");
+            PrintError(L"GetExitCodeProcess");
         else
-            scriptpad::PrintError(sMsg);
+            PrintError(sMsg);
     }
 }   //namespace scriptpad
 

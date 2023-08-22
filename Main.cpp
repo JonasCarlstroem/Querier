@@ -1,8 +1,8 @@
 #ifndef _SCRIPT_PAD_APP_MAIN
     #define _SCRIPT_PAD_APP_MAIN
 
-#include "App.h"
-#include "AppWindow.h"
+#include "Application.h"
+#include "Node.h"
 
 //####Todo####
 //###General###
@@ -21,6 +21,9 @@
 using json = nlohmann::json;
 using namespace scriptpad;
 
+static Application App;
+//static Nodejs nodejs(L"C:\\Program Files\\nodejs\\node.exe");
+
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -29,12 +32,13 @@ int WINAPI WinMain(
 ) {
 
 
-    AppWindow App{ hInstance, nCmdShow };
+    AppWindow MainWindow{ hInstance, nCmdShow };
 
-    nodejs.Initialize(&App);
+    App.Initialize(&MainWindow);
+    //nodejs.Initialize(&MainWindow);
     //node.Run()
 
-    if(!App.Show())
+    if(!MainWindow.Show())
         return 0;
 
     MSG msg;

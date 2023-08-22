@@ -130,14 +130,13 @@ namespace scriptpad {
             HANDLE hEv;
             HANDLE hProc;
             Process* proc;
-            scriptpad::Stopwatch sw;
+            Stopwatch sw;
         } *wctx = new WCTX{ hEvent, m_procInfo.hProcess, this, stopWatch };
 
         return RegisterWaitForSingleObject(&hWait, m_procInfo.hProcess, OnWaitCallback, wctx, INFINITE, WT_EXECUTEONLYONCE);
     }
 
     bool Process::_CreateProcess(const wchar_t* file, wchar_t* cmd, const wchar_t* env, const wchar_t* cwd) {
-        STARTUPINFO si;
         ZeroMemory(&m_procInfo, sizeof(PROCESS_INFORMATION));
         ZeroMemory(&m_startupInfo, sizeof(PROCESS_INFORMATION));
 
@@ -145,7 +144,7 @@ namespace scriptpad {
         m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
                                        StartInfo.RedirectStdOutput,
                                        StartInfo.RedirectStdError,
-                                       si);
+                                       m_startupInfo);
 
         return CreateProcess(lstrlenW(file) > 0 ? file : NULL,
                              lstrlenW(cmd) > 0 ? cmd : NULL,

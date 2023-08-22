@@ -35,7 +35,7 @@ namespace scriptpad {
         return true;
     }
 
-    FileHandler::FileHandler(std::wstring fileName) : m_fileName(scriptpad::wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
+    FileHandler::FileHandler(std::wstring fileName) : m_fileName(wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
@@ -44,7 +44,7 @@ namespace scriptpad {
         }
     }
 
-    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(scriptpad::wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
+    FileHandler::FileHandler(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
         if (m_ioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }

@@ -13,7 +13,13 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Interfaces">
+    <Filter Include="Modules">
+      <UniqueIdentifier>{c6119ac4-85bc-413d-a3fc-69e8e45d0fa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Base">
+      <UniqueIdentifier>{2e56de09-4952-4723-9235-4d7ba6065aed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Base\Interface">
       <UniqueIdentifier>{7d43b9f1-ea5b-45b9-8c64-b2329ec4bb58}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -27,11 +33,44 @@
     <ClCompile Include="AppWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="App.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="File.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Pipe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stopwatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseModule.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdModule.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageModule.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleHandler.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Npm.cpp">
+      <Filter>Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,26 +96,41 @@
     <ClInclude Include="AppWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NodeJS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="File.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Module.h">
+    <ClInclude Include="IModule.h">
+      <Filter>Modules\Base\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdModule.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="IBaseType.h">
+      <Filter>Modules\Base\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageModule.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleHandler.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="Npm.h">
-      <Filter>Header Files</Filter>
+      <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="IModule.h">
-      <Filter>Interfaces</Filter>
+    <ClInclude Include="BaseModule.h">
+      <Filter>Modules\Base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

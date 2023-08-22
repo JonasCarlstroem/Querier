@@ -19,7 +19,6 @@ namespace scriptpad {
                     qt.it++;
             }
         }
-
         return count > 0;
     };
 
@@ -27,18 +26,14 @@ namespace scriptpad {
     bool str_to_wstr(const std::string& source, std::wstring* target) {
         int convertResult = MultiByteToWideChar(CP_UTF8, 0, source.c_str(), (int)source.length(), NULL, 0);
         if (convertResult <= 0) {
-#ifdef _DEBUG
-            scriptpad::PrintError(L"MultiByteToWideChar");
-#endif
+            PRINT_ERROR(L"MultiByteToWideChar");
             return false;
         }
         else {
             target->resize(convertResult);
             convertResult = MultiByteToWideChar(CP_UTF8, 0, source.c_str(), (int)source.length(), target->data(), (int)target->size());
             if (convertResult <= 0) {
-#ifdef _DEBUG
-                scriptpad::PrintError(L"MultiByteToWideChar");
-#endif
+                PRINT_ERROR(L"MultiByteToWideChar");
                 return false;
             }
         }
@@ -48,7 +43,7 @@ namespace scriptpad {
     //Convert ANSI string to UNICODE string
     std::wstring str_to_wstr(const std::string& source) {
         std::wstring ret;
-        if (!scriptpad::str_to_wstr(source, &ret)) {
+        if (!str_to_wstr(source, &ret)) {
             throw std::exception("Error converting string");
         }
         return ret;
@@ -58,18 +53,14 @@ namespace scriptpad {
     bool wstr_to_str(const std::wstring& source, std::string* target) {
         int convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, NULL, 0, NULL, NULL);
         if (convertResult <= 0) {
-#ifdef _DEBUG
-            scriptpad::PrintError(L"WideCharToMultiByte");
-#endif
+            PRINT_ERROR(L"WideCharToMultiByte");
             return false;
         }
         else {
             target->resize(convertResult);
             convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, target->data(), (int)target->size(), NULL, NULL);
             if (convertResult <= 0) {
-#ifdef _DEBUG
-                scriptpad::PrintError(L"WideCharToMultiByte");
-#endif
+                PRINT_ERROR(L"WideCharToMultiByte");
                 return false;
             }
         }
@@ -79,7 +70,7 @@ namespace scriptpad {
     //Convert UNICODE string to ANSI string
     std::string wstr_to_str(const std::wstring& source) {
         std::string ret;
-        if (!scriptpad::wstr_to_str(source, &ret)) {
+        if (!wstr_to_str(source, &ret)) {
             throw std::exception("Error converting string");
         }
         return ret;
