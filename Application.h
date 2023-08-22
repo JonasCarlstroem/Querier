@@ -10,13 +10,16 @@
 namespace scriptpad {
     class Application {
     public:
-        Application();
-        void Initialize(AppWindow*);
-        ModuleHandler ModuleHandler;
-        Nodejs NodeJS;
+        Application(HINSTANCE, int);
+
+        int Start();
+
         AppWindow* MainWindow;
+        ModuleHandler ModuleHandler;
     private:
         std::wstring m_cwd;
+
+        int RunMessagePump();
     };
 }
 

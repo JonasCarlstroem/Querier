@@ -18,45 +18,46 @@ namespace scriptpad {
         std::wstring value;
     };
 
-    enum NodeJSType {
+    enum NodejsType {
         CLASSIC,
         ESM,
         CJS
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(NodeJSType, {
+    NLOHMANN_JSON_SERIALIZE_ENUM(NodejsType, {
         {CLASSIC, "classic"},
         {ESM, "esm"},
         {CJS, "cjs"}
         });
 
-    class Nodejs : public LanguageModule<Interpreter> {
+    class Nodejs : public LanguageModule {
     public:
         NPM Npm;
 
-        Nodejs();
-        Nodejs(std::wstring modulePath);
+        Nodejs(NodejsType, std::wstring, std::wstring);
+        //Nodejs(std::wstring modulePath);
         ~Nodejs();
 
         void Initialize(AppWindow* mainWin);
         void Invoke();
-        void SyncFileContent(std::wstring content);
-        void SyncFileContent(std::string content);
-        void SetNodeType(NodeJSType type);
+
+        void SetNodejsType(NodejsType type);
         void AddNodeOption(std::wstring option);
-        bool GetInitialFileContent(std::string* ret);
-        std::wstring HandleWebMessage(Message* msg);
-        void HandleOutputReceived(std::string ret);
-        void HandleErrorReceived(std::string ret);
 
     private:
-        NodeJSType m_type{ ESM };
-        std::wstring m_esmFileName{ L"langs\\NodeJS\\_eval_.mjs" };
-        std::wstring m_cjsFileName{ L"langs\\NodeJS\\_eval_.cjs" };
-        std::wstring m_clFileName{ L"langs\\NodeJS\\_eval_.js" };
-        std::wstring* m_activeFileName = &m_esmFileName;
-        FileHandler m_file;
-        FileFinder m_fileFinder;
+        NodejsType m_type;
+        std::wstring m_sourceFileName;
+        std::map<NodejsType, std::wstring> m_mFileExtensions{
+            { ESM, L".mjs" },
+            { CJS, L".cjs" },
+            { CLASSIC, L".js" }
+        };
+
+        std::wstring get_activeSourceFile() {
+            return m_sourceFileName + m_mFileExtensions[m_type];
+        }
+
+        File m_fileFinder;
 
         std::vector<Env> m_nodeEnv;
 

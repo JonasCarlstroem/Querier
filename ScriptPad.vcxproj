@@ -139,7 +139,6 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Module.cpp" />
     <ClCompile Include="ModuleHandler.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Npm.cpp" />
@@ -159,10 +158,9 @@
     <ClInclude Include="CmdModule.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="File.h" />
-    <ClInclude Include="IBaseType.h" />
+    <ClInclude Include="ILanguage.h" />
     <ClInclude Include="IModule.h" />
     <ClInclude Include="LanguageModule.h" />
-    <ClInclude Include="Module.h" />
     <ClInclude Include="ModuleHandler.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Npm.h" />

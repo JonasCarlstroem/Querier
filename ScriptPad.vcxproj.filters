@@ -60,9 +60,6 @@
     <ClCompile Include="LanguageModule.cpp">
       <Filter>Modules\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Module.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleHandler.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
@@ -111,11 +108,8 @@
     <ClInclude Include="CmdModule.h">
       <Filter>Modules\Base</Filter>
     </ClInclude>
-    <ClInclude Include="IBaseType.h">
+    <ClInclude Include="ILanguage.h">
       <Filter>Modules\Base\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Module.h">
-      <Filter>Modules\Base</Filter>
     </ClInclude>
     <ClInclude Include="LanguageModule.h">
       <Filter>Modules\Base</Filter>

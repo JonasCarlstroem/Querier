@@ -22,6 +22,38 @@ namespace scriptpad {
         return count > 0;
     };
 
+    std::vector<std::string> str_split(std::string input, char delim) {
+        std::vector<std::string> strings;
+        std::string temp;
+        for (auto it = input.begin(); it < input.end(); it++) {
+            if (*it == delim) {
+                strings.push_back(temp);
+                temp.clear();
+            }
+            else {
+                temp.append(&*it);
+            }
+        }
+
+        return strings;
+    }
+
+    std::vector<std::wstring> wstr_split(std::wstring input, wchar_t delim) {
+        std::vector<std::wstring> wstrings;
+        std::wstring wtemp;
+        for (auto it = input.begin(); it < input.end(); it++) {
+            if (*it == delim) {
+                wstrings.push_back(wtemp);
+                wtemp.clear();
+            }
+            else {
+                wtemp.append(&*it);
+            }
+        }
+
+        return wstrings;
+    }
+
     //Convert ANSI string to UNICODE string
     bool str_to_wstr(const std::string& source, std::wstring* target) {
         int convertResult = MultiByteToWideChar(CP_UTF8, 0, source.c_str(), (int)source.length(), NULL, 0);

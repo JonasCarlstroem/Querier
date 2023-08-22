@@ -20,7 +20,7 @@ namespace scriptpad {
         const std::wstring m_baseArg = L"/C npm";
         const std::wstring m_localInstallArg = L"install";
         const std::wstring m_globalInstallArg = L"install -g";
-        FileFinder m_FileFinder;
+        File m_FileFinder;
     };
 
 }   //namespace scriptpad

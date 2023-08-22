@@ -5,11 +5,13 @@
 
 #include "IModule.h"
 #include "Process.h"
+#include "AppWindow.h"
 #include "File.h"
 
 namespace scriptpad {
     class BaseModule : public IModule, public Process {
     public:
+        BaseModule();
         BaseModule(std::wstring);
 
         template<class...T>
@@ -17,13 +19,13 @@ namespace scriptpad {
             if (m_bIsModuleInstalled) {
                 if (m_bRunAsModule) {
                     StartInfo.RunInCmd = false;
-                    StartInfo.wFileName = m_wszModulePath;
+                    StartInfo.wFileName = m_wszMainModulePath;
                     //StartInfo.wCommandLine = FormatCommandLine(std::forward<T>(cmds)...);
                 }
                 else {
                     StartInfo.RunInCmd = true;
                 }
-                StartInfo.wCommandLine = FormatCommandLine(m_wszModulePath, std::forward<T>(cmds)...);
+                StartInfo.wCommandLine = FormatCommandLine(m_wszMainModulePath, std::forward<T>(cmds)...);
 
                 if (Start()) {
                     WaitForExit();
@@ -39,7 +41,6 @@ namespace scriptpad {
             }
             throw std::exception("Module is not installed");
         }
-
     protected:
         bool m_bRunAsModule = true;
         std::wstring m_wszVersionArg = L"--version";
@@ -51,7 +52,7 @@ namespace scriptpad {
         }
 
     private:
-        FileFinder m_FFinder;
+        File m_FFinder;
 
         bool _FindInstallation(std::wstring, scriptpad::File*);
 

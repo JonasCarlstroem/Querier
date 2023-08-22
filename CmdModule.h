@@ -20,7 +20,7 @@ namespace scriptpad {
                 }
                 else {
                     StartInfo.RunInCmd = true;
-                    StartInfo.wCommandLine = FormatCommandLine(m_wszModulePath, L"/C", m_wszAppName, std::forward<T>(cmds)...);
+                    StartInfo.wCommandLine = FormatCommandLine(m_wszMainModulePath, L"/C", m_wszAppName, std::forward<T>(cmds)...);
                 }
 
                 if (Start()) {
@@ -37,6 +37,7 @@ namespace scriptpad {
             }
             throw std::exception("Module is not installed");
         }
+
     private:
         std::wstring m_wszAppName;
     };

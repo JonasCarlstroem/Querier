@@ -5,6 +5,8 @@
 
 #include <Windows.h>
 #include <string>
+#include <vector>
+
 namespace scriptpad {
     struct strIteratorIndex {
         std::wstring::const_iterator it;
@@ -13,6 +15,9 @@ namespace scriptpad {
 
     //Duplicate quotes in string
     bool dup_quotes(std::wstring* wstr);
+
+    std::vector<std::string> str_split(std::string, char);
+    std::vector<std::wstring> wstr_split(std::wstring, wchar_t);
 
     //Trim whitespaces from both ends
     bool str_trim(std::string*);

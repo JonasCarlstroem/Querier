@@ -4,7 +4,22 @@
 #include "CmdModule.h"
 
 namespace scriptpad {
+    CmdModule::CmdModule(std::wstring appName) : BaseModule(L"C:\\windows\\system32\\cmd.exe"), m_wszAppName(appName) {
+        if (m_bIsModuleInstalled) {
+            m_wszModuleVersion = scriptpad::str_to_wstr(Run(L"-v"));
+        }
+    }
 
+    CmdModule::CmdModule(std::wstring appName, std::wstring versionArg) : BaseModule(L"C:\\windows\\system32\\cmd.exe"), m_wszAppName(appName) {
+        if (m_bIsModuleInstalled) {
+            StartInfo.wFileName = m_wszMainModulePath;
+            StartInfo.RedirectStdOutput = true;
+            StartInfo.RedirectStdError = true;
+
+            m_wszVersionArg = versionArg;
+            m_wszModuleVersion = scriptpad::str_to_wstr(Run(versionArg));
+        }
+    }
 }
 
 #endif

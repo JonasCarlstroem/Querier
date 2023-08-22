@@ -8,10 +8,17 @@
 namespace scriptpad {
     class ModuleHandler {
     public:
-        std::vector<LanguageModule<Interpreter>> Interpreters;
-        std::vector<LanguageModule<Compiler>> Compilers;
-    private:
+        ModuleHandler(AppWindow*);
 
+        std::map<std::wstring, LanguageModule*> Modules;
+        std::wstring ActiveModule;
+        LanguageModule* Module = nullptr;
+
+        std::wstring HandleWebMessage(Message* msg);
+        void HandleOutputReceived(std::string ret);
+        void HandleErrorReceived(std::string ret);
+    private:
+        AppWindow* m_MainWindow;
     };
 }   //namespace scriptpad
 
