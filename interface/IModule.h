@@ -3,6 +3,7 @@
 #ifndef _SCRIPT_PAD_IMODULE_H
 #define _SCRIPT_PAD_IMODULE_H
 
+#include "../resources.h"
 #include <string>
 
 namespace scriptpad {

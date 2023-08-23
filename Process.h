@@ -5,6 +5,7 @@
 
 #define BUFSIZE 4096
 
+#include "resources.h"
 #include "Pipe.h"
 #include "Error.h"
 #include "Stopwatch.h"
@@ -43,7 +44,7 @@ namespace scriptpad {
         Process();
         Process(std::wstring FileName);
         Process(ProcessStartInfo startInfo);
-        ~Process();
+        virtual ~Process();
 
         void InitProcess();
         void SetFileName(std::wstring file);

@@ -4,9 +4,8 @@
 #define _SCRIPT_PAD_BASE_MODULE_H
 
 #include "IModule.h"
-#include "Process.h"
-#include "AppWindow.h"
-#include "File.h"
+#include "../Process.h"
+#include "../File.h"
 
 namespace scriptpad {
     class BaseModule : public IModule, public Process {
@@ -41,6 +40,7 @@ namespace scriptpad {
             }
             throw std::exception("Module is not installed");
         }
+
     protected:
         bool m_bRunAsModule = true;
         std::wstring m_wszVersionArg = L"--version";

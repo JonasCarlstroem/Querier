@@ -1,7 +1,7 @@
 #ifndef _SCRIPT_PAD_NPM_CPP
 #define _SCRIPT_PAD_NPM_CPP
 
-#include "Npm.h"
+#include "NpmT.h"
 
 namespace scriptpad {
 

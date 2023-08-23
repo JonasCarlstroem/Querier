@@ -17,7 +17,8 @@ namespace scriptpad {
         AppWindow* MainWindow;
         ModuleHandler ModuleHandler;
     private:
-        std::wstring m_cwd;
+        std::wstring m_WorkingDirectory;
+        std::wstring m_WorkspaceDirectory;
 
         int RunMessagePump();
     };

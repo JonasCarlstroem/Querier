@@ -26,6 +26,7 @@ namespace scriptpad {
 
         void wWriteFile(std::wstring);
         void WriteFile(std::string);
+        //bool Read(std::string*);
         bool Read(std::string*);
 
         static File FindFile(std::wstring file);
@@ -43,10 +44,14 @@ namespace scriptpad {
     };
 
     class Directory {
+    public:
         static std::string CurrentWorkingDirectory();
         static std::wstring wCurrentWorkingDirectory();
         static std::string ApplicationDirectory();
         static std::wstring wApplicationDirectory();
+
+        static std::vector<std::string> GetFiles(std::string);
+        static std::vector<std::wstring> wGetFiles(std::wstring);
     };
 
     class ProductFinder {

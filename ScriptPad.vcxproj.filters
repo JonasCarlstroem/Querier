@@ -66,7 +66,7 @@
     <ClCompile Include="Node.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Npm.cpp">
+    <ClCompile Include="NpmT.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
   </ItemGroup>
@@ -120,11 +120,17 @@
     <ClInclude Include="Node.h">
       <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Npm.h">
+    <ClInclude Include="NpmT.h">
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="BaseModule.h">
       <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resources.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

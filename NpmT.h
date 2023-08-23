@@ -3,7 +3,7 @@
 #ifndef _SCRIPT_PAD_NPM_H
 #define _SCRIPT_PAD_NPM_H
 
-#include "CmdModule.h"
+#include "interface/CmdModule.h"
 #include "File.h"
 #include <utility>
 

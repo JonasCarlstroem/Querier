@@ -6,7 +6,10 @@
 namespace scriptpad {
     CmdModule::CmdModule(std::wstring appName) : BaseModule(L"C:\\windows\\system32\\cmd.exe"), m_wszAppName(appName) {
         if (m_bIsModuleInstalled) {
-            m_wszModuleVersion = scriptpad::str_to_wstr(Run(L"-v"));
+            StartInfo.wFileName = m_wszMainModulePath;
+            StartInfo.RedirectStdOutput = true;
+            StartInfo.RedirectStdError = true;
+
         }
     }
 
@@ -19,6 +22,10 @@ namespace scriptpad {
             m_wszVersionArg = versionArg;
             m_wszModuleVersion = scriptpad::str_to_wstr(Run(versionArg));
         }
+    }
+
+    CmdModule::~CmdModule() {
+
     }
 }
 

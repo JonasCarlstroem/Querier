@@ -1,3 +1,5 @@
+#pragma warning(suppress : 6387)
+
 #ifndef _SCRIPT_PAD_FILE_CPP
     #define _SCRIPT_PAD_FILE_CPP
 
@@ -76,6 +78,7 @@ namespace scriptpad {
     bool File::Read(std::string* ret) {
         if (!m_ioFile.is_open()) {
             char buffer[BUFSIZE];
+
             ret->clear();
             m_ioFile.open(m_fileName, std::fstream::in);
             while (m_ioFile.read(buffer, sizeof(buffer)))
@@ -129,23 +132,77 @@ namespace scriptpad {
     }
 
     bool File::Create(std::string fileName) {
-
+        return false;
     }
 
     std::string Directory::CurrentWorkingDirectory() {
-
+        char buffer[MAX_PATH] = { 0 };
+        if (GetCurrentDirectoryA(MAX_PATH, buffer))
+            return buffer;
+        return nullptr;
     }
 
     std::wstring Directory::wCurrentWorkingDirectory() {
-
+        wchar_t buffer[MAX_PATH] = { 0 };
+        if (GetCurrentDirectoryW(MAX_PATH, buffer))
+            return buffer;
+        return nullptr;
     }
 
     std::string Directory::ApplicationDirectory() {
-
+        return std::string();
     }
 
     std::wstring Directory::wApplicationDirectory() {
+        return std::wstring();
+    }
 
+    std::vector<std::string> Directory::GetFiles(std::string path) {
+        WIN32_FIND_DATAA findDataA{ 0 };
+        LARGE_INTEGER fileSize;
+        char dir[MAX_PATH];
+        HANDLE hFind = INVALID_HANDLE_VALUE;
+
+        hFind = FindFirstFileA(path.c_str(), &findDataA);
+
+        if (hFind == INVALID_HANDLE_VALUE)
+            PRINT_ERROR(L"FindFirstFileA");
+
+        return std::vector<std::string>();
+    }
+
+    std::vector<std::wstring> Directory::wGetFiles(std::wstring path) {
+        std::vector<std::wstring> result;
+        WIN32_FIND_DATA findData{ 0 };
+        LARGE_INTEGER fileSize{ 0 };
+        wchar_t dir[MAX_PATH];
+        HANDLE hFind = INVALID_HANDLE_VALUE;
+
+        path.append(L"\\*");
+        hFind = FindFirstFileW(path.c_str(), &findData);
+
+        if (hFind == INVALID_HANDLE_VALUE)
+            PRINT_ERROR(L"FindFirstFileW");
+
+        BOOL tmp;
+        do {
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                
+            }
+            else {
+                fileSize.LowPart = findData.nFileSizeLow;
+                fileSize.HighPart = findData.nFileSizeHigh;
+
+                result.push_back(findData.cFileName);
+            }
+            tmp = FindNextFile(hFind, &findData);
+        } while (tmp != 0);
+
+        if (GetLastError() != ERROR_NO_MORE_FILES)
+            PRINT_ERROR(L"FindFirstFile");
+
+        FindClose(hFind);
+        return result;
     }
 }   //namespace scriptpad
 

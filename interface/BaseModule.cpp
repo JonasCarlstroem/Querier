@@ -12,6 +12,8 @@ namespace scriptpad {
         File file;
         if (_FindInstallation(applicationName, &file)) {
             m_bIsModuleInstalled = true;
+
+            m_wszModuleVersion = str_to_wstr(Run(L"-v"));
         }
     }
 

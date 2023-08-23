@@ -5,16 +5,9 @@
 
 namespace scriptpad {
     Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleHandler(MainWindow) {
-        wchar_t buffer[MAX_PATH] = { 0 };
-        if (GetCurrentDirectory(MAX_PATH, buffer)) {
-            print_msg(buffer);
-            m_cwd = buffer;
-        }
+        m_WorkingDirectory = Directory::wCurrentWorkingDirectory();
 
-        wchar_t mbuffer[MAX_PATH] = { 0 };
-        if (GetModuleFileName(NULL, mbuffer, MAX_PATH)) {
-            print_msg(mbuffer);
-        }
+        auto tmp = Directory::wGetFiles(m_WorkingDirectory);
     }
 
     int Application::Start() {

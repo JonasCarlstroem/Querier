@@ -3,6 +3,7 @@
 #ifndef _SCRIPT_PAD_CMD_MODULE_H
 #define _SCRIPT_PAD_CMD_MODULE_H
 
+#include "../resources.h"
 #include "BaseModule.h"
 
 namespace scriptpad {
@@ -10,6 +11,7 @@ namespace scriptpad {
     public:
         CmdModule(std::wstring);
         CmdModule(std::wstring, std::wstring);
+        virtual ~CmdModule();
 
         template<class...T>
         std::string Run(T&&...cmds) {
