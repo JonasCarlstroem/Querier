@@ -41,7 +41,8 @@ namespace scriptpad {
         QueryConfig() {};
         QueryConfig(std::string name, std::string queryPath, std::string queryModule) : name(name), queryPath(queryPath), queryModule(queryModule) {};
         std::string name;
-        std::string queryPath;
+        path queryPath;
+        path queryConfigFile();
         std::string queryModule;
         bool unsavedChanges = false;
     };
@@ -56,6 +57,7 @@ namespace scriptpad {
             static Query load_Query(ModuleHandler*, std::string);
             static Query new_Query(ModuleHandler*, std::wstring);
             static QueryConfig get_QueryConfig(path);
+            static void set_QueryConfig(QueryConfig);
         };
 
         ModuleHandler(AppWindow*);

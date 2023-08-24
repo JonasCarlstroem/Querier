@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Npm.h"
 
-NPM::NPM() : CmdModule(L"npm", L"--version") {
+NPM::NPM() : CmdModule(L"npm", L"--version", true) {
 
 }
 

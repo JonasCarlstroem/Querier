@@ -9,32 +9,10 @@ namespace scriptpad {
         BaseModule(mainModule, versionArg, runAsModule),
         m_LanguageFilePaths{ mainModule },
         m_File(sourceFile) {
-        StartInfo.wFileName = mainModule;
-        StartInfo.RedirectStdOutput = true;
-        StartInfo.RedirectStdError = true;
 
         m_LanguageFilePaths.set_SourceFile(sourceFile);
+        m_wszModuleVersion = str_to_wstr(Run(versionArg));
     }
-
-    /*LanguageModule::LanguageModule(LanguageFilePaths filePaths)
-        : ILanguage(),
-        m_LanguageFilePaths(filePaths),
-        m_File(filePaths.get_SourceFile()),
-        BaseModule(filePaths.MainModule) {
-        StartInfo.wFileName = m_LanguageFilePaths.MainModule;
-        StartInfo.RedirectStdOutput = true;
-        StartInfo.RedirectStdError = true;
-    }
-
-    LanguageModule::LanguageModule(const LanguageModule& mod)
-        : ILanguage(),
-        m_LanguageFilePaths(mod.m_LanguageFilePaths),
-        m_File(m_LanguageFilePaths.get_SourceFile()),
-        BaseModule(m_LanguageFilePaths.MainModule) {
-        StartInfo.wFileName = m_LanguageFilePaths.MainModule;
-        StartInfo.RedirectStdOutput = true;
-        StartInfo.RedirectStdError = true;
-    }*/
 
     LanguageModule::~LanguageModule() {
 

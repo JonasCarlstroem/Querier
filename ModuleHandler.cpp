@@ -22,6 +22,10 @@ namespace scriptpad {
         return str_to_wstr(libraryExtension);
     }
 
+    path QueryConfig::queryConfigFile() {
+        return queryPath / path(name + ".json");
+    }
+
     ModuleHandler::Query::Query(QueryConfig conf) : config(conf) {
 
     }
@@ -30,6 +34,7 @@ namespace scriptpad {
         path queryDir = handler->WorkspaceDirectory / path(queryName);
         path configFile = queryDir / path(queryName + ".json");
         QueryConfig config = get_QueryConfig(configFile);
+
 
         return Query(config);
     }
@@ -52,12 +57,22 @@ namespace scriptpad {
         handler->Module = handler->Modules[_module];
         handler->ActiveModule = _module;
 
-        return Query(QueryConfig{ queryName, queryDir.string(), wstr_to_str(_module) });
+        QueryConfig qConf = QueryConfig{ queryName, queryDir.string(), wstr_to_str(_module) };
+        set_QueryConfig(qConf);
+
+        return Query(qConf);
     }
 
     QueryConfig ModuleHandler::Query::get_QueryConfig(path configFile) {
         json content = json::parse(File::ReadAllTextW(configFile));
         return content.template get<QueryConfig>();
+    }
+
+    void ModuleHandler::Query::set_QueryConfig(QueryConfig conf) {
+        json cont = json(conf);
+        File::Create(conf.queryConfigFile());
+        File f(conf.queryConfigFile());
+        f.WriteFile(cont.dump());
     }
 
     ModuleHandler::ModuleHandler(AppWindow* mainWin) {
@@ -235,7 +250,7 @@ namespace scriptpad {
             { "name", q.name },
             { "queryPath", q.queryPath },
             { "queryModule", q.queryModule },
-            { "unsavedChanges", q.unsavedChanges }
+            { "unsavedChanges", (bool)q.unsavedChanges }
         };
     }
 

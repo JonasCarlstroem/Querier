@@ -11,7 +11,7 @@ namespace scriptpad {
             StartInfo.RedirectStdError = true;
 
             m_wszVersionArg = versionArg;
-            m_wszModuleVersion = scriptpad::str_to_wstr(Run(versionArg));
+            m_wszModuleVersion = str_to_wstr(Run(versionArg));
         }
     }
 

@@ -42,12 +42,17 @@ namespace scriptpad {
         std::vector<std::wstring> wstrings;
         std::wstring wtemp;
         for (auto it = input.begin(); it < input.end(); it++) {
+            if (it == input.end() - 1) {
+                wtemp += (*it);
+                wstrings.push_back(wtemp);
+                break;
+            }
             if (*it == delim) {
                 wstrings.push_back(wtemp);
                 wtemp.clear();
             }
             else {
-                wtemp.append(&*it);
+                wtemp += (*it);
             }
         }
 

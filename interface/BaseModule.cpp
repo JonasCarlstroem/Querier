@@ -14,7 +14,9 @@ namespace scriptpad {
             m_bRunAsModule = runAsModule;
             m_bIsModuleInstalled = true;
 
-            m_wszModuleVersion = str_to_wstr(Run(versionArg));
+            StartInfo.wFileName = applicationName;
+            StartInfo.RedirectStdOutput = true;
+            StartInfo.RedirectStdError = true;
         }
     }
 

@@ -32,7 +32,7 @@ namespace scriptpad {
             auto file0Ext1 = wstr_split(fileName, L'.');
             if (file0Ext1.size() == 2) {
                 SourceFileName = file0Ext1[0];
-                SourceFileExtension = file0Ext1[1];
+                SourceFileExtension = L'.' + file0Ext1[1];
             }
         }
 
