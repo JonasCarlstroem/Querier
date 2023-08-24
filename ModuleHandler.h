@@ -13,21 +13,30 @@ namespace scriptpad {
     using namespace std::filesystem;
     typedef LanguageModule*(_cdecl* DLL)();
     
+    // Loaded language module resources
     struct LoadedModule {
         std::wstring name;
+        // path to dll
         path modulePath;
         HINSTANCE hLibrary;
         DLL createModule;
     };
 
+    // Language module configurations
     class ModuleConfig {
     public:
         std::string name;
+        // path to main module (interpreter / compiler executable)
         path mainModulePath;
+        // path to the modules base directory (where the dll is)
         path moduleDirectory;
+        // language specific source file extension (default is .mjs for nodejs ESM, for csharp it's .cs)
         std::string sourceFileExtension;
+        // custom language specific library, containing language specific types and (D|d)ump() function
         std::string library;
+        // extension for the language specific library
         std::string libraryExtension;
+        // interpreter or compiler
         LanguageType engineType;
 
         std::wstring get_Name();
