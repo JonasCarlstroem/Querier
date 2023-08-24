@@ -44,7 +44,7 @@ namespace scriptpad {
         std::wstring get_Library();
         std::wstring get_LibraryExtension();
     };
-
+    // remove and make members part of query class
     class QueryConfig {
     public:
         QueryConfig() {};
@@ -58,11 +58,14 @@ namespace scriptpad {
 
     class ModuleHandler {
     public:
+        // move outside ModuleHandler
         class Query {
         public:
+            // make QueryConfig members part of Query class and remove QueryConfig
             QueryConfig config;
 
             Query(QueryConfig conf);
+            // make function part of ModuleHandler
             static Query load_Query(ModuleHandler*, std::string);
             static Query new_Query(ModuleHandler*, std::wstring);
             static QueryConfig get_QueryConfig(path);
