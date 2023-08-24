@@ -1,0 +1,11 @@
+{
+  "name": "nodejs",
+  "version": "0.0.1",
+  "description": "NodeJS exec config",
+  "main": "_eval_.js",
+  "scripts": {
+    "start": "node _eval_.js"
+  },
+  "author": "Jonas Carlström",
+  "license": "ISC"
+}

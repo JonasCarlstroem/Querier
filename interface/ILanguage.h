@@ -7,18 +7,11 @@
 #include <string>
 
 namespace scriptpad {
-    enum LanguageType {
-        Interpreter,
-        Compiler
-    };
-
     class ILanguage {
     public:
         virtual bool GetFileContent(std::string*) = 0;
         virtual void SetFileContent(std::string) = 0;
         virtual void Invoke() = 0;
-    protected:
-        LanguageType m_LanguageType{ Interpreter };
     };
 }   //namespace scriptpad
 

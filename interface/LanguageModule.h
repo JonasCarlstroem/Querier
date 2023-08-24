@@ -8,6 +8,15 @@
 #include "BaseModule.h"
 
 namespace scriptpad {
+    enum LanguageType {
+        Interpreter,
+        Compiler
+    };
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(LanguageType, {
+        { Interpreter, "interpreter" },
+        { Compiler, "compiler" }
+    });
 
     struct LanguageFilePaths {
         std::wstring MainModule;
@@ -37,7 +46,7 @@ namespace scriptpad {
 
     class __declspec(dllexport) LanguageModule : public ILanguage, public BaseModule {
     public:
-        LanguageModule(std::wstring mainModule, std::wstring sourceFile);
+        LanguageModule(std::wstring mainModule, std::wstring sourceFile, std::wstring versionArg, bool runAsModule);
         //LanguageModule(LanguageFilePaths filePaths);
         //LanguageModule(const LanguageModule& mod);
 
@@ -55,6 +64,8 @@ namespace scriptpad {
         void SetSourceFileExtension(std::wstring extension);
         std::wstring GetSourceFileExtension();
 
+    protected:
+        LanguageType m_LanguageType{ Interpreter };
 
     private:
         LanguageFilePaths m_LanguageFilePaths;

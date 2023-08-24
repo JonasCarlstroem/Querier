@@ -1,0 +1,8 @@
+﻿{
+    "name": "Nodejs",
+    "mainModulePath": "C:\\Program Files\\nodejs\\node.exe",
+    "sourceFileExtension": ".mjs",
+    "library": "_lib_",
+    "libraryExtension": ".mjs",
+    "engineType": "interpreter"
+}

@@ -7,10 +7,9 @@
 #include "BaseModule.h"
 
 namespace scriptpad {
-    class CmdModule : public BaseModule {
+    class __declspec(dllexport) CmdModule : public BaseModule {
     public:
-        CmdModule(std::wstring);
-        CmdModule(std::wstring, std::wstring);
+        CmdModule(std::wstring, std::wstring, bool);
         virtual ~CmdModule();
 
         template<class...T>

@@ -91,7 +91,7 @@ namespace scriptpad {
         return false;
     }
 
-    File File::FindFile(std::wstring file) {
+    File File::FindFile(path file) {
         WIN32_FIND_DATA wfData;
         HANDLE hFind;
 
@@ -105,7 +105,7 @@ namespace scriptpad {
         return File();
     }
 
-    bool File::SearchFile(std::wstring sFile, File* pFile) {
+    bool File::SearchFile(path sFile, File* pFile) {
         LPWSTR lpFilePart;
         std::wstring ret;
         ret.resize(MAX_PATH);
@@ -117,7 +117,7 @@ namespace scriptpad {
         return true;
     }
 
-    std::string File::ReadAllText(std::string fileName) {
+    std::string File::ReadAllText(path fileName) {
         std::ifstream is(fileName, std::ios_base::in);
         if (is.good()) {
             char buffer[BUFSIZE];
@@ -131,55 +131,55 @@ namespace scriptpad {
         else return nullptr;
     }
 
-    bool File::Create(std::string fileName) {
-        return false;
-    }
+    std::wstring File::ReadAllTextW(path fileName) {
+        std::wifstream wif(fileName, std::ios_base::in);
+        if (wif.good()) {
+            wchar_t buffer[BUFSIZE];
+            std::wstring ret;
+            while (wif.read(buffer, sizeof(buffer)))
+                ret.append(buffer, sizeof(buffer));
+            ret.append(buffer, wif.gcount());
 
-    std::string Directory::CurrentWorkingDirectory() {
-        char buffer[MAX_PATH] = { 0 };
-        if (GetCurrentDirectoryA(MAX_PATH, buffer))
-            return buffer;
-        return nullptr;
-    }
-
-    std::wstring Directory::wCurrentWorkingDirectory() {
-        wchar_t buffer[MAX_PATH] = { 0 };
-        if (GetCurrentDirectoryW(MAX_PATH, buffer))
-            return buffer;
-        return nullptr;
-    }
-
-    std::string Directory::ApplicationDirectory() {
-        return std::string();
-    }
-
-    std::wstring Directory::wApplicationDirectory() {
+            return ret;
+        }
         return std::wstring();
     }
 
-    std::vector<std::string> Directory::GetFiles(std::string path) {
-        WIN32_FIND_DATAA findDataA{ 0 };
-        LARGE_INTEGER fileSize;
-        char dir[MAX_PATH];
-        HANDLE hFind = INVALID_HANDLE_VALUE;
-
-        hFind = FindFirstFileA(path.c_str(), &findDataA);
-
-        if (hFind == INVALID_HANDLE_VALUE)
-            PRINT_ERROR(L"FindFirstFileA");
-
-        return std::vector<std::string>();
+    bool File::Create(path fileName) {
+        std::ofstream of(fileName, std::ios_base::out);
+        bool success = of.good();
+        of.close();
+        return success;
     }
 
-    std::vector<std::wstring> Directory::wGetFiles(std::wstring path) {
-        std::vector<std::wstring> result;
+    bool File::Exists(path file) {
+        return exists(file) && is_regular_file(file);
+    }
+
+    bool File::Exists(std::wstring file) {
+        return !(INVALID_FILE_ATTRIBUTES == GetFileAttributes(file.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND);
+    }
+
+    path Directory::CurrentWorkingDirectory() {
+        TCHAR buffer[MAX_PATH] = { 0 };
+        if (GetCurrentDirectory(MAX_PATH, buffer))
+            return buffer;
+        return path::path();
+    }
+
+    path Directory::ApplicationDirectory() {
+        return std::string();
+    }
+
+    std::vector<path> Directory::GetFiles(path _path) {
+        std::vector<path> result;
         WIN32_FIND_DATA findData{ 0 };
         LARGE_INTEGER fileSize{ 0 };
         wchar_t dir[MAX_PATH];
         HANDLE hFind = INVALID_HANDLE_VALUE;
 
-        path.append(L"\\*");
-        hFind = FindFirstFileW(path.c_str(), &findData);
+        _path.append(L"\\*");
+        hFind = FindFirstFile(_path.c_str(), &findData);
 
         if (hFind == INVALID_HANDLE_VALUE)
             PRINT_ERROR(L"FindFirstFileW");
@@ -187,7 +187,7 @@ namespace scriptpad {
         BOOL tmp;
         do {
             if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                
+
             }
             else {
                 fileSize.LowPart = findData.nFileSizeLow;
@@ -203,6 +203,42 @@ namespace scriptpad {
 
         FindClose(hFind);
         return result;
+    }
+
+    std::vector<path> Directory::GetDirectories(path _path) {
+        std::vector<path> result;
+        WIN32_FIND_DATA findData{ 0 };
+        wchar_t dir[MAX_PATH];
+        HANDLE hFind = INVALID_HANDLE_VALUE;
+
+        _path += path(L"\\*");
+        hFind = FindFirstFileW(_path.c_str(), &findData);
+
+        if (hFind == INVALID_HANDLE_VALUE)
+            PRINT_ERROR(L"FindFirstFileW");
+
+        BOOL tmp;
+        do {
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                if (findData.cFileName[0] != L'.' && findData.cFileName[1] != L'.')
+                    result.push_back(findData.cFileName);
+            }
+            tmp = FindNextFile(hFind, &findData);
+        } while (tmp != 0);
+
+        if (GetLastError() != ERROR_NO_MORE_FILES)
+            PRINT_ERROR(L"FindFirstFile");
+
+        FindClose(hFind);
+        return result;
+    }
+
+    bool Directory::Create(path _path) {
+        return create_directory(_path);
+    }
+
+    bool Directory::Exists(path _path) {
+        return exists(_path) && is_directory(_path);
     }
 }   //namespace scriptpad
 

@@ -8,8 +8,10 @@
 #include <Windows.h>
 #include <string>
 #include <fstream>
+#include <filesystem>
 
 namespace scriptpad {
+    using namespace std::filesystem;
     class File {
     public:
         File();
@@ -29,10 +31,14 @@ namespace scriptpad {
         //bool Read(std::string*);
         bool Read(std::string*);
 
-        static File FindFile(std::wstring file);
-        static bool SearchFile(std::wstring sFile, File* pFile);
-        static std::string ReadAllText(std::string);
-        static bool Create(std::string fileName);
+        static File FindFile(path file);
+        static bool SearchFile(path sFile, File* pFile);
+        static std::string ReadAllText(path);
+        static std::wstring ReadAllTextW(path);
+        static bool Create(path fileName);
+
+        static bool Exists(path);
+        static bool Exists(std::wstring);
 
     private:
         std::wstring m_wFileName{ 0 };
@@ -45,13 +51,15 @@ namespace scriptpad {
 
     class Directory {
     public:
-        static std::string CurrentWorkingDirectory();
-        static std::wstring wCurrentWorkingDirectory();
-        static std::string ApplicationDirectory();
-        static std::wstring wApplicationDirectory();
+        static path CurrentWorkingDirectory();
+        static path ApplicationDirectory();
 
-        static std::vector<std::string> GetFiles(std::string);
-        static std::vector<std::wstring> wGetFiles(std::wstring);
+        static std::vector<path> GetFiles(path);
+        static std::vector<path> GetDirectories(path);
+
+        static bool Create(path);
+
+        static bool Exists(path);
     };
 
     class ProductFinder {

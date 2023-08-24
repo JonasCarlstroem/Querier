@@ -2,7 +2,7 @@
 #include "Nodejs.h"
 
 Nodejs::Nodejs(NodejsType type, std::wstring sourceFile)
-    : LanguageModule( L"C:\\Program Files\\nodejs\\node.exe", sourceFile), m_type(type) {
+    : LanguageModule(L"C:\\Program Files\\nodejs\\node.exe", sourceFile, false), m_type(type) {
     m_sourceFileName = GetSourceFileName();
     if (m_bIsModuleInstalled) {
         m_bRunAsModule = false;
@@ -14,7 +14,7 @@ Nodejs::Nodejs(NodejsType type, std::wstring sourceFile)
 Nodejs::~Nodejs() {};
 
 void Nodejs::Initialize() {
-    m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"./langs/NodeJS/_dump_.mjs\"" });
+    m_nodeEnv.push_back(Env{ L"NODE_OPTIONS", L"--import \"_lib_.mjs\"" });
     SetEnv();
 };
 

@@ -4,11 +4,11 @@
 #include "LanguageModule.h"
 
 namespace scriptpad {
-    LanguageModule::LanguageModule(std::wstring mainModule, std::wstring sourceFile)
+    LanguageModule::LanguageModule(std::wstring mainModule, std::wstring sourceFile, std::wstring versionArg, bool runAsModule)
         : ILanguage(),
+        BaseModule(mainModule, versionArg, runAsModule),
         m_LanguageFilePaths{ mainModule },
-        m_File(sourceFile),
-        BaseModule(mainModule) {
+        m_File(sourceFile) {
         StartInfo.wFileName = mainModule;
         StartInfo.RedirectStdOutput = true;
         StartInfo.RedirectStdError = true;

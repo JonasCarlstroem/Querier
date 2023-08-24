@@ -2,14 +2,15 @@
 
 //#include "interface/LanguageModule.h"
 //#include "Npm.h"
-#include "../interface/LanguageModule.h"
+
+#include "../../interface/LanguageModule.h"
 #include "Npm.h"
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
-//using namespace scriptpad;
+using namespace scriptpad;
 
 struct Env {
     std::wstring key;
@@ -26,9 +27,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(NodejsType, {
     {CLASSIC, "classic"},
     {ESM, "esm"},
     {CJS, "cjs"}
-});
+                             });
 
-class Nodejs : public scriptpad::LanguageModule {
+class Nodejs : public LanguageModule {
 public:
     NPM Npm;
 
@@ -54,8 +55,8 @@ private:
     bool SetEnv();
 };
 
-__declspec(dllexport) scriptpad::LanguageModule* CreateModule() {
-    scriptpad::LanguageModule* langModule = new Nodejs(ESM, L"langs\\NodeJS\\_eval_.mjs");
+extern "C" __declspec(dllexport) LanguageModule * CreateModule() {
+    LanguageModule* langModule = new Nodejs(ESM, L"_eval_.mjs");
 
     return langModule;
 }

@@ -5,9 +5,7 @@
 
 namespace scriptpad {
     Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleHandler(MainWindow) {
-        m_WorkingDirectory = Directory::wCurrentWorkingDirectory();
-
-        auto tmp = Directory::wGetFiles(m_WorkingDirectory);
+        m_WorkingDirectory = Directory::CurrentWorkingDirectory();
     }
 
     int Application::Start() {

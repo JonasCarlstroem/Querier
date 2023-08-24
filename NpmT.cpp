@@ -5,7 +5,7 @@
 
 namespace scriptpad {
 
-    NPM::NPM() : CmdModule(L"npm", L"--version"), m_FileFinder() {
+    NPM::NPM() : CmdModule(L"npm", L"--version", true), m_FileFinder() {
         
     }
 

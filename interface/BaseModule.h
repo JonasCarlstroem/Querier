@@ -11,7 +11,7 @@ namespace scriptpad {
     class BaseModule : public IModule, public Process {
     public:
         BaseModule();
-        BaseModule(std::wstring);
+        BaseModule(std::wstring, std::wstring, bool);
 
         template<class...T>
         std::string Run(T&&...cmds) {

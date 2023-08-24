@@ -8,12 +8,13 @@ namespace scriptpad {
 
     }
 
-    BaseModule::BaseModule(std::wstring applicationName) : IModule(applicationName), m_FFinder() {
+    BaseModule::BaseModule(std::wstring applicationName, std::wstring versionArg, bool runAsModule) : IModule(applicationName), m_FFinder() {
         File file;
         if (_FindInstallation(applicationName, &file)) {
+            m_bRunAsModule = runAsModule;
             m_bIsModuleInstalled = true;
 
-            m_wszModuleVersion = str_to_wstr(Run(L"-v"));
+            m_wszModuleVersion = str_to_wstr(Run(versionArg));
         }
     }
 

@@ -3,7 +3,7 @@
 #ifndef _SCRIPT_PAD_MODULES_NPM_H
 #define _SCRIPT_PAD_MODULES_NPM_H
 
-#include "../interface/CmdModule.h"
+#include "../../interface/CmdModule.h"
 
 using namespace scriptpad;
 
