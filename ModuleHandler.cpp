@@ -102,6 +102,7 @@ namespace scriptpad {
 
     }
 
+    // get module configurations
     std::map<std::wstring, ModuleConfig> ModuleHandler::get_Modules() {
         if (s_ModuleConfigs.size() > 0)
             return s_ModuleConfigs;
