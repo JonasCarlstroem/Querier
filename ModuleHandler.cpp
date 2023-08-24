@@ -35,7 +35,7 @@ namespace scriptpad {
         path configFile = queryDir / path(queryName + ".json");
         QueryConfig config = get_QueryConfig(configFile);
 
-
+        // load language module
         return Query(config);
     }
 
