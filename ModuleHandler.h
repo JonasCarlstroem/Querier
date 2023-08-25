@@ -27,6 +27,7 @@ namespace scriptpad {
         Module(std::string _name, path _path, std::string _lib, LanguageType _type);
         std::string Name;
         path Path;
+        // rename to source file extension
         std::string SourceFile;
         std::string Library;
         LanguageType Type{ Interpreter };
