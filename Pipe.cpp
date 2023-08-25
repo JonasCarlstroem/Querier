@@ -19,6 +19,71 @@ namespace scriptpad {
             CloseHandle(m_stdErr.read);
     };
 
+    bool Pipe::RedirectIO(bool input, bool output, bool error, STARTUPINFOA& sia) {
+        m_redirectedInput = input;
+        m_redirectedOutput = output;
+        m_redirectedError = error;
+
+        if (input || output || error) {
+            sia.dwFlags |= STARTF_USESTDHANDLES;
+            m_saAttr.bInheritHandle = TRUE;
+        }
+
+        if (input) {
+
+            if (!CreatePipe(&m_stdIn.read, &m_stdIn.write, &m_saAttr, 0)) {
+                PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
+                return false;
+            }
+
+            if (!SetHandleInformation(m_stdIn.write, HANDLE_FLAG_INHERIT, 0)) {
+                PRINT_ERROR(L"Pipe::RedirectIO->SetHandleInformation");
+                return false;
+            }
+
+            if (!_InitInput())
+                return false;
+
+            sia.hStdInput = m_stdIn.read;
+        }
+
+        if (output) {
+            if (!CreatePipe(&m_stdOut.read, &m_stdOut.write, &m_saAttr, 0)) {
+                PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
+                return false;
+            }
+
+            if (!SetHandleInformation(m_stdOut.read, HANDLE_FLAG_INHERIT, 0)) {
+                PRINT_ERROR(L"ProcessPipe::redirect_io->SetHandleInformation");
+                return false;
+            }
+
+            if (!_InitOutput())
+                return false;
+
+            sia.hStdOutput = m_stdOut.write;
+        }
+
+        if (error) {
+            if (!CreatePipe(&m_stdErr.read, &m_stdErr.write, &m_saAttr, 0)) {
+                PRINT_ERROR(L"Pipe::RedirectIO->CreatePipe");
+                return false;
+            }
+
+            if (!SetHandleInformation(m_stdErr.read, HANDLE_FLAG_INHERIT, 0)) {
+                PRINT_ERROR(L"Pipe::RedirectIO->SetHandleInformation");
+                return false;
+            }
+
+            if (!_InitError())
+                return false;
+
+            sia.hStdError = m_stdErr.write;
+        }
+
+        return input || output || error;
+    };
+
     bool Pipe::RedirectIO(bool input, bool output, bool error, STARTUPINFO& si) {
         m_redirectedInput = input;
         m_redirectedOutput = output;

@@ -26,12 +26,17 @@ namespace scriptpad {
         std::vector<std::string> strings;
         std::string temp;
         for (auto it = input.begin(); it < input.end(); it++) {
+            if (it == input.end() - 1) {
+                temp += (*it);
+                strings.push_back(temp);
+                break;
+            }
             if (*it == delim) {
                 strings.push_back(temp);
                 temp.clear();
             }
             else {
-                temp.append(&*it);
+                temp += (*it);
             }
         }
 

@@ -11,7 +11,7 @@
 
 namespace scriptpad {
     using namespace std::filesystem;
-    typedef LanguageModule*(_cdecl* DLL)();
+    typedef LanguageModule*(_cdecl* DLL)(std::string);
     
     // Loaded language module resources
     struct LoadedModule {
@@ -23,9 +23,13 @@ namespace scriptpad {
     };
 
     struct Module {
-        std::string name;
-        path path;
-        std::string sourceExtension;
+        Module();
+        Module(std::string _name, path _path, std::string _lib, LanguageType _type);
+        std::string Name;
+        path Path;
+        std::string SourceFile;
+        std::string Library;
+        LanguageType Type{ Interpreter };
     };
 
     class Query {
@@ -33,12 +37,11 @@ namespace scriptpad {
         Query() {};
         Query(std::string, std::string, std::string);
         Query(std::string, std::string, std::string, std::string);
-        Query(std::string, std::string, std::string, std::string, std::string);
+
         std::string Name;
         std::string Path;
         std::string ModuleName;
         std::string SourceFile;
-        std::string SourceExtension;
         bool UnsavedChanges = false;
 
         LanguageModule* loadedLanguageModule = nullptr;
@@ -83,10 +86,10 @@ namespace scriptpad {
         std::map<std::string, LoadedModule> m_LoadedModules;
         static std::map<std::wstring, path> m_wModules;
         static std::map<std::string, path> m_Modules;
-        static std::map<std::string, Module> m_mModules;
+        static std::map<std::string, Module*> m_mModules;
 
-        void init_Modules();
-        void init_Workspace();
+        bool init_Modules();
+        bool init_Workspace();
 
         bool LoadModule(Module);
 
@@ -104,6 +107,9 @@ namespace scriptpad {
 
     void to_json(json& j, const Query& q);
     void from_json(const json& j, Query& q);
+
+    void to_json(json& j, const Module& m);
+    void from_json(const json& j, Module& m);
 }   //namespace scriptpad
 
 #endif  //_SCRIPT_PAD_MODULE_HANDLER_H

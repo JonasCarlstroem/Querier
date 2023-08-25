@@ -23,6 +23,7 @@ namespace scriptpad {
         Pipe(SECURITY_ATTRIBUTES& sa, PROCESS_INFORMATION& pi);
         ~Pipe();
 
+        bool RedirectIO(bool input, bool output, bool error, STARTUPINFOA& sia);
         bool RedirectIO(bool input, bool output, bool error, STARTUPINFO& si);
         void WriteInput(std::string data);
         bool ReadOutput(std::wstring* ret);

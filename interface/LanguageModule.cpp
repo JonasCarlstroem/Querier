@@ -6,18 +6,18 @@
 namespace scriptpad {
     LanguageFilePaths::LanguageFilePaths(std::string mainModule, std::string sourceFile = "", std::string executableFile = "") : MainModule(mainModule) {
         if(!sourceFile.empty())
-            set_SourceFile(sourceFile);
+            SourceFile = sourceFile;
 
         if (!executableFile.empty())
-            set_ExecutableFile(executableFile);
+            ExecutableFile = executableFile;
     }
 
-    LanguageFilePaths::LanguageFilePaths(std::wstring wMainModule, std::wstring wSourceFile = L"", std::wstring wExecutableFile = L"") : wMainModule(wMainModule) {
-        if (!wSourceFile.empty())
-            set_wSourceFile(wSourceFile);
+    LanguageFilePaths::LanguageFilePaths(std::wstring _wMainModule, std::wstring _wSourceFile = L"", std::wstring _wExecutableFile = L"") : wMainModule(_wMainModule) {
+        if (!_wSourceFile.empty())
+            wSourceFile = _wSourceFile;
 
-        if (!wExecutableFile.empty())
-            set_wExecutableFile(wExecutableFile);
+        if (!_wExecutableFile.empty())
+            wExecutableFile = _wExecutableFile;
     }
 
     LanguageModule::LanguageModule(std::wstring wMainModule, std::wstring wSourceFile, std::wstring wVersionArg, bool runAsModule = true)
@@ -25,7 +25,7 @@ namespace scriptpad {
         BaseModule(wMainModule, wVersionArg, runAsModule),
         m_LanguageFilePaths{ wMainModule },
         m_File(wSourceFile) {
-        m_LanguageFilePaths.set_wSourceFile(wSourceFile);
+        m_LanguageFilePaths.wSourceFile = wSourceFile;
         m_wszModuleVersion = str_to_wstr(wRun(wVersionArg));
     }
 
@@ -34,7 +34,7 @@ namespace scriptpad {
         BaseModule(mainModule, versionArg, runAsModule),
         m_LanguageFilePaths{ mainModule },
         m_File(sourceFile) {
-        m_LanguageFilePaths.set_SourceFile(sourceFile);
+        m_LanguageFilePaths.SourceFile = sourceFile;
         m_szModuleVersion = Run(versionArg);
     }
 
@@ -49,11 +49,11 @@ namespace scriptpad {
                 {
                     if (m_isUnicode) {
                         StartInfo.wCommandLine = wFormatCommandLine(StartInfo.wFileName,
-                                                                    m_LanguageFilePaths.get_wSourceFile());
+                                                                    m_LanguageFilePaths.wSourceFile);
                     }
                     else {
                         StartInfo.CommandLine = FormatCommandLine(StartInfo.FileName,
-                                                                  m_LanguageFilePaths.get_SourceFile());
+                                                                  m_LanguageFilePaths.SourceFile);
                     }
 
                     OnProcessExited = [this]() -> void {
@@ -83,56 +83,21 @@ namespace scriptpad {
     };
 
 
-    void LanguageModule::SetSourceFile(std::string fileName, std::string extension) {
-        m_LanguageFilePaths.set_SourceFile(fileName + extension);
+    void LanguageModule::SetSourceFile(std::string fileName) {
+        m_LanguageFilePaths.SourceFile = fileName;
     }
 
-    void LanguageModule::wSetSourceFile(std::wstring fileName, std::wstring extension) {
-        m_LanguageFilePaths.set_wSourceFile(fileName + extension);
+    void LanguageModule::wSetSourceFile(std::wstring fileName) {
+        m_LanguageFilePaths.wSourceFile = fileName;
     }
 
 
     std::string LanguageModule::GetSourceFile() {
-        return m_LanguageFilePaths.get_SourceFile();
+        return m_LanguageFilePaths.SourceFile;
     }
 
     std::wstring LanguageModule::wGetSourceFile() {
-        return m_LanguageFilePaths.get_wSourceFile();
-    }
-
-
-    void LanguageModule::SetSourceFileName(std::string name) {
-        m_LanguageFilePaths.SourceFileName = name;
-    }
-
-    void LanguageModule::wSetSourceFileName(std::wstring name) {
-        m_LanguageFilePaths.wSourceFileName = name;
-    }
-
-
-    std::string LanguageModule::GetSourceFileName() {
-        return m_LanguageFilePaths.SourceFileName;
-    }
-
-    std::wstring LanguageModule::wGetSourceFileName() {
-        return m_LanguageFilePaths.wSourceFileName;
-    }
-
-
-    void LanguageModule::SetSourceFileExtension(std::string extension) {
-        m_LanguageFilePaths.SourceFileExtension = extension;
-    }
-
-    void LanguageModule::wSetSourceFileExtension(std::wstring extension) {
-        m_LanguageFilePaths.wSourceFileExtension = extension;
-    }
-
-
-    std::string LanguageModule::GetSourceFileExtension() {
-        return m_LanguageFilePaths.SourceFileExtension;
-    }
-    std::wstring LanguageModule::wGetSourceFileExtension() {
-        return m_LanguageFilePaths.wSourceFileExtension;
+        return m_LanguageFilePaths.wSourceFile;
     }
 }
 

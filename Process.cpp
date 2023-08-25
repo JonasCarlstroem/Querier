@@ -48,19 +48,38 @@ namespace scriptpad {
     bool Process::Start() {
         stopWatch.Start();
 
-        if (_CreateProcess(StartInfo.RunInCmd ? nullptr : StartInfo.wFileName.c_str(),
-                           StartInfo.wCommandLine.data(),
-                           StartInfo.wEnvironment.c_str(),
-                           StartInfo.wWorkingDirectory.c_str())) {
-            m_isRunning = true;
+        if (StartInfo.wCommandLine.size() > 0) {
+            if (_CreateProcess(StartInfo.RunInCmd ? nullptr : StartInfo.wFileName.c_str(),
+                               StartInfo.wCommandLine.data(),
+                               StartInfo.wEnvironment.c_str(),
+                               StartInfo.wWorkingDirectory.c_str())) {
+                m_isRunning = true;
 
-            CreateProcessSuccess();
-            return true;
+                CreateProcessSuccess();
+                return true;
+            }
+            else {
+                PRINT_ERROR(L"CreateProcess");
+                return false;
+            }
         }
-        else {
-            PRINT_ERROR(L"CreateProcess");
+        else if (StartInfo.CommandLine.size() > 0) {
+            if (_CreateProcess(StartInfo.RunInCmd ? nullptr : StartInfo.FileName.c_str(),
+                               StartInfo.CommandLine.data(),
+                               StartInfo.Environment.c_str(),
+                               StartInfo.WorkingDirectory.c_str())) {
+                m_isRunning = true;
+
+                CreateProcessSuccess();
+                return true;
+            }
+            else {
+                PRINT_ERROR(L"CreateProcess");
+                return false;
+            }
+        }
+        else
             return false;
-        }
 
     }
 
@@ -136,26 +155,60 @@ namespace scriptpad {
         return RegisterWaitForSingleObject(&hWait, m_procInfo.hProcess, OnWaitCallback, wctx, INFINITE, WT_EXECUTEONLYONCE);
     }
 
-    bool Process::_CreateProcess(const wchar_t* file, wchar_t* cmd, const wchar_t* env, const wchar_t* cwd) {
+    bool Process::_BeforeCreateProcess(bool unicode) {
         ZeroMemory(&m_procInfo, sizeof(PROCESS_INFORMATION));
-        ZeroMemory(&m_startupInfo, sizeof(PROCESS_INFORMATION));
+        if (unicode) {
+            ZeroMemory(&m_startupInfo, sizeof(STARTUPINFO));
+        }
+        else {
+            ZeroMemory(&m_startupInfoA, sizeof(STARTUPINFOA));
+        }
 
         m_startupInfo.cb = sizeof(STARTUPINFO);
-        m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
-                                       StartInfo.RedirectStdOutput,
-                                       StartInfo.RedirectStdError,
-                                       m_startupInfo);
+        if (unicode) {
+            m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
+                                           StartInfo.RedirectStdOutput,
+                                           StartInfo.RedirectStdError,
+                                           m_startupInfo);
+        }
+        else {
+            m_hasRedirectedIO = RedirectIO(StartInfo.RedirectStdInput,
+                                           StartInfo.RedirectStdOutput,
+                                           StartInfo.RedirectStdError,
+                                           m_startupInfoA);
+        }
 
-        return CreateProcess(lstrlenW(file) > 0 ? file : NULL,
-                             lstrlenW(cmd) > 0 ? cmd : NULL,
-                             NULL,
-                             NULL,
-                             m_hasRedirectedIO,
-                             CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-                             lstrlenW(env) > 0 ? (LPVOID)env : NULL,
-                             lstrlenW(cwd) > 0 ? cwd : NULL,
-                             &m_startupInfo,
-                             &m_procInfo);
+        return true;
+    }
+
+    bool Process::_CreateProcess(const char* file, char* cmd, const char* env, const char* cwd) {
+        if (_BeforeCreateProcess(false))
+            return CreateProcessA(lstrlenA(file) > 0 ? file : NULL,
+                                  lstrlenA(cmd) > 0 ? cmd : NULL,
+                                  NULL,
+                                  NULL,
+                                  m_hasRedirectedIO,
+                                  CREATE_NO_WINDOW,
+                                  lstrlenA(env) > 0 ? (LPVOID)env : NULL,
+                                  lstrlenA(cwd) > 0 ? cwd : NULL,
+                                  &m_startupInfoA,
+                                  &m_procInfo);
+        return false;
+    }
+
+    bool Process::_CreateProcess(const wchar_t* file, wchar_t* cmd, const wchar_t* env, const wchar_t* cwd) {
+        if(_BeforeCreateProcess(true))
+            return CreateProcessW(lstrlenW(file) > 0 ? file : NULL,
+                                 lstrlenW(cmd) > 0 ? cmd : NULL,
+                                 NULL,
+                                 NULL,
+                                 m_hasRedirectedIO,
+                                 CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                                 lstrlenW(env) > 0 ? (LPVOID)env : NULL,
+                                 lstrlenW(cwd) > 0 ? cwd : NULL,
+                                 &m_startupInfo,
+                                 &m_procInfo);
+        return false;
     }
 
     void Process::CreateProcessSuccess() {

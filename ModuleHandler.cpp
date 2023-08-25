@@ -6,6 +6,12 @@
 
 namespace scriptpad {
 
+    Module::Module() {};
+
+    Module::Module(std::string _name, path _path, std::string _lib, LanguageType _type) : Name(_name), Path(_path), Library(_lib), Type(_type) {
+
+    }
+
     path Query::queryConfigFile() {
         return Path / path(Name + ".json");
     }
@@ -18,47 +24,39 @@ namespace scriptpad {
 
     }
 
-    Query::Query(std::string name, std::string path, std::string module, std::string source, std::string sourceExt) : Name(name), Path(path), ModuleName(module), SourceFile(source), SourceExtension(sourceExt) {
-
-    }
-
     Query ModuleHandler::load_Query(std::string queryName) {
         path queryDir = WorkspaceDirectory / path(queryName);
         path configFile = queryDir / path(queryName + ".json");
         Query loadQuery = Query::LoadQueryConfigFile(configFile);
 
         std::string moduleName = loadQuery.ModuleName.c_str();
-        Module mod = m_mModules[moduleName];
-        //path modulePath = m_Modules[moduleName];
+        Module* mod = m_mModules[moduleName];
+        mod->SourceFile = loadQuery.SourceFile;
 
-        /*if(LoadModule(moduleName, modulePath))
-            loadQuery.loadedLanguageModule = ActiveModule;*/
-
-        if (LoadModule(mod))
+        if (LoadModule(*mod))
             loadQuery.loadedLanguageModule = ActiveModule;
 
-        auto source = ActiveModule->wGetSourceFileName();
         return loadQuery;
     }
 
     Query ModuleHandler::new_Query(std::string _module) {
         int workspaceItemCount = m_WorkspaceItems.size();
         std::string queryName = std::string("query" + workspaceItemCount);
-
+        Module* mod = m_mModules[_module];
         path queryDirectory = path(WorkspaceDirectory) / path(queryName);
+        mod->SourceFile = path(queryDirectory / path(mod->SourceFile)).string();
+
         if (!Directory::Create(queryDirectory)) 
             print_msg(L"Failed creating directory");
 
-        if (!File::Create(queryDirectory / path(ModuleHandler::s_DefaultSourceFileName + ModuleHandler::s_DefaultSourceFileExtension)))
+        if (!File::Create(mod->SourceFile))
             PRINT_ERROR(L"CreateFile");
 
-        path sourceFileName = queryDirectory / path("_eval_");
-        Query newQuery{ queryName, queryDirectory.string(), _module, sourceFileName.string() };
-
-        Module mod = m_mModules[_module];
-        if(LoadModule(mod))
+        Query newQuery{ queryName, queryDirectory.string(), _module, mod->SourceFile };
+        
+        if(LoadModule(*mod))
             newQuery.loadedLanguageModule = ActiveModule;
-        newQuery.SourceExtension = ActiveModule->GetSourceFileExtension();
+        
         newQuery.SaveQueryConfigFile();
 
         return newQuery;
@@ -72,7 +70,7 @@ namespace scriptpad {
         json cont = *this;
         File::Create(queryConfigFile());
         File f(queryConfigFile());
-        f.WriteFile(cont.dump());
+        f.WriteFile(cont.dump(1));
     }
 
     Query Query::LoadQueryConfigFile(path file) {
@@ -96,19 +94,25 @@ namespace scriptpad {
 
     }
 
-    void ModuleHandler::init_Modules() {
+    bool ModuleHandler::init_Modules() {
         std::vector<path> mods = Directory::GetDirectories(ModulesDirectory);
         for (auto it = mods.begin(); it < mods.end(); it++) {
             path moduleDirectory = ModulesDirectory / path(*it);
             path moduleFile = moduleDirectory / path(it->wstring() + L".dll");
+            path moduleConfig = moduleDirectory / path("module_config.json");
             if (File::Exists(moduleFile)) {
-                //m_Modules.insert({ it->string(), moduleFile});
-                m_mModules.insert({ it->string(), Module{ it->string(), moduleFile } });
+                if (File::Exists(moduleConfig)) {
+                    json sd = json::parse(File::ReadAllText(moduleConfig));
+                    Module* mod = sd.template get<Module*>();
+                    mod->Path = moduleFile;
+                    m_mModules.insert({ it->string(), mod });
+                }
             }
         }
+        return m_mModules.size() > 0;
     }
 
-    void ModuleHandler::init_Workspace() {
+    bool ModuleHandler::init_Workspace() {
         m_WorkspaceItems = Directory::GetDirectories(WorkspaceDirectory);
         if (m_WorkspaceItems.empty()) {
             Queries.push_back(new_Query(s_DefaultModule));
@@ -118,6 +122,8 @@ namespace scriptpad {
                 Queries.push_back(load_Query(it->string()));
             }
         }
+
+        return Queries.size() > 0;
     }
 
     bool ModuleHandler::LoadModule(Module _module) {
@@ -125,15 +131,15 @@ namespace scriptpad {
         DLL ProcAddr{ 0 };
         BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
 
-        hLib = LoadLibrary(_module.path.c_str());
+        hLib = LoadLibrary(_module.Path.c_str());
         if (hLib != NULL) {
             ProcAddr = (DLL)GetProcAddress(hLib, "CreateModule");
 
             if (NULL != ProcAddr) {
                 fRunTimeLinkSuccess = TRUE;
-                m_LoadedModules.insert({ _module.name, LoadedModule{_module.name, _module.path, hLib, ProcAddr } });
-                ActiveModuleName = _module.name;
-                ActiveModule = (LanguageModule*)ProcAddr();
+                m_LoadedModules.insert({ _module.Name, LoadedModule{_module.Name, _module.Path, hLib, ProcAddr } });
+                ActiveModuleName = _module.Name;
+                ActiveModule = (LanguageModule*)ProcAddr(_module.SourceFile);
                 Modules.insert({ ActiveModuleName, ActiveModule});
             }
         }
@@ -182,7 +188,7 @@ namespace scriptpad {
 
     std::map<std::wstring, path> ModuleHandler::m_wModules;
     std::map<std::string, path> ModuleHandler::m_Modules;
-    std::map<std::string, Module> ModuleHandler::m_mModules;
+    std::map<std::string, Module*> ModuleHandler::m_mModules;
 
     void to_json(json& j, const Query& q) {
         j = json{
@@ -200,6 +206,22 @@ namespace scriptpad {
         j.at("queryModule").get_to(q.ModuleName);
         j.at("querySource").get_to(q.SourceFile);
         j.at("unsavedChanges").get_to(q.UnsavedChanges);
+    }
+
+    void to_json(json& j, const Module& m) {
+        j = json{
+            { "name", m.Name },
+            { "sourceFile", m.SourceFile },
+            { "library", m.Library },
+            { "type", m.Type }
+        };
+    }
+
+    void from_json(const json& j, Module& m) {
+        j.at("name").get_to(m.Name);
+        j.at("sourceFile").get_to(m.SourceFile);
+        j.at("library").get_to(m.Library);
+        j.at("type").get_to(m.Type);
     }
 }
 

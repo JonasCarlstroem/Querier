@@ -14,7 +14,6 @@ namespace scriptpad {
             m_bRunAsModule = runAsModule;
             m_bIsModuleInstalled = true;
 
-            StartInfo.wFileName = applicationName;
             StartInfo.RedirectStdOutput = true;
             StartInfo.RedirectStdError = true;
         }
@@ -26,7 +25,6 @@ namespace scriptpad {
             m_bRunAsModule = runAsModule;
             m_bIsModuleInstalled = true;
 
-            StartInfo.FileName = applicationName;
             StartInfo.RedirectStdOutput = true;
             StartInfo.RedirectStdError = true;
         }

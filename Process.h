@@ -66,6 +66,7 @@ namespace scriptpad {
         SECURITY_ATTRIBUTES m_secAttr;
         PROCESS_INFORMATION m_procInfo;
         STARTUPINFO m_startupInfo;
+        STARTUPINFOA m_startupInfoA;
         bool m_bSuccess = false,
              m_hasRedirectedIO = false,
              m_isRunning = false,
@@ -80,6 +81,8 @@ namespace scriptpad {
         void InitMembers();
         void InitPipe();
         bool RegisterWaitCallback();
+        bool _BeforeCreateProcess(bool);
+        bool _CreateProcess(const char*, char*, const char*, const char*);
         bool _CreateProcess(const wchar_t*, wchar_t*, const wchar_t*, const wchar_t*);
         void CreateProcessSuccess();
 

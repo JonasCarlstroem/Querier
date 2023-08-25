@@ -33,21 +33,31 @@ class Nodejs : public LanguageModule {
 public:
     NPM Npm;
 
+    Nodejs(NodejsType, std::string);
     Nodejs(NodejsType, std::wstring);
     ~Nodejs();
 
     void Initialize();
 
-    bool SetNodejsType(NodejsType type);
-    bool AddNodeOption(std::wstring option);
+    bool SetNodejsType(NodejsType);
+    bool wSetNodejsType(NodejsType);
+    bool AddNodeOption(std::string);
+    bool wAddNodeOption(std::wstring);
 
 private:
     NodejsType m_type;
-    std::wstring m_sourceFileName;
-    std::map<NodejsType, std::wstring> m_mFileExtensions{
+    std::wstring m_wSourceFileName;
+    std::string m_SourceFileName;
+    std::map<NodejsType, std::wstring> m_wmFileExtensions{
         { ESM, L".mjs" },
         { CJS, L".cjs" },
         { CLASSIC, L".js" }
+    };
+
+    std::map<NodejsType, std::string> m_mFileExtensions{
+        { ESM, ".mjs" },
+        { CJS, ".cjs" },
+        { CLASSIC, ".js" }
     };
 
     std::vector<Env> m_nodeEnv;
@@ -55,7 +65,7 @@ private:
     bool SetEnv();
 };
 
-extern "C" __declspec(dllexport) LanguageModule* CreateModule(std::wstring sourceFilePath = L"") {
+extern "C" __declspec(dllexport) LanguageModule* CreateModule(std::string sourceFilePath = "") {
     LanguageModule* langModule = new Nodejs(ESM, sourceFilePath);
 
     return langModule;
