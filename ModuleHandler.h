@@ -15,106 +15,83 @@ namespace scriptpad {
     
     // Loaded language module resources
     struct LoadedModule {
-        std::wstring name;
+        std::string name;
         // path to dll
         path modulePath;
-        HINSTANCE hLibrary;
-        DLL createModule;
+        HINSTANCE hLibrary = nullptr;
+        DLL createModule = nullptr;
     };
 
-    // Language module configurations
-    class ModuleConfig {
-    public:
+    struct Module {
         std::string name;
-        // path to main module (interpreter / compiler executable)
-        path mainModulePath;
-        // path to the modules base directory (where the dll is)
-        path moduleDirectory;
-        // language specific source file extension (default is .mjs for nodejs ESM, for csharp it's .cs)
-        std::string sourceFileExtension;
-        // custom language specific library, containing language specific types and (D|d)ump() function
-        std::string library;
-        // extension for the language specific library
-        std::string libraryExtension;
-        // interpreter or compiler
-        LanguageType engineType;
-
-        std::wstring get_Name();
-        std::wstring get_SourceFileExtensions();
-        std::wstring get_Library();
-        std::wstring get_LibraryExtension();
+        path path;
+        std::string sourceExtension;
     };
-    // remove and make members part of query class
-    class QueryConfig {
+
+    class Query {
     public:
-        QueryConfig() {};
-        QueryConfig(std::string name, std::string queryPath, std::string queryModule) : name(name), queryPath(queryPath), queryModule(queryModule) {};
-        std::string name;
-        path queryPath;
+        Query() {};
+        Query(std::string, std::string, std::string);
+        Query(std::string, std::string, std::string, std::string);
+        Query(std::string, std::string, std::string, std::string, std::string);
+        std::string Name;
+        std::string Path;
+        std::string ModuleName;
+        std::string SourceFile;
+        std::string SourceExtension;
+        bool UnsavedChanges = false;
+
+        LanguageModule* loadedLanguageModule = nullptr;
+        LoadedModule loadedModule;
         path queryConfigFile();
-        std::string queryModule;
-        bool unsavedChanges = false;
+        Query LoadQueryConfigFile();
+        void SaveQueryConfigFile();
+
+        static Query LoadQueryConfigFile(path file);
     };
 
     class ModuleHandler {
     public:
-        // move outside ModuleHandler
-        class Query {
-        public:
-            // make QueryConfig members part of Query class and remove QueryConfig
-            QueryConfig config;
-
-            Query(QueryConfig conf);
-            // make function part of ModuleHandler
-            static Query load_Query(ModuleHandler*, std::string);
-            static Query new_Query(ModuleHandler*, std::wstring);
-            static QueryConfig get_QueryConfig(path);
-            static void set_QueryConfig(QueryConfig);
-        };
-
         ModuleHandler(AppWindow*);
 
         void Initialize();
 
-        std::map<std::wstring, LanguageModule*> Modules;
-        std::wstring ActiveModule;
-        LanguageModule* Module = nullptr;
+        std::map<std::string, LanguageModule*> Modules;
+        std::string ActiveModuleName;
+        LanguageModule* ActiveModule = nullptr;
 
         std::vector<Query> Queries;
-        std::map<Query, QueryConfig> QueryConfigs;
 
         path WorkingDirectory;
         path ModulesDirectory;
         path WorkspaceDirectory;
 
+        static std::string s_DefaultModule;
         static std::wstring s_wDefaultModule;
+
         static std::string s_DefaultSourceFileName;
         static std::string s_DefaultSourceFileExtension;
+
         static std::wstring s_wDefaultSourceFileName;
         static std::wstring s_wDefautSourceFileExtension;
-
-        static std::map<std::wstring, ModuleConfig> s_ModuleConfigs;
-
 
     private:
         AppWindow* m_MainWindow;
         std::vector<path> m_InstalledModules;
         std::vector<path> m_WorkspaceItems;
 
-        std::map<std::wstring, path> m_ModulePaths;
-        std::map<std::wstring, LoadedModule> m_LoadedModules;
+        std::map<std::string, LoadedModule> m_LoadedModules;
+        static std::map<std::wstring, path> m_wModules;
+        static std::map<std::string, path> m_Modules;
+        static std::map<std::string, Module> m_mModules;
 
-        std::map<std::wstring, ModuleConfig> get_Modules();
-        void init_Workspace();
         void init_Modules();
+        void init_Workspace();
 
-        std::pair<std::wstring, std::wstring> get_PathsToModules(std::wstring _module) {
+        bool LoadModule(Module);
 
-        }
-
-        ModuleConfig get_ModuleConfiguration(path);
-
-        DLL LoadModule(std::wstring, path);
+        Query load_Query(std::string);
+        Query new_Query(std::string);
 
         std::wstring HandleWebMessage(Message* msg);
         void HandleOutputReceived(std::string ret);
@@ -122,11 +99,11 @@ namespace scriptpad {
 
     };
 
-    void to_json(json& j, const ModuleConfig& m);
-    void from_json(const json& j, ModuleConfig& m);
+    /*void to_json(json& j, const ModuleConfig& m);
+    void from_json(const json& j, ModuleConfig& m);*/
 
-    void to_json(json& j, const QueryConfig& q);
-    void from_json(const json& j, QueryConfig& q);
+    void to_json(json& j, const Query& q);
+    void from_json(const json& j, Query& q);
 }   //namespace scriptpad
 
 #endif  //_SCRIPT_PAD_MODULE_HANDLER_H

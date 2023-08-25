@@ -35,40 +35,8 @@ export default {
             editor: null as monaco.editor.IStandaloneCodeEditor | null
         }
     },
-    async mounted() {
-        // if (this.editorSurface !== null) {
-        //     const editorOptions = {
-        //         automaticLayout: true,
-        //         language: this.language.id,
-        //         model: null
-        //     };
-
-        //     monaco.languages.typescript.javascriptDefaults.addExtraLib([
-        //         "function dump(obj: any): void;",
-        //         "function sleep(ms: Number): void;"
-        //     ].join('\n'));
-
-        //     monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
-
-        //     const model = monaco.editor.createModel([].join('\n'),
-        //         this.language.id);
-
-
-        //     this.editor = monaco.editor.create(this.editorSurface, editorOptions);
-
-        //     this.editor.setModel(model);
-
-        //     this.editor.onDidChangeModelContent((e) => {
-        //         if (!e.isFlush) {
-        //             const value = this.editor?.getValue();
-        //             this.$emit('update:code', value);
-        //         }
-        //     });
-
-        //     console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
-        // }
-
-        postWebMessage({ cmd: "initialize" });
+    mounted() {
+        postWebMessage({cmd: "initialize"});
     },
     methods: {
         initEditor(modelValue: string) {

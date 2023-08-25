@@ -3,7 +3,7 @@
 
 Nodejs::Nodejs(NodejsType type, std::wstring sourceFile)
     : LanguageModule(L"C:\\Program Files\\nodejs\\node.exe", sourceFile, L"-v", false), m_type(type) {
-    m_sourceFileName = GetSourceFileName();
+    m_sourceFileName = wGetSourceFileName();
     if (m_bIsModuleInstalled) {
         m_bRunAsModule = false;
 
@@ -19,7 +19,7 @@ void Nodejs::Initialize() {
 };
 
 bool Nodejs::SetNodejsType(NodejsType type) {
-    SetSourceFileExtension(m_mFileExtensions[type]);
+    wSetSourceFileExtension(m_mFileExtensions[type]);
     m_type = type;
     return true;
 };

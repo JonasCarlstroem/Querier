@@ -55,8 +55,8 @@ private:
     bool SetEnv();
 };
 
-extern "C" __declspec(dllexport) LanguageModule* CreateModule() {
-    LanguageModule* langModule = new Nodejs(ESM, L"_eval_.mjs");
+extern "C" __declspec(dllexport) LanguageModule* CreateModule(std::wstring sourceFilePath = L"") {
+    LanguageModule* langModule = new Nodejs(ESM, sourceFilePath);
 
     return langModule;
 }

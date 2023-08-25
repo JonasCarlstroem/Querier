@@ -12,10 +12,13 @@ namespace scriptpad {
     public:
         IModule() : m_wszMainModulePath{ 0 }, m_bIsModuleInstalled{ 0 }, m_wszModuleVersion{ 0 } {};
         IModule(std::wstring path) : m_wszMainModulePath(path), m_bIsModuleInstalled{ 0 }, m_wszModuleVersion{ 0 } {};
+        IModule(std::string path) : m_szMainModulePath(path), m_bIsModuleInstalled{ 0 }, m_szModuleVersion{ 0 } {};
 
     protected:
+        std::string m_szMainModulePath;
         std::wstring m_wszMainModulePath;
         bool m_bIsModuleInstalled;
+        std::string m_szModuleVersion;
         std::wstring m_wszModuleVersion;
 
     };

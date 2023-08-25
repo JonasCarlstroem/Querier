@@ -76,6 +76,8 @@ export default {
         return {
             editorRef,
             resultRef,
+            actionBar,
+            topBar,
             availableLanguages,
             defaultLanguage,
             currentLanguage,
@@ -85,7 +87,12 @@ export default {
     beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
+            console.log("Message received");
             const { cmd, resultType, message, error } = e.data;
+            console.log(cmd);
+            console.log(resultType);
+            console.log(message);
+            console.log(error);
             this.handleCommand(cmd, resultType, message, error);
         });
     },
@@ -111,14 +118,14 @@ export default {
         handleCommand(cmd: string, resultType: string, message: string, error: string) {
             switch (cmd) {
                 case "initialize":
-                    if (message) {
+                        console.log("Initialize");
                         this.code = message;
-
+                        console.log(this.editorRef);
                         if (this.editorRef) {
+                            console.log("Has ref");
                             // this.editorRef.updateCode(this.code);
                             this.editorRef.initEditor(this.code);
                         }
-                    }
                     break;
                 case "result":
                     this.handleResult(resultType, message, error);

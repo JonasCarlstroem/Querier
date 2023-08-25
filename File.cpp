@@ -113,7 +113,9 @@ namespace scriptpad {
             PRINT_ERROR(L"SearchPath");
             return false;
         }
-        pFile = new File{ sFile, ret, lpFilePart };
+        if(pFile)
+            pFile = new File{ sFile, ret, lpFilePart };
+
         return true;
     }
 

@@ -19,36 +19,77 @@ namespace scriptpad {
     });
 
     struct LanguageFilePaths {
-        std::wstring MainModule;
+        LanguageFilePaths(std::string, std::string, std::string);
+        LanguageFilePaths(std::wstring, std::wstring, std::wstring);
 
-        std::wstring SourceFileName;
-        std::wstring SourceFileExtension;
+        std::string MainModule;
+        std::wstring wMainModule;
 
-        std::wstring get_SourceFile() {
+        std::string SourceFileName;
+        std::string SourceFileExtension;
+
+        std::string get_SourceFile() {
             return SourceFileName + SourceFileExtension;
         }
 
-        void set_SourceFile(std::wstring fileName) {
-            auto file0Ext1 = wstr_split(fileName, L'.');
+        void set_SourceFile(std::string fileName) {
+            auto file0Ext1 = str_split(fileName, '.');
             if (file0Ext1.size() == 2) {
                 SourceFileName = file0Ext1[0];
-                SourceFileExtension = L'.' + file0Ext1[1];
+                SourceFileExtension = file0Ext1[1];
             }
         }
 
-        std::wstring ExecutableFileName;
-        std::wstring ExecutableFileExtension;
+        std::wstring wSourceFileName;
+        std::wstring wSourceFileExtension;
 
-        std::wstring get_ExecutableFile() {
+        std::wstring get_wSourceFile() {
+            return wSourceFileName + wSourceFileExtension;
+        }
+
+        void set_wSourceFile(std::wstring fileName) {
+            auto file0Ext1 = wstr_split(fileName, L'.');
+            if (file0Ext1.size() == 2) {
+                wSourceFileName = file0Ext1[0];
+                wSourceFileExtension = L'.' + file0Ext1[1];
+            }
+        }
+
+        std::string ExecutableFileName;
+        std::string ExecutableFileExtension;
+
+        std::string get_ExecutableFile() {
             return ExecutableFileName + ExecutableFileExtension;
+        }
+
+        void set_ExecutableFile(std::string fileName) {
+            auto file0Ext1 = str_split(fileName, '.');
+            if (file0Ext1.size() == 2) {
+                ExecutableFileName = file0Ext1[0];
+                ExecutableFileExtension = file0Ext1[1];
+            }
+        }
+
+        std::wstring wExecutableFileName;
+        std::wstring wExecutableFileExtension;
+
+        std::wstring get_wExecutableFile() {
+            return wExecutableFileName + wExecutableFileExtension;
+        }
+
+        void set_wExecutableFile(std::wstring fileName) {
+            auto file0Ext1 = wstr_split(fileName, L'.');
+            if (file0Ext1.size() == 2) {
+                wExecutableFileName = file0Ext1[0];
+                wExecutableFileExtension = file0Ext1[1];
+            }
         }
     };
 
     class __declspec(dllexport) LanguageModule : public ILanguage, public BaseModule {
     public:
-        LanguageModule(std::wstring mainModule, std::wstring sourceFile, std::wstring versionArg, bool runAsModule);
-        //LanguageModule(LanguageFilePaths filePaths);
-        //LanguageModule(const LanguageModule& mod);
+        LanguageModule(std::wstring, std::wstring, std::wstring, bool);
+        LanguageModule(std::string, std::string, std::string, bool);
 
         virtual ~LanguageModule();
 
@@ -57,12 +98,23 @@ namespace scriptpad {
         virtual void Initialize() = 0;
         virtual void Invoke();
 
-        void SetSourceFile(std::wstring fileName, std::wstring extension);
-        std::wstring GetSourceFile();
-        void SetSourceFileName(std::wstring name);
-        std::wstring GetSourceFileName();
-        void SetSourceFileExtension(std::wstring extension);
-        std::wstring GetSourceFileExtension();
+        void SetSourceFile(std::string, std::string);
+        void wSetSourceFile(std::wstring, std::wstring);
+
+        std::string GetSourceFile();
+        std::wstring wGetSourceFile();
+
+        void SetSourceFileName(std::string);
+        void wSetSourceFileName(std::wstring);
+
+        std::string GetSourceFileName();
+        std::wstring wGetSourceFileName();
+
+        void SetSourceFileExtension(std::string);
+        void wSetSourceFileExtension(std::wstring);
+
+        std::string GetSourceFileExtension();
+        std::wstring wGetSourceFileExtension();
 
     protected:
         LanguageType m_LanguageType{ Interpreter };

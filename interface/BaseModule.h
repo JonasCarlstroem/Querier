@@ -12,19 +12,46 @@ namespace scriptpad {
     public:
         BaseModule();
         BaseModule(std::wstring, std::wstring, bool);
+        BaseModule(std::string, std::string, bool);
 
-        template<class...T>
-        std::string Run(T&&...cmds) {
+        template<class...U>
+        std::string Run(U&&...cmds) {
             if (m_bIsModuleInstalled) {
                 if (m_bRunAsModule) {
                     StartInfo.RunInCmd = false;
-                    StartInfo.wFileName = m_wszMainModulePath;
-                    //StartInfo.wCommandLine = FormatCommandLine(std::forward<T>(cmds)...);
+                    StartInfo.FileName = m_szMainModulePath;
                 }
                 else {
                     StartInfo.RunInCmd = true;
                 }
-                StartInfo.wCommandLine = FormatCommandLine(m_wszMainModulePath, std::forward<T>(cmds)...);
+                StartInfo.CommandLine = FormatCommandLine(m_szMainModulePath, std::forward<U>(cmds)...);
+
+                if (Start()) {
+                    WaitForExit();
+
+                    std::string ret;
+                    ReadOutput(&ret);
+
+                    return ret;
+                }
+                else {
+                    throw std::exception("Error creating process");
+                }
+            }
+            throw std::exception("Module is not installed");
+        }
+
+        template<class...T>
+        std::string wRun(T&&...cmds) {
+            if (m_bIsModuleInstalled) {
+                if (m_bRunAsModule) {
+                    StartInfo.RunInCmd = false;
+                    StartInfo.wFileName = m_wszMainModulePath;
+                }
+                else {
+                    StartInfo.RunInCmd = true;
+                }
+                StartInfo.wCommandLine = wFormatCommandLine(m_wszMainModulePath, std::forward<T>(cmds)...);
 
                 if (Start()) {
                     WaitForExit();
@@ -43,25 +70,46 @@ namespace scriptpad {
 
     protected:
         bool m_bRunAsModule = true;
+        bool m_isUnicode;
+        std::string m_szVersionArg = "--version";
+        std::string m_szVersionArgAlias = "-v";
         std::wstring m_wszVersionArg = L"--version";
         std::wstring m_wszVersionArgAlias = L"-v";
 
         template<class... T>
-        std::wstring FormatCommandLine(T&&... cmds) {
-            return _FormatCommandLine_({ std::forward<std::wstring>(cmds)... });
+        std::wstring wFormatCommandLine(T&&... cmds) {
+            return _wFormatCommandLine_({ std::forward<T>(cmds)... });
+        }
+
+        template<class... U>
+        std::string FormatCommandLine(U&&...cmds) {
+            return _FormatCommandLine_({ std::forward<U>(cmds)... });
         }
 
     private:
         File m_FFinder;
 
-        bool _FindInstallation(std::wstring, scriptpad::File*);
+        bool _FindInstallation(std::wstring, File*);
+        bool _FindInstallation(path, File*);
 
-        std::wstring _FormatCommandLine_(std::initializer_list<std::wstring>&& cmds) {
+        std::wstring _wFormatCommandLine_(std::initializer_list<std::wstring>&& cmds) {
             std::wstring ret;
             for (auto it = cmds.begin(); it < cmds.end(); it++) {
                 ret.append(*it);
                 if (it < cmds.end() - 1) {
                     ret.append(L" ");
+                }
+            }
+
+            return ret;
+        }
+
+        std::string _FormatCommandLine_(std::initializer_list<std::string>&& cmds) {
+            std::string ret;
+            for (auto it = cmds.begin(); it < cmds.end(); it++) {
+                ret.append(*it);
+                if (it < cmds.end() - 1) {
+                    ret.append(" ");
                 }
             }
 
