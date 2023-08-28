@@ -1,4 +1,4 @@
-# ScriptPad
+# Querier
 
 Scratch pad for common programming languages.
 
