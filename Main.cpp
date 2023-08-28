@@ -2,7 +2,6 @@
     #define _SCRIPT_PAD_APP_MAIN
 
 #include "Application.h"
-#include "Node.h"
 
 //####Todo####
 //###General###
@@ -16,9 +15,7 @@
 //###CSharp###
 // imolement as module
 
-using namespace scriptpad;
-
-//static Nodejs nodejs(L"C:\\Program Files\\nodejs\\node.exe");
+using namespace querier;
 
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,

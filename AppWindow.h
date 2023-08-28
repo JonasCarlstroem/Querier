@@ -13,14 +13,15 @@
 #include <wrl.h>
 #include <wil/com.h>
 #include "WebView2.h"
-#include <nlohmann/json.hpp>
+//#include <nlohmann/json.hpp>
+#include "resource.h"
 
 using namespace Microsoft::WRL;
 
 static constexpr size_t s_maxLoadString = 100;
 
-namespace scriptpad {
-    using json = nlohmann::json;
+namespace querier {
+    //using json = nlohmann::json;
 
     static TCHAR szWindowClass[] = _T("DesktopApp");
     static TCHAR szTitle[] = _T("Script pad desktop application");
@@ -86,7 +87,7 @@ namespace scriptpad {
             return m_mainWindow;
         };
 
-        static std::wstring GetResponse(scriptpad::Message msg);
+        static std::wstring GetResponse(Message msg);
 
 
     private:

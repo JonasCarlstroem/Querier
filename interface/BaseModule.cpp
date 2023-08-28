@@ -3,7 +3,7 @@
 
 #include "BaseModule.h"
 
-namespace scriptpad {
+namespace querier {
     BaseModule::BaseModule() {
 
     }
@@ -30,7 +30,7 @@ namespace scriptpad {
         }
     }
 
-    bool BaseModule::_FindInstallation(std::wstring searchFile, scriptpad::File* retFile) {
+    bool BaseModule::_FindInstallation(std::wstring searchFile, File* retFile) {
         return m_FFinder.SearchFile(searchFile, retFile);
     }
 

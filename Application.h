@@ -4,10 +4,11 @@
 #define _SCRIPT_PAD_APPLICATION_H
 
 #include "AppWindow.h"
-#include "ModuleHandler.h"
-#include "Node.h"
+#include "ModuleManager.h"
+#include "QueryManager.h"
+#include <ShlObj.h>
 
-namespace scriptpad {
+namespace querier {
     class Application {
     public:
         Application(HINSTANCE, int);
@@ -15,12 +16,15 @@ namespace scriptpad {
         int Start();
 
         AppWindow* MainWindow;
-        ModuleHandler ModuleHandler;
+        ModuleManager ModuleManager;
+        QueryManager QueryManager;
     private:
-        std::wstring m_WorkingDirectory;
-        std::wstring m_WorkspaceDirectory;
+        path m_WorkingDirectory;
+        path m_ModulesDirectory;
+        path m_WorkspaceDirectory;
 
         int RunMessagePump();
+        std::wstring HandleWebMessage(Message* msg);
     };
 }
 

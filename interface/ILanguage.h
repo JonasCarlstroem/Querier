@@ -3,10 +3,10 @@
 #ifndef _SCRIPT_PAD_IBASE_TYPE_H
 #define _SCRIPT_PAD_IBASE_TYPE_H
 
-#include "../resources.h"
+#include "../resource.h"
 #include <string>
 
-namespace scriptpad {
+namespace querier {
     class ILanguage {
     public:
         virtual bool GetFileContent(std::string*) = 0;

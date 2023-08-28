@@ -3,7 +3,7 @@
 
 #include "Stopwatch.h"
 
-namespace scriptpad {
+namespace querier {
     void Stopwatch::Start() {
         m_start = system_clock::now();
         m_bRunning = true;

@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
-using namespace scriptpad;
+using namespace querier;
 
 struct Env {
     std::wstring key;
@@ -33,8 +33,8 @@ class Nodejs : public LanguageModule {
 public:
     NPM Npm;
 
-    Nodejs(NodejsType, std::string);
-    Nodejs(NodejsType, std::wstring);
+    Nodejs(NodejsType, std::string, path);
+    Nodejs(NodejsType, std::wstring, path);
     ~Nodejs();
 
     void Initialize();
@@ -43,8 +43,10 @@ public:
     bool wSetNodejsType(NodejsType);
     bool AddNodeOption(std::string);
     bool wAddNodeOption(std::wstring);
+    bool wAddImportLibrary(std::wstring);
 
 private:
+    path m_baseDirectory;
     NodejsType m_type;
     std::wstring m_wSourceFileName;
     std::string m_SourceFileName;
@@ -65,8 +67,8 @@ private:
     bool SetEnv();
 };
 
-extern "C" __declspec(dllexport) LanguageModule* CreateModule(std::string sourceFilePath = "") {
-    LanguageModule* langModule = new Nodejs(ESM, sourceFilePath);
+extern "C" __declspec(dllexport) LanguageModule * CreateModule(path sourceFilePath = "", path libFilePath = "") {
+    LanguageModule* langModule = new Nodejs(ESM, sourceFilePath, libFilePath);
 
     return langModule;
 }

@@ -4,7 +4,7 @@
 #include "Error.h"
 #include <Windows.h>
 
-namespace scriptpad {
+namespace querier {
 
     //Duplicate quotes in string
     bool dup_quotes(std::wstring* wstr) {
@@ -21,6 +21,15 @@ namespace scriptpad {
         }
         return count > 0;
     };
+
+    bool convert_backslashes(std::wstring* wstr) {
+        int i;
+        for (i = 0; i < wstr->size(); i++) {
+            if((*wstr)[i] == L'\\')
+                (*wstr)[i] = L'/';
+        }
+        return true;
+    }
 
     std::vector<std::string> str_split(std::string input, char delim) {
         std::vector<std::string> strings;

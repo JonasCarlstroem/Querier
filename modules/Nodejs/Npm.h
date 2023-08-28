@@ -5,7 +5,7 @@
 
 #include "../../interface/CmdModule.h"
 
-using namespace scriptpad;
+using namespace querier;
 
 class NPM : public CmdModule {
 public:

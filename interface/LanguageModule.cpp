@@ -3,7 +3,7 @@
 
 #include "LanguageModule.h"
 
-namespace scriptpad {
+namespace querier {
     LanguageFilePaths::LanguageFilePaths(std::string mainModule, std::string sourceFile = "", std::string executableFile = "") : MainModule(mainModule) {
         if(!sourceFile.empty())
             SourceFile = sourceFile;
@@ -48,11 +48,11 @@ namespace scriptpad {
                 case Interpreter:
                 {
                     if (m_isUnicode) {
-                        StartInfo.wCommandLine = wFormatCommandLine(StartInfo.wFileName,
+                        StartInfo.wCommandLine = wFormatCommandLine(m_LanguageFilePaths.wMainModule,
                                                                     m_LanguageFilePaths.wSourceFile);
                     }
                     else {
-                        StartInfo.CommandLine = FormatCommandLine(StartInfo.FileName,
+                        StartInfo.CommandLine = FormatCommandLine(m_LanguageFilePaths.MainModule,
                                                                   m_LanguageFilePaths.SourceFile);
                     }
 

@@ -5,7 +5,7 @@
 
 #include <chrono>
 
-namespace scriptpad {
+namespace querier {
     using namespace std::chrono;
     class Stopwatch {
     public:

@@ -7,7 +7,7 @@
 #include "../Process.h"
 #include "../File.h"
 
-namespace scriptpad {
+namespace querier {
     class BaseModule : public IModule, public Process {
     public:
         BaseModule();
@@ -70,7 +70,7 @@ namespace scriptpad {
 
     protected:
         bool m_bRunAsModule = true;
-        bool m_isUnicode;
+        bool m_isUnicode = true;
         std::string m_szVersionArg = "--version";
         std::string m_szVersionArgAlias = "-v";
         std::wstring m_wszVersionArg = L"--version";

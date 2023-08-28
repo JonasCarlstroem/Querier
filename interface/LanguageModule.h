@@ -3,11 +3,11 @@
 #ifndef _SCRIPT_PAD_LANGUAGE_MODULE_H
 #define _SCRIPT_PAD_LANGUAGE_MODULE_H
 
-#include "../resources.h"
+#include "../resource.h"
 #include "ILanguage.h"
 #include "BaseModule.h"
 
-namespace scriptpad {
+namespace querier {
     enum LanguageType {
         Interpreter,
         Compiler

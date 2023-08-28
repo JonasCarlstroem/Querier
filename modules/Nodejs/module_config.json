@@ -1,6 +1,6 @@
 ﻿{
     "name": "Nodejs",
-    "sourceFile": "_eval_.mjs",
+    "sourceFileExtension": ".mjs",
     "library": "_lib_.mjs",
     "type": "interpreter"
 }

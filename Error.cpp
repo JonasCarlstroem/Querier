@@ -2,7 +2,7 @@
 #define _SCRIPT_PAD_ERROR_CPP
 #include "Error.h"
 
-namespace scriptpad {
+namespace querier {
     void PrintError(LPCTSTR lpszFunction) {
         LPVOID lpMsgBuf;
         LPVOID lpDisplayBuf;

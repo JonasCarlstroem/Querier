@@ -22,6 +22,9 @@
     <Filter Include="Modules\Base\Interface">
       <UniqueIdentifier>{7d43b9f1-ea5b-45b9-8c64-b2329ec4bb58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Queries">
+      <UniqueIdentifier>{50a806b7-803a-4263-9410-8d48bdb80fd0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Error.cpp">
@@ -51,23 +54,20 @@
     <ClCompile Include="Stopwatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseModule.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="CmdModule.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="LanguageModule.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="ModuleHandler.cpp">
+    <ClCompile Include="ModuleManager.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>Modules</Filter>
+    <ClCompile Include="interface/BaseModule.cpp">
+      <Filter>Modules\Base</Filter>
     </ClCompile>
-    <ClCompile Include="NpmT.cpp">
-      <Filter>Modules</Filter>
+    <ClCompile Include="interface/CmdModule.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="interface/LanguageModule.cpp">
+      <Filter>Modules\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryManager.cpp">
+      <Filter>Queries</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,38 +99,32 @@
     <ClInclude Include="Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IModule.h">
-      <Filter>Modules\Base\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CmdModule.h">
-      <Filter>Modules\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="ILanguage.h">
-      <Filter>Modules\Base\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="LanguageModule.h">
-      <Filter>Modules\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleHandler.h">
+    <ClInclude Include="ModuleManager.h">
       <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="NpmT.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseModule.h">
-      <Filter>Modules\Base</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resources.h">
-      <Filter>Resource Files</Filter>
+    <ClInclude Include="interface/BaseModule.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="interface/CmdModule.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="interface/LanguageModule.h">
+      <Filter>Modules\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="interface/ILanguage.h">
+      <Filter>Modules\Base\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="interface/IModule.h">
+      <Filter>Modules\Base\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryManager.h">
+      <Filter>Queries</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

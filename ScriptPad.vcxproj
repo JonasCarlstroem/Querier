@@ -22,8 +22,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{f7cddfc6-94d5-4acf-b9e0-ebf60f0ddbe3}</ProjectGuid>
-    <RootNamespace>ScriptPad</RootNamespace>
+    <RootNamespace>Querier</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Querier</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -139,11 +140,10 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="ModuleHandler.cpp" />
-    <ClCompile Include="Node.cpp" />
-    <ClCompile Include="NpmT.cpp" />
+    <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Process.cpp" />
+    <ClCompile Include="QueryManager.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
@@ -161,13 +161,11 @@
     <ClInclude Include="interface/ILanguage.h" />
     <ClInclude Include="interface/IModule.h" />
     <ClInclude Include="interface/LanguageModule.h" />
-    <ClInclude Include="ModuleHandler.h" />
-    <ClInclude Include="Node.h" />
-    <ClInclude Include="NpmT.h" />
+    <ClInclude Include="ModuleManager.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Process.h" />
+    <ClInclude Include="QueryManager.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resources.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

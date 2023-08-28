@@ -17,7 +17,7 @@
 
 #define BUFSIZE 4096
 
-namespace scriptpad {
+namespace querier {
     class Pipe {
     public:
         Pipe(SECURITY_ATTRIBUTES& sa, PROCESS_INFORMATION& pi);

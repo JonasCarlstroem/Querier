@@ -3,9 +3,32 @@
 
 #include "Application.h"
 
-namespace scriptpad {
-    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleHandler(MainWindow) {
-        m_WorkingDirectory = Directory::CurrentWorkingDirectory();
+namespace querier {
+    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleManager(MainWindow), QueryManager(MainWindow, &ModuleManager) {
+        MainWindow->AddWebMessageHandler(std::bind(&Application::HandleWebMessage, this, std::placeholders::_1));
+        path specialFolder;
+        if (Directory::GetSpecialFolder(FOLDERID_RoamingAppData, &specialFolder)) {
+            path appDataFolder = specialFolder / path("Querier");
+            if (!Directory::Exists(appDataFolder))
+                Directory::Create(appDataFolder);
+
+            if (Directory::SetCurrentWorkingDirectory(appDataFolder)) {
+                m_WorkingDirectory = appDataFolder;
+            }
+        }
+        else {
+            m_WorkingDirectory = Directory::GetCurrentWorkingDirectory();
+        }
+        m_ModulesDirectory = m_WorkingDirectory / path(L"modules");
+        if (!Directory::Exists(m_ModulesDirectory))
+            Directory::Create(m_ModulesDirectory);
+
+        m_WorkspaceDirectory = m_WorkingDirectory / path(L"workspace");
+        if (!Directory::Exists(m_WorkspaceDirectory))
+            Directory::Create(m_WorkspaceDirectory);
+
+        ModuleManager.Initialize(m_WorkingDirectory, m_ModulesDirectory);
+        QueryManager.Initialize(m_WorkingDirectory, m_WorkspaceDirectory);
     }
 
     int Application::Start() {
@@ -23,6 +46,27 @@ namespace scriptpad {
         }
 
         return (int)msg.wParam;
+    }
+
+    std::wstring Application::HandleWebMessage(Message* msg) {
+        switch (msg->cmd) {
+            case AppCommand::INITIALIZE:
+                /*ModuleManager.Initialize();
+                QueryManager.Initialize();*/
+                //Initialize();
+                msg->respond = true;
+                ModuleManager.ActiveModule->GetFileContent(&msg->message);
+                break;
+            case AppCommand::CONFIG:
+                break;
+            case AppCommand::CODESYNC:
+                ModuleManager.ActiveModule->SetFileContent(msg->message);
+                break;
+            case AppCommand::INVOKE:
+                ModuleManager.ActiveModule->Invoke();
+                break;
+        }
+        return str_to_wstr(json(*msg).dump());
     }
 }
 

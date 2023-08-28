@@ -9,10 +9,11 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <ShlObj.h>
 
-namespace scriptpad {
-    using namespace std::filesystem;
-    class File {
+using namespace std::filesystem;
+namespace querier {
+    class __declspec(dllexport) File {
     public:
         File();
         File(std::wstring);
@@ -49,10 +50,13 @@ namespace scriptpad {
         std::ios_base::openmode mode = std::ofstream::out;
     };
 
-    class Directory {
+    class __declspec(dllexport) Directory {
     public:
-        static path CurrentWorkingDirectory();
+        static path GetCurrentWorkingDirectory();
+        static bool SetCurrentWorkingDirectory(path);
         static path ApplicationDirectory();
+
+        static bool GetSpecialFolder(KNOWNFOLDERID, path*);
 
         static std::vector<path> GetFiles(path);
         static std::vector<path> GetDirectories(path);

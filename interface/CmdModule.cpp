@@ -3,7 +3,7 @@
 
 #include "CmdModule.h"
 
-namespace scriptpad {
+namespace querier {
     CmdModule::CmdModule(std::wstring wAppName, std::wstring wVersionArg, bool runAsModule) : BaseModule(L"C:\\windows\\system32\\cmd.exe", wVersionArg, runAsModule), m_wszAppName(wAppName) {
         if (m_bIsModuleInstalled) {
             StartInfo.wFileName = m_wszMainModulePath;

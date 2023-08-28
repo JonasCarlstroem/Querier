@@ -3,7 +3,7 @@
 
 #include "AppWindow.h"
 
-namespace scriptpad {
+namespace querier {
 
     void to_json(json& j, const Message& m) {
         j = json{

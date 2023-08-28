@@ -3,10 +3,10 @@
 #ifndef _SCRIPT_PAD_CMD_MODULE_H
 #define _SCRIPT_PAD_CMD_MODULE_H
 
-#include "../resources.h"
+#include "../resource.h"
 #include "BaseModule.h"
 
-namespace scriptpad {
+namespace querier {
     class __declspec(dllexport) CmdModule : public BaseModule {
     public:
         CmdModule(std::wstring, std::wstring, bool);

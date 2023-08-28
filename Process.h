@@ -5,7 +5,7 @@
 
 #define BUFSIZE 4096
 
-#include "resources.h"
+#include "resource.h"
 #include "Pipe.h"
 #include "Error.h"
 #include "Stopwatch.h"
@@ -17,7 +17,7 @@
 #include <functional>
 
 
-namespace scriptpad {
+namespace querier {
 
     struct ProcessStartInfo {
         std::string FileName;

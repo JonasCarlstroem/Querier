@@ -5,11 +5,10 @@
 
 #include "File.h"
 #include "Util.h"
-#include <Windows.h>
 
 #define BUFSIZE 4096
 
-namespace scriptpad {
+namespace querier {
     File::File() {
 
     }
@@ -162,11 +161,25 @@ namespace scriptpad {
         return !(INVALID_FILE_ATTRIBUTES == GetFileAttributes(file.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND);
     }
 
-    path Directory::CurrentWorkingDirectory() {
+    path Directory::GetCurrentWorkingDirectory() {
         TCHAR buffer[MAX_PATH] = { 0 };
         if (GetCurrentDirectory(MAX_PATH, buffer))
             return buffer;
         return path::path();
+    }
+
+    bool Directory::SetCurrentWorkingDirectory(path path) {
+        return SetCurrentDirectory(path.c_str());
+    }
+
+    bool Directory::GetSpecialFolder(KNOWNFOLDERID id, path* p) {
+        std::wstring fol[BUFSIZE];
+        wchar_t* fol2;
+        if (SUCCEEDED(SHGetKnownFolderPath(id, 0, NULL, &fol2))) {
+            *p = path(fol2);
+            return true;
+        }
+        return false;
     }
 
     path Directory::ApplicationDirectory() {

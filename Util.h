@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace scriptpad {
+namespace querier {
     struct strIteratorIndex {
         std::wstring::const_iterator it;
         int id{ 0 };
@@ -15,7 +15,7 @@ namespace scriptpad {
 
     //Duplicate quotes in string
     bool dup_quotes(std::wstring* wstr);
-
+    __declspec(dllexport) bool convert_backslashes(std::wstring* wstr);
     std::vector<std::string> str_split(std::string, char);
     std::vector<std::wstring> wstr_split(std::wstring, wchar_t);
 
