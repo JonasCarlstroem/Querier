@@ -13,7 +13,7 @@ export default {
 <style scoped>
 .actionbar {
     height: 100%;
-    width: 150px;
+    width: 100%;
     border: 1px solid white;
     line-height: 1.5;
     resize: horizontal;

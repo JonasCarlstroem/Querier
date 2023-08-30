@@ -6,8 +6,7 @@ Nodejs::Nodejs(NodejsType type, std::string sourceFile, path libFilePath)
     m_SourceFileName = GetSourceFile();
     if (m_bIsModuleInstalled) {
         m_bRunAsModule = false;
-        //path tst("test");
-        path asd = Directory::GetCurrentWorkingDirectory();
+
         SetNodejsType(ESM);
 
         //m_nodeEnv.push_back(Env{ L"NODE_OPTIONS"})

@@ -3,11 +3,8 @@
         case "object":
             console.log(JSON.stringify({object: this}));
             return this;
-        case "function":
-            console.log(JSON.stringify({function: this.toString()}));
-            return this;
         default:
-            console.log(JSON.stringify({string: this}));
+            console.log(JSON.stringify({string: this.toString()}));
             return this;
     }
 };

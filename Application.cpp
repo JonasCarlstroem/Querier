@@ -51,9 +51,6 @@ namespace querier {
     std::wstring Application::HandleWebMessage(Message* msg) {
         switch (msg->cmd) {
             case AppCommand::INITIALIZE:
-                /*ModuleManager.Initialize();
-                QueryManager.Initialize();*/
-                //Initialize();
                 msg->respond = true;
                 ModuleManager.ActiveModule->GetFileContent(&msg->message);
                 break;

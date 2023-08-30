@@ -36,7 +36,6 @@ namespace querier {
     }
 
     QueryManager::~QueryManager() {
-
         CleanupQueries();
     }
 
@@ -118,8 +117,8 @@ namespace querier {
 
     void from_json(const json& j, Query& q) {
         j.at("name").get_to(q.Name);
-        j.at("queryPath").get_to(q.Path);
         j.at("queryModule").get_to(q.ModuleName);
+        j.at("queryPath").get_to(q.Path);
         j.at("querySource").get_to(q.SourceFile);
         j.at("queryLibraries").get_to(q.Libraries);
         j.at("unsavedChanges").get_to(q.UnsavedChanges);

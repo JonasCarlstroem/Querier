@@ -1,6 +1,6 @@
 ﻿<template>    
-    <v-container fluid class="ma-0">
-        <v-row no-gutters style="height: 25px;">
+    <v-container fluid class="ma-0 pa-0">
+        <v-row no-gutters justify="stretch" class="pa-1">
             <v-col cols="1">
                 <v-btn icon="mdi-play" density="compact" @click="$emit('invoke')">
                 </v-btn>
@@ -13,34 +13,22 @@
                 <v-btn icon="mdi-stop" density="compact">
                 </v-btn>
             </v-col>
-        
-            <!-- <v-spacer></v-spacer> -->
-
-            <!-- <v-col cols="2">
-                <v-text-field
-                        readonly
-                        single-line
-                        variant="plain" 
-                        density="compact" >Language</v-text-field>
-            </v-col> -->
-            <v-col cols="1">
-                <select name="language" id="language-select" style="width: 50px;">
-                    <option value="">--Select Language--</option>
-                    <option v-for="lang of availableLanguages" :key="'id'">
-                    </option>
-                </select>
+            <v-col cols="2">
+                <v-input
+                    density="compact"
+                    :hide-details="true">hello</v-input>
                 <!-- <v-select
-                        ref="lang"
-                        density="compact"
-                        variant="outlined"
-                        single-line
-                        :items="availableLanguages"
-                        :item-title="'name'"
-                        :item-value="'id'"
-                        v-model="currentLanguage"></v-select> -->
+                    ref="lang"
+                    height="30"
+                    variant="outlined"
+                    class="h-0"
+                    :items="availableLanguages"
+                    :item-title="'name'"
+                    :item-value="'id'"
+                    v-model="currentLanguage"></v-select> -->
             </v-col>
-            </v-row>
-        </v-container>
+        </v-row>
+    </v-container>
 </template>
 
 <script lang="ts">

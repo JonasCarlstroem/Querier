@@ -1,16 +1,26 @@
 <template>
-    <div class="wrapper">
-        <div class="action">
-            <ActionBar />
+    <div class="wrapper" @mouseup="endDragging()">
+        <div class="action" :style="{
+            width: `${resize.divider.horizontal}%`
+        }">
+            <ActionBar ref="actionBar" />
         </div>
-        <div class="main">
-            <TopBar :available-languages="availableLanguages" v-model:active-language="currentLanguage"
+        <v-divider id="dividerhorizontal" class="divideh" @mousedown="startDragging('horizontal')" vertical thickness="10"></v-divider>
+        <div class="main" :style="{
+            width: `${100 - resize.divider.horizontal}%`
+        }">
+            <TopBar ref="topBar" :available-languages="availableLanguages" v-model:active-language="currentLanguage"
                 @update:active-language="listen" @invoke="onInvoke" />
             <div class="surface">
-                <div class="editor" v-bind:style="`height: ${editorHeight}%;`">
+                <div class="editor" :style="{
+                    height: `${(showResult ? resize.divider.vertical : 100)}%`
+                }">
                     <EditorSurface ref="editorRef" :language="currentLanguage" v-on:update:code="setCode" />
                 </div>
-                <div class="result" v-if="showResult">
+                <v-divider id="dividervertical" class="dividev" @mousedown="startDragging('vertical')" thickness="10" v-if="showResult"></v-divider>
+                <div class="result" v-if="showResult" :style="{
+                    height: `${100 - resize.divider.vertical}%`
+                }">
                     <ResultSurface ref="resultRef" 
                         :hasResult="showResult" 
                         :result="result"
@@ -70,7 +80,15 @@ export default {
             result: {} as any,
             hasError: false as boolean,
             error: {} as any,
-            editorHeight: 100 as number
+            editorHeight: 100 as number,
+            resize: {
+                divider: {
+                    horizontal: 15,
+                    vertical: 70
+                },
+                direction: ""
+            },
+            pause: false
         });
 
         return {
@@ -89,14 +107,46 @@ export default {
         window.chrome.webview.addEventListener("message", (e) => {
             console.log("Message received");
             const { cmd, resultType, message, error } = e.data;
-            console.log(cmd);
-            console.log(resultType);
-            console.log(message);
-            console.log(error);
             this.handleCommand(cmd, resultType, message, error);
         });
     },
     methods: {
+        getSizePercentage(left: number, right: number) {
+            const percentage = (left / right) * 100;
+            if(percentage >= 10 && percentage <= 90) 
+                return Number(percentage.toFixed(2));
+            return percentage <= 10 ? 10 : 90;
+        },
+        handleResizeVertical(e: any) {
+            const topBarHeight = this.topBar!.$el.clientHeight;
+            this.resize.divider.vertical = this.getSizePercentage((e.pageY - topBarHeight), (window.innerHeight - topBarHeight));
+        },
+        handleResizeHorizontal(e: any) {
+            this.resize.divider.horizontal = this.getSizePercentage(e.pageX, window.innerWidth);
+        },
+        handleDragging(e: any) {
+            console.log(e);
+            const percentage = (e.pageX / window.innerWidth) * 100;
+
+            if(percentage >= 10 && percentage <= 90) {
+                this.resize.divider.horizontal = Number(percentage.toFixed(2));
+            }
+        },
+        startDragging(direction: string) {
+            console.log(direction);
+            this.resize.direction = direction;
+            if(direction === "vertical")
+                document.addEventListener('mousemove', this.handleResizeVertical);
+            else if(direction === "horizontal")
+                document.addEventListener('mousemove', this.handleResizeHorizontal);
+        },
+        endDragging() {
+            const dir = this.resize.direction;
+            if(dir === "vertical")
+                document.removeEventListener('mousemove', this.handleResizeVertical);
+            else if(dir === "horizontal")
+                document.removeEventListener('mousemove', this.handleResizeHorizontal);
+        },
         listen(language: { name: string, id: string, value: string }) {
             console.log("Listener from App");
             this.currentLanguage = language;
@@ -107,6 +157,7 @@ export default {
             this.editorHeight = 50;
             this.result = {};
             this.error = {};
+            this.hasError = false;
             postWebMessage({ cmd: "invoke" });
             this.isRunning = true;
             this.editorRef?.resizeEditor();
@@ -160,9 +211,6 @@ export default {
                         if(this.error.strings === undefined || this.error.strings === null)
                             this.error.strings = [];
 
-                        if(this.error.functions === undefined || this.error.functions === null)
-                            this.error.functions = [];
-
                         if(this.error.objects === undefined || this.error.objects === null)
                             this.error.objects = [];
 
@@ -182,7 +230,7 @@ export default {
                     this.result.objects.push(obj.object);
                 }
                 else if(obj.hasOwnProperty("function")) {
-                    this.result.functions.push(obj.function);
+                    this.result.strings.push(obj.function + '\r\n');
                 }
                 else if(obj.hasOwnProperty("string")) {
                     this.result.strings.push(obj.string);
@@ -221,22 +269,36 @@ export default {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-flow: row;
 }
 
+.divideh {
+    cursor: ew-resize;
+}
+
+.dividev {
+    cursor: ns-resize;
+}
+
 .main {
+    box-sizing: border-box !important;
     width: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .surface {
+    box-sizing: border-box !important;
     height: 100%;
     width: 100%;
     line-height: 1.5;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .editor {
@@ -245,7 +307,11 @@ export default {
 }
 
 .result {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box !important;
     height: 100%;
     width: 100%;
+    overflow: hidden;
+    margin: 0 auto;
 }
 </style>

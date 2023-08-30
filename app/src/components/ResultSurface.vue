@@ -8,31 +8,19 @@
                 <v-tab v-for="_tab in _tabs" :value="_tab.value" variant="plain">{{ _tab.title }}</v-tab>
             </v-tabs>
             <div class="result" v-if="_hasResult" :style="`width: ${(_hasError ? 50 : 100)}%;`">
-                <!-- <span style="white-space: pre">{{ result }}</span> -->
                 <v-window v-model="tab">
-                    <template v-if="tab === 'strings' && _strings !== null">
+                    <template v-if="tab === 'output' && _strings !== null">
                         <div v-for="value of _strings">
                             <span style="color: white; word-wrap: break-word; white-space: pre;">{{ value }}</span>
                         </div>
                     </template>
 
-                    <template v-if="tab === 'functions' && _functions !== null">
-                        <div v-for="value of _functions">
-                            <span style="color: white; word-wrap: break-word; white-space: pre;">{{ value }}</span>
-                        </div>
-                    </template>
-
-                    <template v-if="tab === 'objects' && _objects !== null">
-                        <v-tabs 
-                            v-model="objectTab">
-                            <v-tab v-for="_objTab in _objectTabs" :value="_objTab"> {{ _objTab.constructor.name }} </v-tab>
-                        </v-tabs>
-                        <v-window v-model="objectTab">
-                            {{ objectTab }}
-                        </v-window>
-                        <div v-for="(value, key) of _objects">
-                            <span style="color: white; word-wrap: break-word; white-space: pre">{{ key }}: {{ value }}</span>
-                        </div>
+                    <template v-for="_tab in _tabs?.filter(tab => tab.value !== 'output')">
+                        <template v-if="_tab.value === tab && _objects !== null">
+                            <div v-for="(value, key) of _objects">
+                                <span style="color: white; word-wrap: break-word; white-space: pre">{{ _tab.title }}: {{ _result[_tab.value] }}</span>
+                            </div>
+                        </template>
                     </template>
                 </v-window>
             </div>
@@ -80,11 +68,16 @@ export default {
     },
     computed: {
         _tabs() {
+            if(!this.result) return;
+            if(!this.result.strings || !this.result.objects) return;
+
             let tabs = [];
-            if(this.result) {
-                for(const entry of Object.keys(this.result)) {
-                    if(this.result[entry].length > 0)
-                        tabs.push({ title: entry[0].toUpperCase() + entry.substring(1, entry.length), value: entry });
+            if(this.result.strings.length > 0) {
+                tabs.push({ title: "Output", value: "output" });
+            }
+            if(this.result.objects.length > 0) {
+                for(const key of Object.keys(this.result.objects)) {
+                    tabs.push({ title: key, value: key})
                 }
             }
             if(tabs.length > 0) {
@@ -159,27 +152,39 @@ export default {
 
 <style scoped>
 .resultSurface {
-    box-sizing: border-box;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
     height: 100%;
     resize: vertical;
+    margin: 0 auto;
 }
 
 .frame {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box !important;
+    margin: 0 auto;
+    padding: 0 auto;
     display: flex;
-    /* flex-flow: row; */
     flex-direction: column;
     padding: 10px;
     padding-top: 0;
     border: 1px solid white;
     height: 100%;
+    overflow: hidden;
 }
 
 .result {
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
     flex: 1;
-    height: 100%;
+    /* height: 100%; */
     border: 1px solid white;
     padding: 10px;
     overflow-y: auto;
+}
+
+.result-strings {
+    box-sizing: border-box !important;
 }
 
 .error {
