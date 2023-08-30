@@ -66,8 +66,6 @@ export default {
                         this.$emit('update:code', value);
                     }
                 });
-
-                console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
             }
         },
         resizeEditor() {
@@ -83,7 +81,6 @@ export default {
     watch: {
         language: {
             handler() {
-                console.log("language");
                 if (!this.editor) return;
                 const model = this.editor.getModel();
                 if (model !== null) {

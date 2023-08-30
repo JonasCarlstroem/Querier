@@ -49,10 +49,12 @@ namespace querier {
     }
 
     std::wstring Application::HandleWebMessage(Message* msg) {
+        json test;
         switch (msg->cmd) {
             case AppCommand::INITIALIZE:
                 msg->respond = true;
                 ModuleManager.ActiveModule->GetFileContent(&msg->message);
+                test = QueryManager.get_QueriesAsJson();
                 break;
             case AppCommand::CONFIG:
                 break;

@@ -10,7 +10,9 @@
             width: `${100 - resize.divider.horizontal}%`
         }">
             <TopBar ref="topBar" :available-languages="availableLanguages" v-model:active-language="currentLanguage"
-                @update:active-language="listen" @invoke="onInvoke" />
+                @update:active-language="listen" 
+                @invoke="onInvoke"
+                @config="showSettingsWindow" />
             <div class="surface">
                 <div class="editor" :style="{
                     height: `${(showResult ? resize.divider.vertical : 100)}%`
@@ -30,17 +32,19 @@
             </div>
         </div>
     </div>
+
+    <Settings
+        :show-dialog="showSettings"
+        v-model="showSettings" />
 </template>
 
 <script lang="ts">
-import { toRef } from 'vue';
+import { toRef, reactive, toRefs, ref } from 'vue';
 import ActionBar from './components/ActionBar.vue';
 import TopBar from './components/TopBar.vue';
 import EditorSurface from './components/EditorSurface.vue';
 import ResultSurface from './components/ResultSurface.vue';
-import { reactive } from 'vue';
-import { toRefs } from 'vue';
-import { ref } from 'vue';
+import Settings from './components/Settings.vue';
 //@ts-ignore
 import type { ILanguage } from '@/interface/ILanguage';
 import { postWebMessage, split } from './Utils';
@@ -53,7 +57,8 @@ export default {
         'ActionBar': ActionBar,
         'TopBar': TopBar,
         'EditorSurface': EditorSurface,
-        'ResultSurface': ResultSurface
+        'ResultSurface': ResultSurface,
+        'Settings': Settings
     },
     setup() {
         const actionBar = ref<InstanceType<typeof ActionBar> | null>(null);
@@ -88,7 +93,7 @@ export default {
                 },
                 direction: ""
             },
-            pause: false
+            showSettings: false
         });
 
         return {
@@ -105,12 +110,17 @@ export default {
     beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
-            console.log("Message received");
             const { cmd, resultType, message, error } = e.data;
             this.handleCommand(cmd, resultType, message, error);
         });
     },
     methods: {
+        showSettingsWindow(opt: any) {
+            this.showSettings = true;
+        },
+        closeSettingsWindow() {
+            this.showSettings = false;
+        },
         getSizePercentage(left: number, right: number) {
             const percentage = (left / right) * 100;
             if(percentage >= 10 && percentage <= 90) 
@@ -169,12 +179,8 @@ export default {
         handleCommand(cmd: string, resultType: string, message: string, error: string) {
             switch (cmd) {
                 case "initialize":
-                        console.log("Initialize");
                         this.code = message;
-                        console.log(this.editorRef);
                         if (this.editorRef) {
-                            console.log("Has ref");
-                            // this.editorRef.updateCode(this.code);
                             this.editorRef.initEditor(this.code);
                         }
                     break;
@@ -188,7 +194,6 @@ export default {
             switch (resultType) {
                 case "success":
                     if (message) {
-                        console.log(message);
                         if(this.result.strings === undefined || this.result.strings === null)
                             this.result.strings = [];
 
@@ -223,7 +228,6 @@ export default {
         setResult(message: string) {
             const arr = split(message, "\n");
             for(const item of arr) {
-                console.log(item);
                 const obj = JSON.parse(item);
 
                 if(obj.hasOwnProperty("object")) {
@@ -235,10 +239,7 @@ export default {
                 else if(obj.hasOwnProperty("string")) {
                     this.result.strings.push(obj.string);
                 }
-                console.log(obj);
             }
-            
-            console.log(this.result);
         },
         setError(error: string) {
             const arr = split(error, "\n");
@@ -266,13 +267,15 @@ export default {
 
 <style scoped>
 .wrapper {
+    font-family: Consolas, 'Courier New', monospace;
+    color: white;
     box-sizing: border-box;
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-flow: row;
+    flex-direction: row;
 }
 
 .divideh {
@@ -288,7 +291,7 @@ export default {
     width: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .surface {
@@ -312,6 +315,6 @@ export default {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    margin: 0 auto;
 }
 </style>
+@/types/ILanguage

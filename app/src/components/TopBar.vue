@@ -1,19 +1,35 @@
 ﻿<template>    
     <v-container fluid class="ma-0 pa-0">
-        <v-row no-gutters justify="stretch" class="pa-1">
+        <v-row no-gutters justify="start" class="pa-1">
             <v-col cols="1">
-                <v-btn icon="mdi-play" density="compact" @click="$emit('invoke')">
+                <v-btn 
+                    icon="mdi-play" 
+                    density="compact" 
+                    @click="$emit('invoke')">
                 </v-btn>
             </v-col>
             <v-col cols="1">
-                <v-btn icon="mdi-pause" density="compact">
+                <v-btn 
+                    icon="mdi-pause" 
+                    density="compact"
+                    @click="">
                 </v-btn>
             </v-col>
             <v-col cols="1">
-                <v-btn icon="mdi-stop" density="compact">
+                <v-btn 
+                    icon="mdi-stop" 
+                    density="compact"
+                    @click="">
                 </v-btn>
             </v-col>
-            <v-col cols="2">
+            <v-col cols="1" offset="1">
+                <v-btn 
+                    icon="mdi-cog" 
+                    density="compact" 
+                    @click="$emit('config')">
+                </v-btn>
+            </v-col>
+            <v-col cols="1" offset="1">
                 <v-input
                     density="compact"
                     :hide-details="true">hello</v-input>
@@ -44,7 +60,8 @@ export default {
     },
     emits: [
         "update:activeLanguage",
-        "invoke"
+        "invoke",
+        "config"
     ],
     setup() {
         const lang = ref<HTMLElement | null>(null);
@@ -54,7 +71,8 @@ export default {
     },
     data() {
         return {
-            currentLanguage: this.activeLanguage
+            currentLanguage: this.activeLanguage,
+            dialog: false
         }
     },
     watch: {

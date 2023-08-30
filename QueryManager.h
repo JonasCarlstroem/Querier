@@ -37,6 +37,19 @@ namespace querier {
         void Initialize(path, path);
 
         std::map<std::string, Query*> Queries;
+        std::map<std::string, Query> get_Queries() {
+            std::map<std::string, Query> map;
+            if (Queries.size() > 0) {
+                for (auto q : Queries) {
+                    map.insert({ q.first, *q.second });
+                }
+            }
+            return map;
+        }
+
+        json get_QueriesAsJson() {
+            return json::parse(get_Queries());
+        }
 
         path WorkingDirectory,
              WorkspaceDirectory;
@@ -58,6 +71,9 @@ namespace querier {
 
     void to_json(json& j, const Query& q);
     void from_json(const json& j, Query& q);
+
+    void to_json(json& j, const std::vector<Query>& q);
+    void from_json(const json& j, std::vector<Query>& q);
 } //namespace querier
 
 #endif  //_QUERIER_QUERY_MANAGER_H

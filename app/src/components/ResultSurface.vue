@@ -17,9 +17,31 @@
 
                     <template v-for="_tab in _tabs?.filter(tab => tab.value !== 'output')">
                         <template v-if="_tab.value === tab && _objects !== null">
-                            <div v-for="(value, key) of _objects">
+                            <Table :items="_objects[_tab.value]" :key="_tab.value">
+                                <template v-slot:main="{ no }">
+                                    <div>Hello!</div>
+                                </template>
+                                <template v-slot:other="{ yes }">
+                                    <div>Hi</div>
+                                </template>
+                            </Table>
+                            <!-- <v-table fixed-header>
+                                <thead>
+                                    <tr>
+                                        <th class="text-left" v-for="n of Object.keys(_objects[_tab.value])" :key="n">
+                                            {{ n }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="n of Object.values(_objects[_tab.value])">
+                                        <td> {{  n }}</td>
+                                    </tr>
+                                </tbody>
+                            </v-table> -->
+                            <!-- <div v-for="(value, key) of _objects">
                                 <span style="color: white; word-wrap: break-word; white-space: pre">{{ _tab.title }}: {{ _result[_tab.value] }}</span>
-                            </div>
+                            </div> -->
                         </template>
                     </template>
                 </v-window>
@@ -34,6 +56,8 @@
 </template>
 
 <script lang="ts">
+import Table from "./ux/Table/Table.vue"
+
 export default {
     props: {
         hasResult: {
@@ -53,12 +77,37 @@ export default {
             default: null
         }
     },
+    components: {
+        "Table": Table
+    },
     data() {
         return {
             tab: null as any,
             objectTab: null as any,
             tabs: [{key:"Strings", value:"strings"}, {key: "Functions", value: "functions" }, {key: "Objects", value: "objects"}],
-            objectTabs: [{key: "", value: ""}]
+            objectTabs: [{key: "", value: ""}],
+            headers: [
+                {
+                    key: "name",
+                    title: "Test",
+                    align: "start"
+                },
+                {
+                    key: "age",
+                    title: "test2",
+                    align: "end"
+                }
+            ],
+            items: [
+                {
+                    name: "Jonas",
+                    age: 29
+                },
+                {
+                    name: "Mickis",
+                    age: 30
+                }
+            ]
         }
     },
     methods: {
@@ -67,6 +116,33 @@ export default {
         }
     },
     computed: {
+        _headers() {
+            const headers = [
+                {
+                    key: "name",
+                    title: "Test",
+                    align: "start"
+                },
+                {
+                    key: "age",
+                    title: "test2",
+                    align: "end"
+                }
+            ];
+            return headers;
+        },
+        _items() {
+            return [
+                {
+                    name: "Jonas",
+                    age: 29
+                },
+                {
+                    name: "Mickis",
+                    age: 30
+                }
+            ]
+        },
         _tabs() {
             if(!this.result) return;
             if(!this.result.strings || !this.result.objects) return;
@@ -77,11 +153,10 @@ export default {
             }
             if(this.result.objects.length > 0) {
                 for(const key of Object.keys(this.result.objects)) {
-                    tabs.push({ title: key, value: key})
+                    tabs.push({ title: "Object", value: key})
                 }
             }
             if(tabs.length > 0) {
-                console.log(tabs);
                 this.tab = tabs[0].value;
             }
             return tabs;
@@ -91,7 +166,6 @@ export default {
             let tabs: any[] = [];
             if(this.result.objects) {
                 for(const entry of this.result.objects) {
-                    console.log("Object tabs", entry);
                     if(this.result.objects[entry]) {
                         // console.log(this.result.objects[entry]);
                         
@@ -106,7 +180,6 @@ export default {
         },
 
         _result(): any {
-            console.log(this.result);
             return this.result ?? null;
         },
 
@@ -118,12 +191,22 @@ export default {
             return this._result.functions;
         },
 
-        _objects(): Object[] {
-            return this._result.objects;
+        _objects(): any {
+            let obj = {};
+            const entries = Object.entries(this._result.objects);
+            console.log(Object.entries(this._result.objects));
+            console.log(Object.keys(this._result.objects));
+            console.log(Object.values(this._result.objects));
+            let count = 0;
+            for(let temp of Object.values(this._result.objects)) {
+                Object.assign(obj, {[`${count}`]:temp});
+                count++;
+            }
+            console.log(obj);
+            return Object.values(this._result.objects);
         },
 
         _hasError() {
-            console.log(this.hasError);
             return this.hasError;
         },
 
@@ -154,33 +237,34 @@ export default {
 .resultSurface {
     -webkit-box-sizing: border-box !important;
     box-sizing: border-box !important;
+    width: 100%;
     height: 100%;
-    resize: vertical;
-    margin: 0 auto;
+    resize: both;
+    /* margin: 0 auto; */
 }
 
 .frame {
     -webkit-box-sizing: border-box;
     box-sizing: border-box !important;
-    margin: 0 auto;
-    padding: 0 auto;
+    /* margin: 0 auto; */
+    /* padding: 0 auto; */
     display: flex;
     flex-direction: column;
     padding: 10px;
     padding-top: 0;
     border: 1px solid white;
     height: 100%;
-    overflow: hidden;
+    width: 100%;
+    /* overflow: hidden; */
 }
 
 .result {
     -webkit-box-sizing: border-box !important;
     box-sizing: border-box !important;
-    flex: 1;
-    /* height: 100%; */
-    border: 1px solid white;
-    padding: 10px;
-    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+    /* border: 1px solid white; */
+    overflow: auto;
 }
 
 .result-strings {
@@ -193,4 +277,9 @@ export default {
     border: 1px solid white;
     padding: 10px;
     overflow-y: auto;
-}</style>
+}
+
+.v-window {
+    overflow: visible;
+}
+</style>
