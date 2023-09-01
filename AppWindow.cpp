@@ -5,22 +5,6 @@
 
 namespace querier {
 
-    void to_json(json& j, const Message& m) {
-        j = json{
-            { "cmd", m.cmd },
-            { "resultType", m.resultType },
-            { "message", m.message },
-            { "error", m.error }
-        };
-    }
-
-    void from_json(const json& j, Message& m) {
-        j.at("cmd").get_to(m.cmd);
-        if (m.cmd != INITIALIZE && m.cmd != INVOKE) {
-            j.at("message").get_to(m.message);
-        }
-    }
-
     AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) : m_hInst(hInstance), m_nShow(nCmdShow) {
         g_appInstance = hInstance;
         InitializeWindow();
@@ -40,7 +24,7 @@ namespace querier {
         m_customWebMessageHandler = true;
     };
 
-    void AppWindow::AddWebMessageHandler(std::function<std::wstring(Message*)> function) {
+    void AppWindow::AddWebMessageHandler(std::function<std::wstring(json)> function) {
         HandleWebMessage = function;
     };
 
@@ -59,15 +43,15 @@ namespace querier {
         return true;
     };
 
-    std::wstring AppWindow::GetResponse(Message msg) {
-        json cont = json(msg);
-        std::string src = cont.dump();
-        std::wstring ret;
-        if (str_to_wstr(src, &ret))
-            return ret;
+    //std::wstring AppWindow::GetResponse(Message msg) {
+    //    json cont = json(msg);
+    //    std::string src = cont.dump();
+    //    std::wstring ret;
+    //    if (str_to_wstr(src, &ret))
+    //        return ret;
 
-        return std::wstring();
-    };
+    //    return std::wstring();
+    //};
 
     bool AppWindow::InitializeWindow() {
         m_mainWindow = CreateWindowEx(
@@ -229,9 +213,10 @@ namespace querier {
             }
             case WM_WEBVIEW:
             {
-                Message* data = (Message*)wParam;
-                std::wstring response = GetResponse(*data);
+                json* data = (json*)wParam;
+                std::wstring response = str_to_wstr(data->dump());
                 m_webView->PostWebMessageAsJson(response.c_str());
+                delete data;
                 return true;
             }
             case WM_KEYDOWN:
@@ -287,12 +272,9 @@ namespace querier {
         args->TryGetWebMessageAsString(&message);
 
         json data = json::parse((std::wstring)message.get());
-        Message cmd = data.template get<Message>();
-        std::wstring response = HandleWebMessage(&cmd);
+        std::wstring response = HandleWebMessage(data);
 
-        if (cmd.respond) {
-            webView->PostWebMessageAsJson(response.c_str());
-        }
+        webView->PostWebMessageAsJson(response.c_str());
 
         return S_OK;
     };

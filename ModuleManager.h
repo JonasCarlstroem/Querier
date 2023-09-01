@@ -8,11 +8,13 @@
 #include "AppWindow.h"
 #include "Util.h"
 #include <filesystem>
+#include "resource.h"
+#include "ApplicationData.h"
 
 namespace querier {
     using namespace std::filesystem;
     typedef LanguageModule*(_cdecl* DLL)(path, path);
-    
+
     // Loaded language module resources
     struct LoadedModule {
         std::string name;
@@ -46,6 +48,7 @@ namespace querier {
 
     class ModuleManager {
     public:
+
         ModuleManager(AppWindow*);
         ~ModuleManager();
         void Initialize(path, path);
@@ -72,6 +75,8 @@ namespace querier {
             return m_ModulesAvailable[name];
         }
 
+        void HandleCommand(ModuleCommand, Message*);
+
     private:
         AppWindow* m_MainWindow;
         std::vector<path> m_InstalledModules;
@@ -87,6 +92,8 @@ namespace querier {
 
         void HandleOutputReceived(std::string ret);
         void HandleErrorReceived(std::string ret);
+
+        void PostApplicationMessage(ApplicationMessage*);
 
         void CleanupLoadedModules();
         void CleanupAvailableModules();

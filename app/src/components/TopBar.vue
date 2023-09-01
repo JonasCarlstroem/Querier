@@ -43,6 +43,13 @@
                     :item-value="'id'"
                     v-model="currentLanguage"></v-select> -->
             </v-col>
+            <v-col cols="1" offset="4">
+                <v-btn
+                    icon="mdi-close"
+                    density="compact"
+                    @click="$emit('close-query')">
+                </v-btn>
+            </v-col>
         </v-row>
     </v-container>
 </template>
@@ -61,7 +68,8 @@ export default {
     emits: [
         "update:activeLanguage",
         "invoke",
-        "config"
+        "config",
+        "close-query"
     ],
     setup() {
         const lang = ref<HTMLElement | null>(null);

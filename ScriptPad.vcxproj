@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ApplicationData.cpp" />
     <ClCompile Include="interface/BaseModule.cpp" />
     <ClCompile Include="interface/CmdModule.cpp" />
     <ClCompile Include="interface/LanguageModule.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="ApplicationData.h" />
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="interface/BaseModule.h" />
     <ClInclude Include="interface/CmdModule.h" />

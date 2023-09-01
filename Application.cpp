@@ -4,7 +4,8 @@
 #include "Application.h"
 
 namespace querier {
-    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleManager(MainWindow), QueryManager(MainWindow, &ModuleManager) {
+
+    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ManModule(MainWindow), ManQuery(MainWindow, &ManModule) {
         MainWindow->AddWebMessageHandler(std::bind(&Application::HandleWebMessage, this, std::placeholders::_1));
         path specialFolder;
         if (Directory::GetSpecialFolder(FOLDERID_RoamingAppData, &specialFolder)) {
@@ -27,8 +28,8 @@ namespace querier {
         if (!Directory::Exists(m_WorkspaceDirectory))
             Directory::Create(m_WorkspaceDirectory);
 
-        ModuleManager.Initialize(m_WorkingDirectory, m_ModulesDirectory);
-        QueryManager.Initialize(m_WorkingDirectory, m_WorkspaceDirectory);
+        ManModule.Initialize(m_WorkingDirectory, m_ModulesDirectory);
+        ManQuery.Initialize(m_WorkingDirectory, m_WorkspaceDirectory);
     }
 
     int Application::Start() {
@@ -48,24 +49,21 @@ namespace querier {
         return (int)msg.wParam;
     }
 
-    std::wstring Application::HandleWebMessage(Message* msg) {
-        json test;
-        switch (msg->cmd) {
-            case AppCommand::INITIALIZE:
-                msg->respond = true;
-                ModuleManager.ActiveModule->GetFileContent(&msg->message);
-                test = QueryManager.get_QueriesAsJson();
+    std::wstring Application::HandleWebMessage(json data) {
+        ApplicationMessage msg = data.template get<ApplicationMessage>();
+        switch (msg.type) {
+            case MODULE:
+            {
+                ManModule.HandleCommand(msg.modcmd, &msg.message);
+            }
                 break;
-            case AppCommand::CONFIG:
-                break;
-            case AppCommand::CODESYNC:
-                ModuleManager.ActiveModule->SetFileContent(msg->message);
-                break;
-            case AppCommand::INVOKE:
-                ModuleManager.ActiveModule->Invoke();
+            case QUERY:
+            {
+                ManQuery.HandleCommand(msg.querycmd, &msg.message);
+            }
                 break;
         }
-        return str_to_wstr(json(*msg).dump());
+        return str_to_wstr(json(msg).dump());
     }
 }
 

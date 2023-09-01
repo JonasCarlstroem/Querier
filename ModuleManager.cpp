@@ -103,15 +103,53 @@ namespace querier {
     }
 
     void ModuleManager::HandleOutputReceived(std::string ret) {
-        Message* response = new Message{ AppCommand::RESULT, ResultType::ISSUCCESS };
-        response->message = ret;
-        PostMessage(m_MainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
+        ApplicationMessage* response = new ApplicationMessage{ 
+            MODULE, 
+            RESULT_MODULE, 
+            NOQUERYCOMMAND, 
+            { 
+                SUCCESS_RESULT,
+                ret
+            } 
+        };
+        PostApplicationMessage(response);
+        delete response;
     }
 
     void ModuleManager::HandleErrorReceived(std::string ret) {
-        Message* response = new Message{ AppCommand::RESULT, ResultType::ISERROR };
-        response->error = ret;
-        PostMessage(m_MainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(response), NULL);
+        ApplicationMessage* response = new ApplicationMessage{
+            MODULE,
+            RESULT_MODULE,
+            NOQUERYCOMMAND,
+            {
+                ERROR_RESULT,
+                ret
+            }
+        };
+        PostApplicationMessage(response);
+        delete response;
+    }
+
+    void ModuleManager::PostApplicationMessage(ApplicationMessage *msg) {
+        json* pjson = new json(*msg);
+        PostMessage(m_MainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(pjson), NULL);
+    }
+
+    void ModuleManager::HandleCommand(ModuleCommand modcmd, Message* msg) {
+        switch (modcmd) {
+            case INIT_MODULE:
+                msg->msg_type = MODULE_RESPONSE;
+                ActiveModule->GetFileContent(&msg->content);
+                break;
+            case CONFIG_MODULE:
+                break;
+            case CODESYNC_MODULE:
+                ActiveModule->SetFileContent(msg->content);
+                break;
+            case INVOKE_MODULE:
+                ActiveModule->Invoke();
+                break;
+        }
     }
 
     void ModuleManager::CleanupLoadedModules() {

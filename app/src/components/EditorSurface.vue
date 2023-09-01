@@ -36,7 +36,7 @@ export default {
         }
     },
     mounted() {
-        postWebMessage({cmd: "initialize"});
+        this.postInitialize();
     },
     methods: {
         initEditor(modelValue: string) {
@@ -73,6 +73,9 @@ export default {
         },
         updateCode(code: string) {
             this.editor?.setValue(code);
+        },
+        postInitialize() {
+            // postWebMessage({ cmdtype: "module", modcmd: "init_module" })
         }
     },
     computed: {

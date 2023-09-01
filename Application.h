@@ -16,15 +16,15 @@ namespace querier {
         int Start();
 
         AppWindow* MainWindow;
-        ModuleManager ModuleManager;
-        QueryManager QueryManager;
+        ModuleManager ManModule;
+        QueryManager ManQuery;
     private:
         path m_WorkingDirectory;
         path m_ModulesDirectory;
         path m_WorkspaceDirectory;
 
         int RunMessagePump();
-        std::wstring HandleWebMessage(Message* msg);
+        std::wstring HandleWebMessage(json data);
     };
 }
 

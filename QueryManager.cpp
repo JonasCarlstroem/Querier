@@ -48,12 +48,12 @@ namespace querier {
     bool QueryManager::load_Workspace() {
         m_WorkspaceItems = Directory::GetDirectories(WorkspaceDirectory);
         if (m_WorkspaceItems.empty()) {
-            Queries.insert({ "query", new_Query("query", DefaultModule)});
+            Queries.insert({ "query1", new_Query("query1", DefaultModule) });
         }
         else {
             for (auto it = m_WorkspaceItems.begin(); it < m_WorkspaceItems.end(); it++) {
                 auto t = it->string();
-                Queries.insert({ t, load_Query(it->string())});
+                Queries.insert({ t, load_Query(it->string()) });
             }
         }
 
@@ -67,7 +67,7 @@ namespace querier {
         const Module* mod = m_ModuleManager->get_Module(loadQuery.ModuleName);
 
         if (m_ModuleManager->LoadModule(mod->Name, mod->Path, loadQuery.SourceFile, mod->Data.Library))
-            loadQuery.LoadedLanguageModule = m_ModuleManager->ActiveModule;
+            loadQuery.QueryLanguageModule = m_ModuleManager->ActiveModule;
 
         return new Query(loadQuery);
     }
@@ -82,10 +82,10 @@ namespace querier {
         if (!File::Create(queryDirectory / mod->Data.SourceFile))
             PRINT_ERROR(L"CreateFile");
 
-        Query* newQuery = new Query{ queryName, queryDirectory.string(), _module, path(path(queryDirectory) / path(mod->Data.SourceFile)).string()};
+        Query* newQuery = new Query{ queryName, queryDirectory.string(), _module, path(path(queryDirectory) / path(mod->Data.SourceFile)).string() };
 
         if (m_ModuleManager->LoadModule(_module, mod->Path, newQuery->SourceFile, mod->Data.Library))
-            newQuery->LoadedLanguageModule = m_ModuleManager->ActiveModule;
+            newQuery->QueryLanguageModule = m_ModuleManager->ActiveModule;
 
         newQuery->SaveQueryConfigFile();
 
@@ -102,6 +102,22 @@ namespace querier {
                 }
             }
         }
+    }
+
+    std::vector<Query> QueryManager::get_QueriesV() {
+        std::vector<Query> vec;
+        if (Queries.size() > 0) {
+            for (auto q : Queries) {
+                vec.push_back(*q.second);
+            }
+        }
+        return vec;
+    }
+
+    json QueryManager::get_QueriesAsJson() {
+            //std::map<std::string, Query> map = get_Queries();
+        std::vector<Query> vec = get_QueriesV();
+        return json(vec);
     }
 
     void to_json(json& j, const Query& q) {
@@ -122,6 +138,30 @@ namespace querier {
         j.at("querySource").get_to(q.SourceFile);
         j.at("queryLibraries").get_to(q.Libraries);
         j.at("unsavedChanges").get_to(q.UnsavedChanges);
+    }
+
+    void QueryManager::HandleCommand(QueryCommand querycmd, Message* msg) {
+        msg->msg_type = QUERY_RESPONSE;
+        switch (querycmd) {
+            case INIT_QUERY:
+                msg->content = get_QueriesAsJson().dump();
+                break;
+            case NEW_QUERY:
+            {
+                int count = Queries.size() + 1;
+                std::string name = std::string("query" + std::to_string(count));
+                Query* q = new_Query(name, DefaultModule);
+                Queries.insert({ name, q });
+                msg->content = json(*q).dump();
+                break;
+            }
+            case LOAD_QUERY:
+                break;
+            case CLOSE_QUERY:
+                break;
+            case REMOVE_QUERY:
+                break;
+        }
     }
 }
 

@@ -19,50 +19,11 @@ using namespace Microsoft::WRL;
 
 static constexpr size_t s_maxLoadString = 100;
 
+
 namespace querier {
+    /*class Message;*/
     static TCHAR szWindowClass[] = _T("DesktopApp");
     static TCHAR szTitle[] = _T("Script pad desktop application");
-
-    enum AppCommand {
-        NONE,
-        INITIALIZE,
-        CONFIG,
-        CODESYNC,
-        INVOKE,
-        RESULT
-    };
-
-    enum ResultType {
-        NORESULT,
-        ISSUCCESS,
-        ISERROR
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(AppCommand, {
-        { INITIALIZE, "initialize" },
-        { CONFIG, "config" },
-        { CODESYNC, "codesync" },
-        { INVOKE, "invoke" },
-        { RESULT, "result" }
-    });
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(ResultType, {
-        { NORESULT, "noresult" },
-        { ISSUCCESS, "success" },
-        { ISERROR, "error" }
-    });
-
-    struct Message {
-        AppCommand cmd{ NONE };
-        ResultType resultType{ NORESULT };
-        std::string message{ 0 };
-        std::string error{ 0 };
-        bool respond{ 0 };
-        std::string response{0};
-    };
-
-    void to_json(json& j, const Message& m);
-    void from_json(const json& j, Message& m);
 
     static HINSTANCE g_appInstance;
 
@@ -72,7 +33,7 @@ namespace querier {
         ~AppWindow();
 
         void AddWebMessageReceivedHandler(HRESULT(*webMessage)(ICoreWebView2* webView, ICoreWebView2WebMessageReceivedEventArgs* args));
-        void AddWebMessageHandler(std::function<std::wstring(Message*)> function);
+        void AddWebMessageHandler(std::function<std::wstring(json)> function);
         void AddOnWebViewCreatedHandler(void (*OnWebViewCreatedHandler)(ICoreWebView2* webview));
         bool Show();
 
@@ -84,7 +45,7 @@ namespace querier {
             return m_mainWindow;
         };
 
-        static std::wstring GetResponse(Message msg);
+        /*static std::wstring GetResponse(Message msg);*/
 
 
     private:
@@ -94,7 +55,7 @@ namespace querier {
 
         HRESULT(*WebMessageReceivedHandler)(ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs*);
         std::function<HRESULT(ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs*)>   OnWebMessageReceived;
-        std::function<std::wstring(Message*)>                                               HandleWebMessage;
+        std::function<std::wstring(json)>                                                   HandleWebMessage;
 
         void (*OnWebViewCreated)(ICoreWebView2* webview);
         bool m_customWebMessageHandler{ 0 };

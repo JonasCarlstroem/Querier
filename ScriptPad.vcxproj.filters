@@ -69,6 +69,9 @@
     <ClCompile Include="QueryManager.cpp">
       <Filter>Queries</Filter>
     </ClCompile>
+    <ClCompile Include="ApplicationData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="QueryManager.h">
       <Filter>Queries</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

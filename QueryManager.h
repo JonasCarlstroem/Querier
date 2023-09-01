@@ -3,13 +3,15 @@
 #ifndef _QUERIER_QUERY_MANAGER_H
 #define _QUERIER_QUERY_MANAGER_H
 #include "interface/LanguageModule.h"
-#include "AppWindow.h"
 #include "ModuleManager.h"
+#include "AppWindow.h"
 #include "resource.h"
 
 namespace querier {
+
     class Query {
     public:
+
         Query() {};
         Query(std::string, std::string, std::string);
         Query(std::string, std::string, std::string, std::string);
@@ -21,7 +23,7 @@ namespace querier {
         std::vector<std::string> Libraries;
         bool UnsavedChanges = false;
 
-        LanguageModule* LoadedLanguageModule = nullptr;
+        LanguageModule* QueryLanguageModule = nullptr;
         path queryConfigFile();
         Query LoadQueryConfigFile();
         void SaveQueryConfigFile();
@@ -31,6 +33,7 @@ namespace querier {
 
     class QueryManager {
     public:
+
         QueryManager(AppWindow*, ModuleManager*);
         ~QueryManager();
 
@@ -47,14 +50,17 @@ namespace querier {
             return map;
         }
 
-        json get_QueriesAsJson() {
-            return json::parse(get_Queries());
-        }
+        std::vector<Query> get_QueriesV();
+
+        json get_QueriesAsJson();
 
         path WorkingDirectory,
              WorkspaceDirectory;
         inline static std::string DefaultModule = "Nodejs";
         inline static std::string DefaultSourceFileExtension = ".mjs";
+
+        void HandleCommand(QueryCommand, Message*);
+
     private:
         AppWindow* m_MainWindow;
         ModuleManager* m_ModuleManager;
@@ -71,9 +77,6 @@ namespace querier {
 
     void to_json(json& j, const Query& q);
     void from_json(const json& j, Query& q);
-
-    void to_json(json& j, const std::vector<Query>& q);
-    void from_json(const json& j, std::vector<Query>& q);
 } //namespace querier
 
 #endif  //_QUERIER_QUERY_MANAGER_H
