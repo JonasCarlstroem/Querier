@@ -99,6 +99,13 @@ namespace querier {
     std::wstring LanguageModule::wGetSourceFile() {
         return m_LanguageFilePaths.wSourceFile;
     }
+
+    std::string LanguageModule::GetModuleVersion() {
+        if (m_szModuleVersion.size() > 0)
+            return m_szModuleVersion;
+        else if(m_wszModuleVersion.size() > 0)
+            return wstr_to_str(m_wszModuleVersion);
+    }
 }
 
 #endif

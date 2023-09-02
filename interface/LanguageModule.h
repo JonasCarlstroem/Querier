@@ -50,6 +50,8 @@ namespace querier {
         std::string GetSourceFile();
         std::wstring wGetSourceFile();
 
+        std::string GetModuleVersion();
+
     protected:
         LanguageType m_LanguageType{ Interpreter };
 

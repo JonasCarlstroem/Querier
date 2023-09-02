@@ -14,7 +14,7 @@ export default {
 .actionbar {
     height: 100%;
     width: 100%;
-    border: 1px solid white;
+    /* border: 1px solid white; */
     line-height: 1.5;
     resize: horizontal;
     padding: 10px;

@@ -11,7 +11,10 @@
             width: `${100 - resize.divider.horizontal}%`
         }">
             <v-tabs 
+                class="mt-1 ml-1"
                 density="compact"
+                :align-tabs="'start'"
+                :height="20"
                 v-model="query"
                 :hide-slider="true">
                 <v-tab v-for="_tab in _tabs" :value="_tab.value" variant="plain" :border="true" style="border-color: white;">
@@ -21,23 +24,23 @@
                     New Query
                 </v-tab>
             </v-tabs>
-            <v-window v-model="query">
+            <v-window v-model="query" class="h-100">
                 <div class="query-surface">
-                    <TopBar ref="topBar" :available-languages="availableLanguages" v-model:active-language="currentLanguage"
+                    <TopBar ref="topBar" :available-modules="availableLanguages" :query-name="query.query_name" :module-name="query.query_module" :module-version="query.query_module_version" v-model:active-module="currentLanguage"
                         @update:active-language="listen" @invoke="onInvoke" @config="showSettingsWindow" />
                     <div class="surface">
                         <div class="editor" :style="{
-                            height: `${(showResult ? resize.divider.vertical : 100)}%`
+                            height: `${(query.showResult ? resize.divider.vertical : 100)}%`
                         }">
-                            <EditorSurface ref="editorRef" :language="currentLanguage" v-on:update:code="setCode" />
+                            <EditorSurface ref="editorRef" :language="currentLanguage" @update:code="setCode" @loaded="postQueryInitialize" />
                         </div>
                         <v-divider id="dividervertical" class="dividev" @mousedown="startDragging('vertical')" thickness="10"
-                            v-if="showResult"></v-divider>
-                        <div class="result" v-if="showResult" :style="{
+                            v-if="query.showResult"></v-divider>
+                        <div class="result" v-if="query.showResult" :style="{
                             height: `${100 - resize.divider.vertical}%`
                         }">
-                            <ResultSurface ref="resultRef" :hasResult="showResult" :result="result" :hasError="hasError"
-                                :error="error" />
+                            <ResultSurface ref="resultRef" :hasResult="query.showResult" :result="query.result" :hasError="query.showError"
+                                :error="query.error" />
                         </div>
                     </div>
                 </div>
@@ -58,7 +61,7 @@ import Settings from './components/Settings.vue';
 //@ts-ignore
 import type { ILanguage } from '@/interface/ILanguage';
 import { postWebMessage, split } from './Utils';
-import type { CommandType, ModuleCommand, QueryCommand, Message } from './Utils';
+import type { CommandType, ModuleCommand, QueryCommand, Message, Query, ModuleMessage, QueryMessage } from './Utils';
 
 //####TODO
 // wait for init message before creating editor
@@ -91,11 +94,11 @@ export default {
 
         const state = reactive({
             code: currentLanguage.value.value as string,
-            showResult: false as boolean,
-            isRunning: false as boolean,
-            result: {} as any,
-            hasError: false as boolean,
-            error: {} as any,
+            // showResult: false as boolean,
+            // isRunning: false as boolean,
+            // result: {} as any,
+            // hasError: false as boolean,
+            // error: {} as any,
             editorHeight: 100 as number,
             resize: {
                 divider: {
@@ -105,8 +108,8 @@ export default {
                 direction: ""
             },
             showSettings: false,
-            queries: [],
-            query: null as any
+            queries: [] as Query[],
+            query: {} as Query
         });
 
         return {
@@ -123,12 +126,9 @@ export default {
     beforeMount() {
         //@ts-ignore
         window.chrome.webview.addEventListener("message", (e) => {
-            const { cmdtype, modcmd, querycmd, message } = e.data;
-            this.handleCommand(cmdtype, modcmd, querycmd, message);
+            const { cmdtype, modmsg, querymsg } = e.data;
+            this.handleCommand(cmdtype, modmsg, querymsg);
         });
-    },
-    mounted() {
-        this.postQueryInitialize();
     },
     methods: {
         showSettingsWindow(opt: any) {
@@ -179,34 +179,40 @@ export default {
             console.log("Causes error");
         },
         onInvoke() {
-            this.showResult = true;
             this.editorHeight = 50;
-            this.result = {};
-            this.error = {};
-            this.hasError = false;
+            this.query.showResult = true;
+            this.query.result = {
+                objects: [],
+                functions: [],
+                strings: []
+            };
+            this.query.error = {};
+            this.query.showError = false;
             this.postInvoke();
-            this.isRunning = true;
+            this.query.isRunning = true;
             this.editorRef?.resizeEditor();
         },
         setCode(code: string) {
-            this.code = code;
+            this.query.query_source_content = code;
             this.postCodeSync(code);
         },
-        handleCommand(cmdtype: CommandType, modcmd: ModuleCommand, querycmd: QueryCommand, message: Message) {
+        handleCommand(cmdtype: CommandType, modmsg: ModuleMessage, querymsg: QueryMessage) {
             switch (cmdtype) {
                 case "module":
-                    this.handleModuleCommand(modcmd, message);
+                    this.handleModuleCommand(modmsg);
                     break;
                 case "query":
-                    this.handleQueryCommand(querycmd, message);
+                    this.handleQueryCommand(querymsg);
                     break;
             }
         },
-        handleModuleCommand(modcmd: ModuleCommand, message: Message) {
-            switch (modcmd) {
+        handleModuleCommand(message: ModuleMessage) {
+            switch (message.cmd) {
                 case "init_module":
-                    this.code = message.content;
+                    console.log(message);
+                    this.code = message.content!;
                     if (this.editorRef) {
+                        console.log(this.code);
                         this.editorRef.initEditor(this.code);
                     }
                     break;
@@ -219,11 +225,19 @@ export default {
                     break;
             }
         },
-        handleQueryCommand(querycmd: QueryCommand, message: Message) {
-            switch (querycmd) {
+        handleQueryCommand(message: QueryMessage) {
+            switch (message.cmd) {
                 case "init_query":
-                    let query = JSON.parse(message.content);
-                    this.queries = query;
+                    let queries = JSON.parse(message.content!);
+                    this.queries = queries;
+                    this.query = queries[0];
+                    this.postModuleInitialize();
+                    break;
+                case "init_query_module":
+                    this.query.query_source_content = message.content!;
+                    if (this.editorRef) {
+                        this.editorRef.initEditor(this.query.query_source_content);
+                    }
                     break;
                 case "new_query":
                     break;
@@ -235,18 +249,18 @@ export default {
                     break;
             }
         },
-        handleResult(message: Message) {
-            switch (message.msg_type) {
+        handleResult(message: ModuleMessage) {
+            switch (message.result_type) {
                 case "success_result":
                     if (message.content) {
-                        if (this.result.strings === undefined || this.result.strings === null)
-                            this.result.strings = [];
+                        if (this.query.result.strings === undefined || this.query.result.strings === null)
+                            this.query.result.strings = [];
 
-                        if (this.result.functions === undefined || this.result.functions === null)
-                            this.result.functions = [];
+                        if (this.query.result.functions === undefined || this.query.result.functions === null)
+                            this.query.result.functions = [];
 
-                        if (this.result.objects === undefined || this.result.functions === null)
-                            this.result.objects = [];
+                        if (this.query.result.objects === undefined || this.query.result.functions === null)
+                            this.query.result.objects = [];
 
                         this.setResult(message.content);
 
@@ -257,12 +271,12 @@ export default {
                     break;
                 case "error_result":
                     if (message.content) {
-                        this.hasError = true;
-                        if (this.error.strings === undefined || this.error.strings === null)
-                            this.error.strings = [];
+                        this.query.showError = true;
+                        if (this.query.error.strings === undefined || this.query.error.strings === null)
+                            this.query.error.strings = [];
 
-                        if (this.error.objects === undefined || this.error.objects === null)
-                            this.error.objects = [];
+                        if (this.query.error.objects === undefined || this.query.error.objects === null)
+                            this.query.error.objects = [];
 
                         this.setError(message.content);
                     }
@@ -276,13 +290,13 @@ export default {
                 const obj = JSON.parse(item);
 
                 if (obj.hasOwnProperty("object")) {
-                    this.result.objects.push(obj.object);
+                    this.query.result.objects?.push(obj.object);
                 }
                 else if (obj.hasOwnProperty("function")) {
-                    this.result.strings.push(obj.function + '\r\n');
+                    this.query.result.strings?.push(obj.function + '\r\n');
                 }
                 else if (obj.hasOwnProperty("string")) {
-                    this.result.strings.push(obj.string);
+                    this.query.result.strings?.push(obj.string);
                 }
             }
         },
@@ -291,53 +305,94 @@ export default {
             for (const item of arr) {
                 try {
                     const obj = JSON.parse(item);
-                    Object.assign(this.error, obj);
+                    Object.assign(this.query.error, obj);
                 }
                 catch (ex) {
-                    this.error.strings.push(item);
+                    this.query.error.strings.push(item);
                 }
             }
         },
         postQueryInitialize() {
-            postWebMessage({ cmdtype: "query", querycmd: "init_query" });
+            postWebMessage({ 
+                cmdtype: "query", 
+                querymsg: { 
+                    cmd: "init_query", 
+                    query_name: this.query.query_name 
+                } 
+            });
         },
         postQueryNew() {
-            postWebMessage({ cmdtype: "query", querycmd: "new_query" });
+            postWebMessage({ 
+                cmdtype: "query", 
+                querymsg: {
+                    cmd: "new_query", 
+                    query_name: this.query.query_name 
+                } 
+            });
         },
         postModuleInitialize() {
-            postWebMessage({ cmdtype: "module", modcmd: "init_module"});
+            postWebMessage({ 
+                cmdtype: "query", 
+                querymsg: {
+                    cmd:"init_query_module", 
+                    query_name: this.query.query_name
+                } 
+            });
         },
         postInvoke() {
-            postWebMessage({ cmdtype: "module", modcmd: "invoke_module" });
+            postWebMessage({ 
+                cmdtype: "query", 
+                querymsg: { 
+                    cmd: "invoke_query_module", 
+                    query_name: this.query.query_name
+                } 
+            });
         },
         postConfig() {
-            postWebMessage({ cmdtype: "module", modcmd: "config_module" });
+            postWebMessage({ 
+                cmdtype: "module", 
+                modmsg: { 
+                    cmd: "config_module", 
+                    module_name: this.query.query_module 
+                } 
+            });
         },
         postCodeSync(content: string) {
             postWebMessage({
-                cmdtype: "module", modcmd: "codesync_module", message: {
-                    content
+                cmdtype: "query", 
+                querymsg: { 
+                    cmd: "codesync_query_module", 
+                    query_name: this.query.query_name, 
+                    content: content 
                 }
             });
         }
     },
+    watch: {
+        query: {
+            handler(a, b) {
+                this.editorRef?.updateCode(a.query_source_content);
+            }
+        }
+    },
     computed: {
         _hasResult() {
-            return this.showResult;
+            return this.query.showResult;
         },
-        _hasError() {
-            return this.hasError;
+        _showError() {
+            return this.query.showError;
         },
         _tabs() {
-            const tabs = this.queries.map((x: any) => { 
+            const tabs = this.queries.map((x: any) : { name: string, value: Query } => { 
                 console.log(x);
                 return { 
-                    name: x.name[0].toUpperCase() + x.name.substring(1, x.name.length), 
+                    name: x.query_name[0].toUpperCase() + x.query_name.substring(1, x.query_name.length), 
                     value: x
                 }
             });
             if(tabs.length > 0) {
-                this.query = tabs[0];
+                console.log(tabs);
+                this.query = tabs[0].value;
             }
             return tabs;
         }
@@ -346,6 +401,7 @@ export default {
 </script>
 
 <style scoped>
+
 .wrapper {
     font-family: Consolas, 'Courier New', monospace;
     color: white;
@@ -369,9 +425,8 @@ export default {
 .main {
     box-sizing: border-box !important;
     width: 100%;
-    /* display: flex;
-    flex-direction: column; */
-    /* overflow: hidden; */
+    display: flex;
+    flex-direction: column;
 }
 
 .surface {

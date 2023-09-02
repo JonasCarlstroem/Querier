@@ -75,7 +75,7 @@ namespace querier {
             return m_ModulesAvailable[name];
         }
 
-        void HandleCommand(ModuleCommand, Message*);
+        void HandleCommand(ModuleMessage*);
 
     private:
         AppWindow* m_MainWindow;

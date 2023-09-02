@@ -7,17 +7,10 @@
 #include "resource.h"
 
 namespace querier {
-    enum MessageType {
+    enum ModuleResultType {
         NOMESSAGETYPE = 0,
         SUCCESS_RESULT,
-        ERROR_RESULT,
-        QUERY_RESPONSE,
-        MODULE_RESPONSE
-    };
-
-    struct Message {
-        MessageType msg_type;
-        std::string content{ 0 };
+        ERROR_RESULT
     };
 
     enum CommandType {
@@ -28,7 +21,6 @@ namespace querier {
 
     enum ModuleCommand {
         NOMODULECOMMAND = 0,
-        INIT_MODULE,
         CONFIG_MODULE,
         CODESYNC_MODULE,
         INVOKE_MODULE,
@@ -38,6 +30,9 @@ namespace querier {
     enum QueryCommand {
         NOQUERYCOMMAND = 0,
         INIT_QUERY,
+        INIT_QUERY_MODULE,
+        INVOKE_QUERY_MODULE,
+        CODESYNC_QUERY_MODULE,
         NEW_QUERY,
         LOAD_QUERY,
         CLOSE_QUERY,
@@ -50,25 +45,42 @@ namespace querier {
         ISERROR
     };
 
-    struct ApplicationMessage {
-        CommandType type = NOCOMMANDTYPE;
-        ModuleCommand modcmd = NOMODULECOMMAND;
-        QueryCommand querycmd = NOQUERYCOMMAND;
-        Message message;
+    struct Message {
+        std::string content;
     };
 
-    void to_json(json& j, const Message& m);
-    void from_json(const json& j, Message& m);
+
+    struct ModuleMessage : public Message {
+        ModuleCommand cmd;
+        ModuleResultType result_type;
+        std::string module_name;
+    };
+
+    struct QueryMessage : public Message {
+        QueryCommand cmd;
+        ModuleResultType result_type;
+        std::string query_name;
+    };
+
+    struct ApplicationMessage {
+        CommandType type;
+        ModuleMessage modmsg;
+        QueryMessage querymsg;
+    };
+
+    void to_json(json& j, const Message&);
+    void from_json(const json& j, Message&);
+
+    void to_json(json& j, const QueryMessage&);
+    void from_json(const json& j, QueryMessage&);
 
     void to_json(json& j, const ApplicationMessage&);
     void from_json(const json& j, ApplicationMessage&);
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(MessageType, {
+    NLOHMANN_JSON_SERIALIZE_ENUM(ModuleResultType, {
         { NOMESSAGETYPE, "no_message_type" },
         { SUCCESS_RESULT, "success_result" },
-        { ERROR_RESULT, "error_result" },
-        { QUERY_RESPONSE, "query_response" },
-        { MODULE_RESPONSE, "module_response"}
+        { ERROR_RESULT, "error_result" }
     });
 
     NLOHMANN_JSON_SERIALIZE_ENUM(CommandType, {
@@ -79,7 +91,6 @@ namespace querier {
 
     NLOHMANN_JSON_SERIALIZE_ENUM(ModuleCommand, {
         { NOMODULECOMMAND, "no_module_command" },
-        { INIT_MODULE, "init_module" },
         { CONFIG_MODULE, "config_module" },
         { CODESYNC_MODULE, "codesync_module" },
         { INVOKE_MODULE, "invoke_module" },
@@ -89,6 +100,9 @@ namespace querier {
     NLOHMANN_JSON_SERIALIZE_ENUM(QueryCommand, {
         { NOQUERYCOMMAND, "no_query_command" },
         { INIT_QUERY, "init_query" },
+        { INIT_QUERY_MODULE, "init_query_module" },
+        { INVOKE_QUERY_MODULE, "invoke_query_module" },
+        { CODESYNC_QUERY_MODULE, "codesync_query_module" },
         { NEW_QUERY, "new_query" },
         { LOAD_QUERY, "load_query" },
         { CLOSE_QUERY, "close_query" },

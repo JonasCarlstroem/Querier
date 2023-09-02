@@ -103,14 +103,9 @@ namespace querier {
     }
 
     void ModuleManager::HandleOutputReceived(std::string ret) {
-        ApplicationMessage* response = new ApplicationMessage{ 
-            MODULE, 
-            RESULT_MODULE, 
-            NOQUERYCOMMAND, 
-            { 
-                SUCCESS_RESULT,
-                ret
-            } 
+        ApplicationMessage* response = new ApplicationMessage{
+            MODULE,
+            { ret, RESULT_MODULE, SUCCESS_RESULT, ActiveModuleName }
         };
         PostApplicationMessage(response);
         delete response;
@@ -119,12 +114,7 @@ namespace querier {
     void ModuleManager::HandleErrorReceived(std::string ret) {
         ApplicationMessage* response = new ApplicationMessage{
             MODULE,
-            RESULT_MODULE,
-            NOQUERYCOMMAND,
-            {
-                ERROR_RESULT,
-                ret
-            }
+            { ret, RESULT_MODULE, ERROR_RESULT, ActiveModuleName }
         };
         PostApplicationMessage(response);
         delete response;
@@ -135,11 +125,8 @@ namespace querier {
         PostMessage(m_MainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(pjson), NULL);
     }
 
-    void ModuleManager::HandleCommand(ModuleCommand modcmd, Message* msg) {
-        switch (modcmd) {
-            case INIT_MODULE:
-                msg->msg_type = MODULE_RESPONSE;
-                ActiveModule->GetFileContent(&msg->content);
+    void ModuleManager::HandleCommand(ModuleMessage* msg) {
+        switch (msg->cmd) {
                 break;
             case CONFIG_MODULE:
                 break;

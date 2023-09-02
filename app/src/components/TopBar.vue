@@ -1,5 +1,5 @@
 ﻿<template>    
-    <v-container fluid class="ma-0 pa-0">
+    <v-container fluid class="pa-0">
         <v-row no-gutters justify="start" class="pa-1">
             <v-col cols="1">
                 <v-btn 
@@ -29,21 +29,13 @@
                     @click="$emit('config')">
                 </v-btn>
             </v-col>
-            <v-col cols="1" offset="1">
-                <v-input
-                    density="compact"
-                    :hide-details="true">hello</v-input>
-                <!-- <v-select
-                    ref="lang"
-                    height="30"
-                    variant="outlined"
-                    class="h-0"
-                    :items="availableLanguages"
-                    :item-title="'name'"
-                    :item-value="'id'"
-                    v-model="currentLanguage"></v-select> -->
+            <v-col cols="2" offset="1">
+                <span>{{ moduleName }}</span> <span>{{ _moduleVersion }}</span>
             </v-col>
-            <v-col cols="1" offset="4">
+            <v-col cols="1">
+                <span>{{ queryName }}</span>
+            </v-col>
+            <v-col cols="1" offset="2">
                 <v-btn
                     icon="mdi-close"
                     density="compact"
@@ -59,11 +51,14 @@ import { ref } from 'vue';
 
 export default {
     props: {
-        activeLanguage: {
+        activeModule: {
             type: Object,
             default: { }
         },
-        availableLanguages: Array
+        availableModules: Array,
+        moduleName: String,
+        moduleVersion: String,
+        queryName: String
     },
     emits: [
         "update:activeLanguage",
@@ -79,7 +74,7 @@ export default {
     },
     data() {
         return {
-            currentLanguage: this.activeLanguage,
+            currentLanguage: this.activeModule,
             dialog: false
         }
     },
@@ -87,6 +82,11 @@ export default {
         currentLanguage: function(a, b) {
             console.log("Watcher");
             this.$emit('update:activeLanguage', b);
+        }
+    },
+    computed: {
+        _moduleVersion() {
+            return this.moduleVersion?.replace('\r\n', '');
         }
     },
     mounted() {

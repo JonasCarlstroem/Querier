@@ -54,12 +54,12 @@ namespace querier {
         switch (msg.type) {
             case MODULE:
             {
-                ManModule.HandleCommand(msg.modcmd, &msg.message);
+                ManModule.HandleCommand(&msg.modmsg);
             }
                 break;
             case QUERY:
             {
-                ManQuery.HandleCommand(msg.querycmd, &msg.message);
+                ManQuery.HandleCommand(&msg.querymsg);
             }
                 break;
         }

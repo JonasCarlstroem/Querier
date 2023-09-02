@@ -20,6 +20,7 @@ export default {
         }
     },
     emits: [
+        "loaded",
         "update:code"
     ],
     setup(props) {
@@ -36,15 +37,16 @@ export default {
         }
     },
     mounted() {
-        this.postInitialize();
+        this.$emit('loaded', true);
     },
     methods: {
         initEditor(modelValue: string) {
             if (this.editorSurface !== null) {
-                const editorOptions = {
+                const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
                     automaticLayout: true,
                     language: this.language.id,
-                    model: null
+                    model: null,
+                    theme: "vs-dark"
                 };
 
                 monaco.languages.typescript.javascriptDefaults.addExtraLib([
@@ -53,7 +55,7 @@ export default {
                 ].join('\n'));
 
                 monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
-
+                console.log(modelValue);
                 const model = monaco.editor.createModel(modelValue, this.language.id);
 
                 this.editor = monaco.editor.create(this.editorSurface, editorOptions);
@@ -101,6 +103,6 @@ export default {
 <style scoped>
 .editorSurface {
     height: 100%;
-    border: 1px solid white;
+    /* border: 1px solid white; */
 }
 </style>

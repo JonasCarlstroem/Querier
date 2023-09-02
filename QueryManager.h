@@ -19,7 +19,9 @@ namespace querier {
         std::string Name;
         std::string Path;
         std::string ModuleName;
+        std::string ModuleVersion;
         std::string SourceFile;
+        std::string SourceFileContent;
         std::vector<std::string> Libraries;
         bool UnsavedChanges = false;
 
@@ -59,7 +61,7 @@ namespace querier {
         inline static std::string DefaultModule = "Nodejs";
         inline static std::string DefaultSourceFileExtension = ".mjs";
 
-        void HandleCommand(QueryCommand, Message*);
+        void HandleCommand(QueryMessage*);
 
     private:
         AppWindow* m_MainWindow;

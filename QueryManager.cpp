@@ -66,9 +66,11 @@ namespace querier {
 
         const Module* mod = m_ModuleManager->get_Module(loadQuery.ModuleName);
 
-        if (m_ModuleManager->LoadModule(mod->Name, mod->Path, loadQuery.SourceFile, mod->Data.Library))
+        if (m_ModuleManager->LoadModule(mod->Name, mod->Path, loadQuery.SourceFile, mod->Data.Library)) {
             loadQuery.QueryLanguageModule = m_ModuleManager->ActiveModule;
-
+            loadQuery.ModuleVersion = m_ModuleManager->ActiveModule->GetModuleVersion();
+            m_ModuleManager->ActiveModule->GetFileContent(&loadQuery.SourceFileContent);
+        }
         return new Query(loadQuery);
     }
 
@@ -122,29 +124,47 @@ namespace querier {
 
     void to_json(json& j, const Query& q) {
         j = json{
-            { "name", q.Name },
-            { "queryModule", q.ModuleName },
-            { "queryPath", q.Path },
-            { "querySource", q.SourceFile },
-            { "queryLibraries", q.Libraries },
-            { "unsavedChanges", (bool)q.UnsavedChanges }
+            { "query_name", q.Name },
+            { "query_module", q.ModuleName },
+            { "query_module_version", q.ModuleVersion },
+            { "query_path", q.Path },
+            { "query_source", q.SourceFile },
+            { "query_source_content", q.SourceFileContent },
+            { "query_libraries", q.Libraries },
+            { "unsaved_changes", (bool)q.UnsavedChanges }
         };
     }
 
     void from_json(const json& j, Query& q) {
-        j.at("name").get_to(q.Name);
-        j.at("queryModule").get_to(q.ModuleName);
-        j.at("queryPath").get_to(q.Path);
-        j.at("querySource").get_to(q.SourceFile);
-        j.at("queryLibraries").get_to(q.Libraries);
-        j.at("unsavedChanges").get_to(q.UnsavedChanges);
+        q.Name = j.value("query_name", "");
+        q.ModuleName = j.value("query_module", "Nodejs");
+        q.ModuleVersion = j.value("query_module_version", "0");
+        q.Path = j.value("query_path", "");
+        q.SourceFile = j.value("query_source", "");
+        q.SourceFileContent = j.value("query_source_content", "");
+        q.Libraries = j.value("query_libraries", std::vector<std::string>());
+        q.UnsavedChanges = j.value("unsaved_changes", false);
     }
 
-    void QueryManager::HandleCommand(QueryCommand querycmd, Message* msg) {
-        msg->msg_type = QUERY_RESPONSE;
-        switch (querycmd) {
+    void QueryManager::HandleCommand(QueryMessage* msg) {
+        Query* query = nullptr;
+
+        if (Queries.count(msg->query_name))
+            query = Queries.find(msg->query_name)->second;
+
+        switch (msg->cmd) {
             case INIT_QUERY:
                 msg->content = get_QueriesAsJson().dump();
+                break;
+            case INIT_QUERY_MODULE:
+                query->QueryLanguageModule->GetFileContent(&msg->content);
+                break;
+            case INVOKE_QUERY_MODULE:
+                query->QueryLanguageModule->Invoke();
+                break;
+            case CODESYNC_QUERY_MODULE:
+                query->QueryLanguageModule->SetFileContent(msg->content);
+                query->SaveQueryConfigFile();
                 break;
             case NEW_QUERY:
             {

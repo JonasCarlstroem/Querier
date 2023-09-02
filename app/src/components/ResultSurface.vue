@@ -239,23 +239,20 @@ export default {
     box-sizing: border-box !important;
     width: 100%;
     height: 100%;
-    resize: both;
+    display: flex;
     /* margin: 0 auto; */
 }
 
 .frame {
     -webkit-box-sizing: border-box;
     box-sizing: border-box !important;
-    /* margin: 0 auto; */
-    /* padding: 0 auto; */
     display: flex;
     flex-direction: column;
     padding: 10px;
     padding-top: 0;
-    border: 1px solid white;
+    /* border: 1px solid white; */
     height: 100%;
     width: 100%;
-    /* overflow: hidden; */
 }
 
 .result {
@@ -263,6 +260,7 @@ export default {
     box-sizing: border-box !important;
     height: 100%;
     width: 100%;
+    display: flex;
     /* border: 1px solid white; */
     overflow: auto;
 }
