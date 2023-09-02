@@ -16,8 +16,8 @@ namespace querier {
         int Start();
 
         AppWindow* MainWindow;
-        ModuleManager ManModule;
-        QueryManager ManQuery;
+        ModuleManager ModuleManager;
+        QueryManager QueryManager;
     private:
         path m_WorkingDirectory;
         path m_ModulesDirectory;

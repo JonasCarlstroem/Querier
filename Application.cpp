@@ -5,7 +5,7 @@
 
 namespace querier {
 
-    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ManModule(MainWindow), ManQuery(MainWindow, &ManModule) {
+    Application::Application(HINSTANCE hInst, int nCmdShow) : MainWindow(new AppWindow(hInst, nCmdShow)), ModuleManager(MainWindow), QueryManager(MainWindow, &ModuleManager) {
         MainWindow->AddWebMessageHandler(std::bind(&Application::HandleWebMessage, this, std::placeholders::_1));
         path specialFolder;
         if (Directory::GetSpecialFolder(FOLDERID_RoamingAppData, &specialFolder)) {
@@ -28,8 +28,8 @@ namespace querier {
         if (!Directory::Exists(m_WorkspaceDirectory))
             Directory::Create(m_WorkspaceDirectory);
 
-        ManModule.Initialize(m_WorkingDirectory, m_ModulesDirectory);
-        ManQuery.Initialize(m_WorkingDirectory, m_WorkspaceDirectory);
+        ModuleManager.Initialize(m_WorkingDirectory, m_ModulesDirectory);
+        QueryManager.Initialize(m_WorkingDirectory, m_WorkspaceDirectory);
     }
 
     int Application::Start() {
@@ -54,14 +54,14 @@ namespace querier {
         switch (msg.type) {
             case MODULE:
             {
-                ManModule.HandleCommand(&msg.modmsg);
-            }
+                ModuleManager.HandleCommand(&msg.modmsg);
                 break;
+            }
             case QUERY:
             {
-                ManQuery.HandleCommand(&msg.querymsg);
-            }
+                QueryManager.HandleCommand(&msg.querymsg);
                 break;
+            }
         }
         return str_to_wstr(json(msg).dump());
     }

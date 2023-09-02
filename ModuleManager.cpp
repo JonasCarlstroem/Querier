@@ -52,37 +52,10 @@ namespace querier {
         return Modules.size() > 0;
     }
 
-    //bool ModuleManager::LoadModule(Module _module) {
-    //    HINSTANCE hLib;
-    //    DLL ProcAddr{ 0 };
-    //    BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
-
-    //    hLib = LoadLibrary(_module.Path.c_str());
-    //    if (hLib != NULL) {
-    //        ProcAddr = (DLL)GetProcAddress(hLib, "CreateModule");
-
-    //        if (NULL != ProcAddr) {
-    //            fRunTimeLinkSuccess = TRUE;
-    //            m_LoadedModules.insert({ _module.Name, new LoadedModule{_module.Name, _module.Path, hLib, ProcAddr } });
-
-    //            std::string moduleName = _module.Name;
-    //            ActiveModuleName = _module.Name;
-    //            //ActiveModule = (LanguageModule*)ProcAddr(_module.SourceFileExtension, "");
-    //            ActiveModule->OnOutputReceived = std::bind(&ModuleManager::HandleOutputReceived, this, std::placeholders::_1);
-    //            ActiveModule->OnErrorReceived = std::bind(&ModuleManager::HandleErrorReceived, this, std::placeholders::_1);
-
-    //            Modules.insert({ ActiveModuleName, ActiveModule});
-    //        }
-    //    }
-
-
-    //    return fRunTimeLinkSuccess;
-    //}
-
     bool ModuleManager::LoadModule(std::string moduleName, path modulePath, path querySourceFile, path libFilePath, LanguageModule** langModule) {
         HINSTANCE hLib;
         DLL ProcAddr{ 0 };
-        BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
+        BOOL fRunTimeLinkSuccess = FALSE;
 
         hLib = LoadLibrary(modulePath.c_str());
         if (hLib != NULL) {

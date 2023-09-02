@@ -13,21 +13,21 @@ namespace querier {
 
     }
 
-    File::File(std::wstring fileName) : m_fileName(wstr_to_str(fileName)), m_ioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
-        if (m_ioFile.bad()) {
+    File::File(std::wstring fileName) : m_fileName(wstr_to_str(fileName)), m_wioFile(m_fileName, std::ios_base::in | std::ios_base::out) {
+        if (m_wioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
         else {
-            m_ioFile.close();
+            m_wioFile.close();
         }
     }
 
-    File::File(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(wstr_to_str(fileName)), m_ioFile(m_fileName, mode) {
-        if (m_ioFile.bad()) {
+    File::File(std::wstring fileName, std::ios_base::openmode mode) : m_fileName(wstr_to_str(fileName)), m_wioFile(m_fileName, mode) {
+        if (m_wioFile.bad()) {
             throw std::exception(m_fileName.c_str());
         }
         else {
-            m_ioFile.close();
+            m_wioFile.close();
         }
     }
 
@@ -74,6 +74,14 @@ namespace querier {
         }
     }
 
+    void File::wWrite(std::wstring content) {
+        if (!m_wioFile.is_open()) {
+            m_wioFile.open(m_fileName, std::wfstream::out | std::wfstream::trunc);
+            m_wioFile.write(content.c_str(), content.length());
+            m_wioFile.close();
+        }
+    }
+
     bool File::Read(std::string* ret) {
         if (!m_ioFile.is_open()) {
             char buffer[BUFSIZE];
@@ -85,6 +93,22 @@ namespace querier {
             ret->append(buffer, m_ioFile.gcount());
 
             m_ioFile.close();
+            return true;
+        }
+        return false;
+    }
+
+    bool File::wRead(std::wstring* ret) {
+        if (!m_wioFile.is_open()) {
+            wchar_t buffer[BUFSIZE];
+
+            ret->clear();
+            m_wioFile.open(m_fileName, std::wfstream::in);
+            while (m_wioFile.read(buffer, sizeof(buffer)))
+                ret->append(buffer, sizeof(buffer));
+            ret->append(buffer, m_wioFile.gcount());
+
+            m_wioFile.close();
             return true;
         }
         return false;

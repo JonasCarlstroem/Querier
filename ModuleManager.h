@@ -56,12 +56,9 @@ namespace querier {
         ~ModuleManager();
         void Initialize(path, path);
 
-        //bool LoadModule(Module);
         bool LoadModule(std::string, path, path, path, LanguageModule**);
 
         std::map<std::string, Module*> Modules;
-        /*std::string ActiveModuleName;
-        LanguageModule* ActiveModule = nullptr;*/
 
         path WorkingDirectory,
              ModulesDirectory;
@@ -69,10 +66,6 @@ namespace querier {
         inline static std::string s_DefaultModule = "Nodejs",
                                   s_DefaultSourceFileName = "_eval_",
                                   s_DefaultSourceFileExtension = ".mjs";
-
-        //static std::wstring s_wDefaultModule,
-        //                    s_wDefaultSourceFileName,
-        //                    s_wDefautSourceFileExtension;
 
         Module* get_Module(std::string name) {
             return Modules[name];

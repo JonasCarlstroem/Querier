@@ -98,7 +98,7 @@ namespace querier {
     };
 
     void LanguageModule::wSetFileContent(std::wstring content) {
-        m_File.Write(wstr_to_str(content));
+        m_File.wWrite(content);
     }
 
     std::string LanguageModule::GetSourceFile() {

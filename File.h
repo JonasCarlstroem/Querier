@@ -37,8 +37,10 @@ namespace querier {
 
         void wWriteFile(std::wstring);
         void Write(std::string);
+        void wWrite(std::wstring);
         //bool Read(std::string*);
         bool Read(std::string*);
+        bool wRead(std::wstring*);
 
         void SetFileName(std::string);
 
@@ -56,6 +58,8 @@ namespace querier {
         std::string m_fileName{ 0 };
         std::wofstream m_woFile;
         std::ofstream m_oFile;
+
+        std::wfstream m_wioFile;
         std::fstream m_ioFile;
         std::ios_base::openmode mode = std::ofstream::out;
     };
