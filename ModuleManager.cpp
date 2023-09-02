@@ -39,46 +39,47 @@ namespace querier {
             if (File::Exists(moduleFile)) {
                 if (File::Exists(moduleConfig)) {
                     json sd = json::parse(File::ReadAllText(moduleConfig));
-                    Module mod = sd.template get<Module>();
-                    mod.Path = moduleFile;
-                    mod.Data.Path = moduleData;
-                    mod.Data.Library = mod.Data.Path / mod.Library;
-                    mod.Data.SourceFile = std::string(s_DefaultSourceFileName + mod.SourceFileExtension);
-
-                    m_ModulesAvailable.insert({ it->string(), new Module(mod)});
+                    Module* mod = new Module(sd.template get<Module>());
+                    mod->Path = moduleFile;
+                    mod->Data.Path = moduleData;
+                    mod->Data.Library = mod->Data.Path / mod->Library;
+                    mod->Data.SourceFile = std::string(s_DefaultSourceFileName + mod->SourceFileExtension);
+                    LoadModule(mod->Name, mod->Path, mod->Data.SourceFile, mod->Data.Library, &mod->LanguageModule);
+                    Modules.insert({ it->string(), mod});
                 }
             }
         }
-        return m_ModulesAvailable.size() > 0;
+        return Modules.size() > 0;
     }
 
-    bool ModuleManager::LoadModule(Module _module) {
-        HINSTANCE hLib;
-        DLL ProcAddr{ 0 };
-        BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
+    //bool ModuleManager::LoadModule(Module _module) {
+    //    HINSTANCE hLib;
+    //    DLL ProcAddr{ 0 };
+    //    BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
 
-        hLib = LoadLibrary(_module.Path.c_str());
-        if (hLib != NULL) {
-            ProcAddr = (DLL)GetProcAddress(hLib, "CreateModule");
+    //    hLib = LoadLibrary(_module.Path.c_str());
+    //    if (hLib != NULL) {
+    //        ProcAddr = (DLL)GetProcAddress(hLib, "CreateModule");
 
-            if (NULL != ProcAddr) {
-                fRunTimeLinkSuccess = TRUE;
-                m_LoadedModules.insert({ _module.Name, new LoadedModule{_module.Name, _module.Path, hLib, ProcAddr } });
+    //        if (NULL != ProcAddr) {
+    //            fRunTimeLinkSuccess = TRUE;
+    //            m_LoadedModules.insert({ _module.Name, new LoadedModule{_module.Name, _module.Path, hLib, ProcAddr } });
 
-                ActiveModuleName = _module.Name;
-                ActiveModule = (LanguageModule*)ProcAddr(_module.SourceFileExtension, "");
-                ActiveModule->OnOutputReceived = std::bind(&ModuleManager::HandleOutputReceived, this, std::placeholders::_1);
-                ActiveModule->OnErrorReceived = std::bind(&ModuleManager::HandleErrorReceived, this, std::placeholders::_1);
+    //            std::string moduleName = _module.Name;
+    //            ActiveModuleName = _module.Name;
+    //            //ActiveModule = (LanguageModule*)ProcAddr(_module.SourceFileExtension, "");
+    //            ActiveModule->OnOutputReceived = std::bind(&ModuleManager::HandleOutputReceived, this, std::placeholders::_1);
+    //            ActiveModule->OnErrorReceived = std::bind(&ModuleManager::HandleErrorReceived, this, std::placeholders::_1);
 
-                Modules.insert({ ActiveModuleName, ActiveModule});
-            }
-        }
+    //            Modules.insert({ ActiveModuleName, ActiveModule});
+    //        }
+    //    }
 
 
-        return fRunTimeLinkSuccess;
-    }
+    //    return fRunTimeLinkSuccess;
+    //}
 
-    bool ModuleManager::LoadModule(std::string moduleName, path modulePath, path querySourceFile, path libFilePath) {
+    bool ModuleManager::LoadModule(std::string moduleName, path modulePath, path querySourceFile, path libFilePath, LanguageModule** langModule) {
         HINSTANCE hLib;
         DLL ProcAddr{ 0 };
         BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
@@ -90,11 +91,9 @@ namespace querier {
             if (NULL != ProcAddr) {
                 fRunTimeLinkSuccess = TRUE;
                 m_LoadedModules.insert({ moduleName, new LoadedModule{moduleName, modulePath, hLib, ProcAddr } });
-                ActiveModuleName = moduleName;
-                ActiveModule = (LanguageModule*)ProcAddr(querySourceFile, libFilePath);
-                ActiveModule->OnOutputReceived = std::bind(&ModuleManager::HandleOutputReceived, this, std::placeholders::_1);
-                ActiveModule->OnErrorReceived = std::bind(&ModuleManager::HandleErrorReceived, this, std::placeholders::_1);
-                Modules.insert({ ActiveModuleName, ActiveModule });
+                *langModule = (LanguageModule*)ProcAddr(libFilePath);
+                (*langModule)->OnOutputReceivedQ = std::bind(&ModuleManager::HandleOutputReceived, this, std::placeholders::_1, std::placeholders::_2);
+                (*langModule)->OnErrorReceivedQ = std::bind(&ModuleManager::HandleErrorReceived, this, std::placeholders::_1, std::placeholders::_2);
             }
         }
 
@@ -102,19 +101,19 @@ namespace querier {
         return fRunTimeLinkSuccess;
     }
 
-    void ModuleManager::HandleOutputReceived(std::string ret) {
+    void ModuleManager::HandleOutputReceived(std::string ret, std::string queryName) {
         ApplicationMessage* response = new ApplicationMessage{
             MODULE,
-            { ret, RESULT_MODULE, SUCCESS_RESULT, ActiveModuleName }
+            { ret, RESULT_MODULE, SUCCESS_RESULT, queryName }
         };
         PostApplicationMessage(response);
         delete response;
     }
 
-    void ModuleManager::HandleErrorReceived(std::string ret) {
+    void ModuleManager::HandleErrorReceived(std::string ret, std::string queryName) {
         ApplicationMessage* response = new ApplicationMessage{
             MODULE,
-            { ret, RESULT_MODULE, ERROR_RESULT, ActiveModuleName }
+            { ret, RESULT_MODULE, ERROR_RESULT, queryName }
         };
         PostApplicationMessage(response);
         delete response;
@@ -131,10 +130,8 @@ namespace querier {
             case CONFIG_MODULE:
                 break;
             case CODESYNC_MODULE:
-                ActiveModule->SetFileContent(msg->content);
                 break;
             case INVOKE_MODULE:
-                ActiveModule->Invoke();
                 break;
         }
     }
@@ -170,9 +167,9 @@ namespace querier {
     void ModuleManager::CleanupLanguageModules() {
         if (Modules.size() > 0) {
             for (auto it : Modules) {
-                if (it.second != nullptr) {
-                    delete it.second;
-                    it.second = nullptr;
+                if (it.second->LanguageModule != nullptr) {
+                    delete it.second->LanguageModule;
+                    it.second->LanguageModule = nullptr;
                 }
             }
         }

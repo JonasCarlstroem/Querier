@@ -66,7 +66,7 @@ namespace querier {
         }
     }
 
-    void File::WriteFile(std::string content) {
+    void File::Write(std::string content) {
         if (!m_ioFile.is_open()) {
             m_ioFile.open(m_fileName, std::ofstream::out | std::ofstream::trunc);
             m_ioFile.write(content.c_str(), content.length());
@@ -88,6 +88,10 @@ namespace querier {
             return true;
         }
         return false;
+    }
+
+    void File::SetFileName(std::string fileName) {
+        m_fileName = fileName;
     }
 
     File File::FindFile(path file) {

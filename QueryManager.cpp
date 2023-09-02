@@ -23,7 +23,7 @@ namespace querier {
         json cont = *this;
         File::Create(queryConfigFile());
         File f(queryConfigFile());
-        f.WriteFile(cont.dump(1));
+        f.Write(cont.dump(1));
     }
 
     Query Query::LoadQueryConfigFile(path file) {
@@ -64,13 +64,12 @@ namespace querier {
         path configFile = WorkspaceDirectory / path(queryName) / path(queryName + ".json");
         Query loadQuery = Query::LoadQueryConfigFile(configFile);
 
-        const Module* mod = m_ModuleManager->get_Module(loadQuery.ModuleName);
-
-        if (m_ModuleManager->LoadModule(mod->Name, mod->Path, loadQuery.SourceFile, mod->Data.Library)) {
-            loadQuery.QueryLanguageModule = m_ModuleManager->ActiveModule;
-            loadQuery.ModuleVersion = m_ModuleManager->ActiveModule->GetModuleVersion();
-            m_ModuleManager->ActiveModule->GetFileContent(&loadQuery.SourceFileContent);
-        }
+        Module* mod = m_ModuleManager->get_Module(loadQuery.ModuleName);
+        loadQuery.QueryLanguageModule = m_ModuleManager->get_Module(loadQuery.ModuleName)->LanguageModule;
+        /*if (m_ModuleManager->LoadModule(mod->Name, mod->Path, loadQuery.SourceFile, mod->Data.Library, loadQuery.QueryLanguageModule)) {
+            loadQuery.ModuleVersion = loadQuery.QueryLanguageModule->GetModuleVersion();
+            loadQuery.QueryLanguageModule->GetFileContent(&loadQuery.SourceFileContent);
+        }*/
         return new Query(loadQuery);
     }
 
@@ -86,8 +85,9 @@ namespace querier {
 
         Query* newQuery = new Query{ queryName, queryDirectory.string(), _module, path(path(queryDirectory) / path(mod->Data.SourceFile)).string() };
 
-        if (m_ModuleManager->LoadModule(_module, mod->Path, newQuery->SourceFile, mod->Data.Library))
-            newQuery->QueryLanguageModule = m_ModuleManager->ActiveModule;
+        newQuery->QueryLanguageModule = m_ModuleManager->get_Module(newQuery->ModuleName)->LanguageModule;
+        /*if (m_ModuleManager->LoadModule(_module, mod->Path, newQuery->SourceFile, mod->Data.Library))
+            newQuery->QueryLanguageModule = m_ModuleManager->ActiveModule;*/
 
         newQuery->SaveQueryConfigFile();
 
@@ -148,23 +148,47 @@ namespace querier {
 
     void QueryManager::HandleCommand(QueryMessage* msg) {
         Query* query = nullptr;
-
-        if (Queries.count(msg->query_name))
+        bool isUnicode = false;
+        if (Queries.count(msg->query_name)) {
             query = Queries.find(msg->query_name)->second;
+            if (isUnicode = query->QueryLanguageModule->IsUnicode()) {
+                query->QueryLanguageModule->wSetSourceFile(str_to_wstr(query->SourceFile));
+            }
+            else {
+                query->QueryLanguageModule->SetSourceFile(query->SourceFile);
+            }
+        }
 
         switch (msg->cmd) {
             case INIT_QUERY:
                 msg->content = get_QueriesAsJson().dump();
                 break;
             case INIT_QUERY_MODULE:
-                query->QueryLanguageModule->GetFileContent(&msg->content);
+                if (query != nullptr) {
+                    if (isUnicode) {
+                        std::wstring content;
+                        query->QueryLanguageModule->wGetFileContent(&content);
+                        msg->content = wstr_to_str(content);
+                    }
+                    else
+                        query->QueryLanguageModule->GetFileContent(&msg->content);
+                }
                 break;
             case INVOKE_QUERY_MODULE:
-                query->QueryLanguageModule->Invoke();
+                if (query != nullptr) {
+                    query->QueryLanguageModule->Invoke(query->Name);
+                }
                 break;
             case CODESYNC_QUERY_MODULE:
-                query->QueryLanguageModule->SetFileContent(msg->content);
-                query->SaveQueryConfigFile();
+                if (query != nullptr) {
+                    if (isUnicode) {
+                        query->QueryLanguageModule->wSetFileContent(str_to_wstr(msg->content));
+                    }
+                    else 
+                        query->QueryLanguageModule->SetFileContent(msg->content);
+
+                    query->SaveQueryConfigFile();
+                }
                 break;
             case NEW_QUERY:
             {

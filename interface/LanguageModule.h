@@ -34,23 +34,32 @@ namespace querier {
 
     class __declspec(dllexport) LanguageModule : public ILanguage, public BaseModule {
     public:
-        LanguageModule(std::wstring, std::wstring, std::wstring, bool);
-        LanguageModule(std::string, std::string, std::string, bool);
+        LanguageModule(std::wstring, std::wstring, bool);
+        LanguageModule(std::string, std::string, bool);
 
         virtual ~LanguageModule();
 
-        bool GetFileContent(std::string*);
-        void SetFileContent(std::string);
         virtual void Initialize() = 0;
-        virtual void Invoke();
+        virtual void Invoke(std::string);
 
-        void SetSourceFile(std::string);
-        void wSetSourceFile(std::wstring);
+        bool GetFileContent(std::string*);
+        bool wGetFileContent(std::wstring*);
+
+        void SetFileContent(std::string);
+        void wSetFileContent(std::wstring);
 
         std::string GetSourceFile();
         std::wstring wGetSourceFile();
 
+        void SetSourceFile(std::string);
+        void wSetSourceFile(std::wstring);
+
         std::string GetModuleVersion();
+        std::wstring wGetModuleVersion();
+
+        bool IsUnicode() {
+            return m_isUnicode;
+        }
 
     protected:
         LanguageType m_LanguageType{ Interpreter };

@@ -11,7 +11,7 @@ namespace querier {
     public:
         virtual bool GetFileContent(std::string*) = 0;
         virtual void SetFileContent(std::string) = 0;
-        virtual void Invoke() = 0;
+        virtual void Invoke(std::string) = 0;
     };
 }   //namespace scriptpad
 

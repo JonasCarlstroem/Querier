@@ -33,13 +33,18 @@ namespace querier {
         bool Read(std::ifstream* std, std::string* ret);
         void ProcessStarted();
         void BeginOutputRead();
+        void BeginOutputRead(std::string);
         void EndOutputRead();
+
         void BeginErrorRead();
+        void BeginErrorRead(std::string);
         void EndErrorRead();
 
         std::function<void(std::string)> OnOutputReceived;
+        std::function<void(std::string, std::string)> OnOutputReceivedQ;
         std::function<void(std::string)> OnErrorReceived;
-
+        std::function<void(std::string, std::string)> OnErrorReceivedQ;
+        
     private:
         unsigned long dataWritten = 0, dataRead = 0;
 
@@ -58,7 +63,11 @@ namespace querier {
         PROCESS_INFORMATION& m_piProcInfo;
 
         void _read_output_loop(std::string* ret);
+        void _read_output_loop_p(std::string* ret, std::string param);
+
         void _read_error_loop(std::string* ret);
+        void _read_error_loop_p(std::string* ret, std::string param);
+
         bool _InitInput();
         bool _InitOutput();
         bool _InitError();

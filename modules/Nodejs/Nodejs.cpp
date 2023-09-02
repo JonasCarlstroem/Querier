@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "Nodejs.h"
 
-Nodejs::Nodejs(NodejsType type, std::string sourceFile, path libFilePath)
-    : LanguageModule("C:\\Program Files\\nodejs\\node.exe", sourceFile, "-v", false), m_type(type) {
+Nodejs::Nodejs(NodejsType type, std::string libFilePath)
+    : LanguageModule("C:\\Program Files\\nodejs\\node.exe", "-v", false), m_type(type) {
     m_SourceFileName = GetSourceFile();
     if (m_bIsModuleInstalled) {
         m_bRunAsModule = false;
+        m_isUnicode = false;
 
         SetNodejsType(ESM);
 
@@ -13,11 +14,12 @@ Nodejs::Nodejs(NodejsType type, std::string sourceFile, path libFilePath)
     }
 }
 
-Nodejs::Nodejs(NodejsType type, std::wstring sourceFile, path libFilePath)
-    : LanguageModule(L"C:\\Program Files\\nodejs\\node.exe", sourceFile, L"-v", false), m_type(type) {
+Nodejs::Nodejs(NodejsType type, std::wstring libFilePath)
+    : LanguageModule(L"C:\\Program Files\\nodejs\\node.exe", L"-v", false), m_type(type) {
     m_wSourceFileName = wGetSourceFile();
     if (m_bIsModuleInstalled) {
         m_bRunAsModule = false;
+        m_isUnicode = true;
 
         SetNodejsType(ESM);
         wAddImportLibrary(libFilePath);
@@ -32,7 +34,6 @@ void Nodejs::Initialize() {
 };
 
 bool Nodejs::SetNodejsType(NodejsType type) {
-    SetSourceFile(m_SourceFileName + m_mFileExtensions[type]);
     m_type = type;
     return true;
 };

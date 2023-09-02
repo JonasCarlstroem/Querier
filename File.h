@@ -6,7 +6,9 @@
 #include "Error.h"
 #include "Util.h"
 #include <Windows.h>
+#include <utility>
 #include <string>
+#include <string_view>
 #include <fstream>
 #include <filesystem>
 #include <ShlObj.h>
@@ -23,14 +25,22 @@ namespace querier {
         File(std::wstring, std::wstring, std::wstring);
         ~File();
 
+        File& operator=(const File&& file) noexcept {
+            m_fileName = file.m_fileName;
+            m_ioFile = std::fstream(m_fileName, std::ios::in | std::ios::out);
+            return *this;
+        };
+
         std::wstring Name;
         std::wstring FullName;
         std::wstring Path;
 
         void wWriteFile(std::wstring);
-        void WriteFile(std::string);
+        void Write(std::string);
         //bool Read(std::string*);
         bool Read(std::string*);
+
+        void SetFileName(std::string);
 
         static File FindFile(path file);
         static bool SearchFile(path sFile, File* pFile);

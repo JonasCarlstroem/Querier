@@ -13,7 +13,7 @@
 
 namespace querier {
     using namespace std::filesystem;
-    typedef LanguageModule*(_cdecl* DLL)(path, path);
+    typedef LanguageModule*(_cdecl* DLL)(path);
 
     // Loaded language module resources
     struct LoadedModule {
@@ -40,6 +40,9 @@ namespace querier {
         std::string Library;
         LanguageType Type{ Interpreter };
 
+        LanguageModule* LanguageModule;
+        bool UnicodeModule = true;
+
         ModuleData Data;
         path Path;
     };
@@ -53,12 +56,12 @@ namespace querier {
         ~ModuleManager();
         void Initialize(path, path);
 
-        bool LoadModule(Module);
-        bool LoadModule(std::string, path, path, path);
+        //bool LoadModule(Module);
+        bool LoadModule(std::string, path, path, path, LanguageModule**);
 
-        std::map<std::string, LanguageModule*> Modules;
-        std::string ActiveModuleName;
-        LanguageModule* ActiveModule = nullptr;
+        std::map<std::string, Module*> Modules;
+        /*std::string ActiveModuleName;
+        LanguageModule* ActiveModule = nullptr;*/
 
         path WorkingDirectory,
              ModulesDirectory;
@@ -71,8 +74,8 @@ namespace querier {
         //                    s_wDefaultSourceFileName,
         //                    s_wDefautSourceFileExtension;
 
-        const Module* get_Module(std::string name) {
-            return m_ModulesAvailable[name];
+        Module* get_Module(std::string name) {
+            return Modules[name];
         }
 
         void HandleCommand(ModuleMessage*);
@@ -90,8 +93,8 @@ namespace querier {
 
         bool load_Modules();
 
-        void HandleOutputReceived(std::string ret);
-        void HandleErrorReceived(std::string ret);
+        void HandleOutputReceived(std::string ret, std::string);
+        void HandleErrorReceived(std::string ret, std::string);
 
         void PostApplicationMessage(ApplicationMessage*);
 

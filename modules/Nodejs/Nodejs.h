@@ -33,8 +33,8 @@ class Nodejs : public LanguageModule {
 public:
     NPM Npm;
 
-    Nodejs(NodejsType, std::string, path);
-    Nodejs(NodejsType, std::wstring, path);
+    Nodejs(NodejsType, std::string);
+    Nodejs(NodejsType, std::wstring);
     ~Nodejs();
 
     void Initialize();
@@ -67,8 +67,8 @@ private:
     bool SetEnv();
 };
 
-extern "C" __declspec(dllexport) LanguageModule * CreateModule(path sourceFilePath = "", path libFilePath = "") {
-    LanguageModule* langModule = new Nodejs(ESM, sourceFilePath, libFilePath);
+extern "C" __declspec(dllexport) LanguageModule * CreateModule(path libFilePath = "") {
+    LanguageModule* langModule = new Nodejs(ESM, libFilePath.wstring());
 
     return langModule;
 }

@@ -218,6 +218,11 @@ namespace querier {
         m_threads.insert({ "output", std::thread(&Pipe::_read_output_loop, this, &m_retBuffer) });
     };
 
+    void Pipe::BeginOutputRead(std::string param) {
+        readingOutput = true;
+        m_threads.insert({ "output", std::thread(&Pipe::_read_output_loop_p, this, &m_retBuffer, param) });
+    }
+
 
     void Pipe::EndOutputRead() {
         readingOutput = false;
@@ -231,6 +236,10 @@ namespace querier {
         m_threads.insert({ "error", std::thread(&Pipe::_read_error_loop, this, &m_errBuffer) });
     }
 
+    void Pipe::BeginErrorRead(std::string param) {
+        readingError = true;
+        m_threads.insert({ "error", std::thread(&Pipe::_read_error_loop_p, this, &m_errBuffer, param) });
+    }
 
     void Pipe::EndErrorRead() {
         readingError = false;
@@ -248,10 +257,26 @@ namespace querier {
         }
     };
 
+    void Pipe::_read_output_loop_p(std::string* ret, std::string param) {
+        while (readingOutput) {
+            if (ReadOutput(ret)) {
+                OnOutputReceivedQ(*ret, param);
+            }
+        }
+    }
+
     void Pipe::_read_error_loop(std::string* ret) {
         while (readingError) {
             if (ReadError(ret)) {
                 OnErrorReceived(*ret);
+            }
+        }
+    }
+
+    void Pipe::_read_error_loop_p(std::string* ret, std::string param) {
+        while (readingError) {
+            if (ReadError(ret)) {
+                OnErrorReceivedQ(*ret, param);
             }
         }
     }

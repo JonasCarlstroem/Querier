@@ -5,36 +5,42 @@
 
 namespace querier {
     LanguageFilePaths::LanguageFilePaths(std::string mainModule, std::string sourceFile = "", std::string executableFile = "") : MainModule(mainModule) {
-        if(!sourceFile.empty())
+        if (!sourceFile.empty())
             SourceFile = sourceFile;
+        else
+            SourceFile = "";
 
         if (!executableFile.empty())
             ExecutableFile = executableFile;
+        else
+            ExecutableFile = "";
     }
 
     LanguageFilePaths::LanguageFilePaths(std::wstring _wMainModule, std::wstring _wSourceFile = L"", std::wstring _wExecutableFile = L"") : wMainModule(_wMainModule) {
         if (!_wSourceFile.empty())
             wSourceFile = _wSourceFile;
+        else
+            wSourceFile = L"";
 
         if (!_wExecutableFile.empty())
             wExecutableFile = _wExecutableFile;
+        else
+            wExecutableFile = L"";
     }
 
-    LanguageModule::LanguageModule(std::wstring wMainModule, std::wstring wSourceFile, std::wstring wVersionArg, bool runAsModule = true)
+    LanguageModule::LanguageModule(std::wstring wMainModule, std::wstring wVersionArg, bool runAsModule = true)
         : ILanguage(),
         BaseModule(wMainModule, wVersionArg, runAsModule),
-        m_LanguageFilePaths{ wMainModule },
-        m_File(wSourceFile) {
-        m_LanguageFilePaths.wSourceFile = wSourceFile;
+        m_LanguageFilePaths{ wMainModule } {
+        m_LanguageFilePaths.wSourceFile = L"";
         m_wszModuleVersion = str_to_wstr(wRun(wVersionArg));
     }
 
-    LanguageModule::LanguageModule(std::string mainModule, std::string sourceFile, std::string versionArg, bool runAsModule = true)
+    LanguageModule::LanguageModule(std::string mainModule, std::string versionArg, bool runAsModule = true)
         : ILanguage(),
         BaseModule(mainModule, versionArg, runAsModule),
-        m_LanguageFilePaths{ mainModule },
-        m_File(sourceFile) {
-        m_LanguageFilePaths.SourceFile = sourceFile;
+        m_LanguageFilePaths{ mainModule } {
+        m_LanguageFilePaths.SourceFile = "";
         m_szModuleVersion = Run(versionArg);
     }
 
@@ -42,7 +48,7 @@ namespace querier {
 
     }
 
-    void LanguageModule::Invoke() {
+    void LanguageModule::Invoke(std::string queryName) {
         if (m_bIsModuleInstalled) {
             switch (m_LanguageType) {
                 case Interpreter:
@@ -60,8 +66,8 @@ namespace querier {
                         EndOutputRead();
                         EndErrorRead();
                     };
-                    BeginOutputRead();
-                    BeginErrorRead();
+                    BeginOutputRead(queryName);
+                    BeginErrorRead(queryName);
                     Start();
                     break;
                 }
@@ -78,19 +84,22 @@ namespace querier {
         return m_File.Read(ret);
     };
 
+    bool LanguageModule::wGetFileContent(std::wstring* ret) {
+        std::string read;
+        if (m_File.Read(&read)) {
+            *ret = str_to_wstr(read);
+            return true;
+        }
+        return false;
+    }
+
     void LanguageModule::SetFileContent(std::string content) {
-        m_File.WriteFile(content);
+        m_File.Write(content);
     };
 
-
-    void LanguageModule::SetSourceFile(std::string fileName) {
-        m_LanguageFilePaths.SourceFile = fileName;
+    void LanguageModule::wSetFileContent(std::wstring content) {
+        m_File.Write(wstr_to_str(content));
     }
-
-    void LanguageModule::wSetSourceFile(std::wstring fileName) {
-        m_LanguageFilePaths.wSourceFile = fileName;
-    }
-
 
     std::string LanguageModule::GetSourceFile() {
         return m_LanguageFilePaths.SourceFile;
@@ -100,11 +109,28 @@ namespace querier {
         return m_LanguageFilePaths.wSourceFile;
     }
 
+    void LanguageModule::SetSourceFile(std::string fileName) {
+        m_LanguageFilePaths.SourceFile = fileName;
+        m_File.SetFileName(fileName);
+    }
+
+    void LanguageModule::wSetSourceFile(std::wstring fileName) {
+        m_LanguageFilePaths.wSourceFile = fileName;
+        m_File.SetFileName(wstr_to_str(fileName));
+    }
+
     std::string LanguageModule::GetModuleVersion() {
         if (m_szModuleVersion.size() > 0)
             return m_szModuleVersion;
         else if(m_wszModuleVersion.size() > 0)
             return wstr_to_str(m_wszModuleVersion);
+    }
+
+    std::wstring LanguageModule::wGetModuleVersion() {
+        if (m_wszMainModulePath.size() > 0)
+            return m_wszMainModulePath;
+        else if (m_szModuleVersion.size() > 0)
+            return str_to_wstr(m_szModuleVersion);
     }
 }
 
