@@ -40,14 +40,12 @@ namespace querier {
         std::string Library;
         LanguageType Type{ Interpreter };
 
-        LanguageModule* LanguageModule;
+        LanguageModule* LanguageModule = nullptr;
         bool UnicodeModule = true;
 
         ModuleData Data;
         path Path;
     };
-
-    using AvailableModules = std::map<std::string, Module*>;
 
     class ModuleManager {
     public:
@@ -71,6 +69,8 @@ namespace querier {
             return Modules[name];
         }
 
+        json get_ModulesAsJson();
+
         void HandleCommand(ModuleMessage*);
 
     private:
@@ -78,13 +78,15 @@ namespace querier {
         std::vector<path> m_InstalledModules;
         std::vector<path> m_WorkspaceItems;
         LoadedModules m_LoadedModules;
-        AvailableModules m_ModulesAvailable;
+        //AvailableModules m_ModulesAvailable;
 
         static std::map<std::wstring, path> m_wModules;
         static std::map<std::string, path> m_Modules;
         static std::map<std::string, Module*> m_mModules;
 
         bool load_Modules();
+
+        std::vector<Module> get_Modules();
 
         void HandleOutputReceived(std::string ret, std::string);
         void HandleErrorReceived(std::string ret, std::string);

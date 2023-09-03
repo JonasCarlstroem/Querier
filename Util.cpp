@@ -87,6 +87,8 @@ namespace querier {
                 PRINT_ERROR(L"MultiByteToWideChar");
                 return false;
             }
+            /*NORM_FORM::
+            if(!IsNormalizedString())*/
         }
         return true;
     }
@@ -102,14 +104,14 @@ namespace querier {
 
     //Convert UNICODE string to ANSI string
     bool wstr_to_str(const std::wstring& source, std::string* target) {
-        int convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, NULL, 0, NULL, NULL);
+        int convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), source.size(), NULL, 0, NULL, NULL);
         if (convertResult <= 0) {
             PRINT_ERROR(L"WideCharToMultiByte");
             return false;
         }
         else {
             target->resize(convertResult);
-            convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), -1, target->data(), (int)target->size(), NULL, NULL);
+            convertResult = WideCharToMultiByte(CP_ACP, 0, source.c_str(), source.size(), target->data(), (int)target->size(), NULL, NULL);
             if (convertResult <= 0) {
                 PRINT_ERROR(L"WideCharToMultiByte");
                 return false;

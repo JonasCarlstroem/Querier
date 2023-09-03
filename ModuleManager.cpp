@@ -18,7 +18,6 @@ namespace querier {
 
     ModuleManager::~ModuleManager() {
         CleanupLanguageModules();
-        CleanupAvailableModules();
         CleanupLoadedModules();
         m_MainWindow = nullptr;
     }
@@ -97,6 +96,18 @@ namespace querier {
         PostMessage(m_MainWindow->get_MainWindow(), WM_WEBVIEW, reinterpret_cast<WPARAM>(pjson), NULL);
     }
 
+    json ModuleManager::get_ModulesAsJson() {
+        return json(get_Modules());
+    }
+
+    std::vector<Module> ModuleManager::get_Modules() {
+        std::vector<Module> vec;
+        for (auto iterator : Modules) {
+            vec.push_back(*iterator.second);
+        }
+        return vec;
+    }
+
     void ModuleManager::HandleCommand(ModuleMessage* msg) {
         switch (msg->cmd) {
                 break;
@@ -104,7 +115,8 @@ namespace querier {
                 break;
             case CODESYNC_MODULE:
                 break;
-            case INVOKE_MODULE:
+            case GET_MODULES:
+                msg->content = get_ModulesAsJson().dump();
                 break;
         }
     }
@@ -122,17 +134,6 @@ namespace querier {
                     it.second = nullptr;
                 }
 
-            }
-        }
-    }
-
-    void ModuleManager::CleanupAvailableModules() {
-        if (m_ModulesAvailable.size() > 0) {
-            for (auto it : m_ModulesAvailable) {
-                if (it.second != nullptr) {
-                    delete it.second;
-                    it.second = nullptr;
-                }
             }
         }
     }

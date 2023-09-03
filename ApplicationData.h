@@ -23,8 +23,8 @@ namespace querier {
         NOMODULECOMMAND = 0,
         CONFIG_MODULE,
         CODESYNC_MODULE,
-        INVOKE_MODULE,
-        RESULT_MODULE
+        RESULT_MODULE,
+        GET_MODULES
     };
 
     enum QueryCommand {
@@ -93,8 +93,8 @@ namespace querier {
         { NOMODULECOMMAND, "no_module_command" },
         { CONFIG_MODULE, "config_module" },
         { CODESYNC_MODULE, "codesync_module" },
-        { INVOKE_MODULE, "invoke_module" },
-        { RESULT_MODULE, "result_module" }
+        { RESULT_MODULE, "result_module" },
+        { GET_MODULES, "get_modules" }
     });
 
     NLOHMANN_JSON_SERIALIZE_ENUM(QueryCommand, {

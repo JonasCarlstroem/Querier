@@ -26,7 +26,7 @@ namespace querier {
     void from_json(const json& j, ModuleMessage& m) {
         m.cmd = j.value("cmd", NOMODULECOMMAND);
         m.result_type = j.value("result_type", ModuleResultType::NOMESSAGETYPE);
-        m.module_name = j.value("module_name", "Nodejs");
+        m.module_name = j.value("module_name", "");
         m.content = j.value("content", "");
     }
 

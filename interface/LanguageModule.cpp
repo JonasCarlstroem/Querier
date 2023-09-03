@@ -85,12 +85,13 @@ namespace querier {
     };
 
     bool LanguageModule::wGetFileContent(std::wstring* ret) {
-        std::string read;
+        /*std::string read;
         if (m_File.Read(&read)) {
             *ret = str_to_wstr(read);
             return true;
         }
-        return false;
+        return false;*/
+        return m_File.wRead(ret);
     }
 
     void LanguageModule::SetFileContent(std::string content) {

@@ -1,9 +1,11 @@
 ﻿export type ModuleResultType = "success_result" | "error_result";
 export type CommandType = "module" | "query";
-export type ModuleCommand = "init_module" | "config_module" | "codesync_module" | "invoke_module" | "result_module";
+export type ModuleCommand = "init_module" | "config_module" | "codesync_module" | "invoke_module" | "result_module" | "get_modules";
 
 export type QueryCommand = "init_query" | "init_query_module" | "invoke_query_module" | "new_query" | "load_query" | "close_query" | "remove_query" | "codesync_query_module";
 export type MessageType = "success_result" | "error_result" | "query_response" | "module_response";
+
+export type LanguageType = "interpreter" | "compiler";
 
 export interface Message {
     content?: string;
@@ -16,7 +18,7 @@ export interface QueryMessage extends Message {
 
 export interface ModuleMessage extends Message {
     cmd: ModuleCommand;
-    module_name: string;
+    module_name?: string;
     result_type?: ModuleResultType;
 }
 
@@ -45,6 +47,13 @@ export class Query {
     };
     showError?: boolean = false;
     error: any = {};
+}
+
+export class Module {
+    name?: string;
+    sourceFileExtension?: string;
+    library?: string;
+    type?: LanguageType;
 }
 
 export function postWebMessage(appmessage: {cmdtype: CommandType, modmsg?: ModuleMessage, querymsg?: QueryMessage }) {

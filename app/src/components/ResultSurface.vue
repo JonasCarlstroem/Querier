@@ -261,6 +261,7 @@ export default {
     height: 100%;
     width: 100%;
     display: flex;
+    padding: 10px;
     /* border: 1px solid white; */
     overflow: auto;
 }

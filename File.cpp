@@ -104,8 +104,8 @@ namespace querier {
 
             ret->clear();
             m_wioFile.open(m_fileName, std::wfstream::in);
-            while (m_wioFile.read(buffer, sizeof(buffer)))
-                ret->append(buffer, sizeof(buffer));
+            while (m_wioFile.read(buffer, sizeof(buffer) / sizeof(wchar_t)))
+                ret->append(buffer, sizeof(buffer) / sizeof(wchar_t));
             ret->append(buffer, m_wioFile.gcount());
 
             m_wioFile.close();
@@ -165,8 +165,8 @@ namespace querier {
         if (wif.good()) {
             wchar_t buffer[BUFSIZE];
             std::wstring ret;
-            while (wif.read(buffer, sizeof(buffer)))
-                ret.append(buffer, sizeof(buffer));
+            while (wif.read(buffer, sizeof(buffer) / sizeof(wchar_t)))
+                ret.append(buffer, sizeof(buffer) / sizeof(wchar_t));
             ret.append(buffer, wif.gcount());
 
             return ret;
@@ -201,10 +201,9 @@ namespace querier {
     }
 
     bool Directory::GetSpecialFolder(KNOWNFOLDERID id, path* p) {
-        std::wstring fol[BUFSIZE];
-        wchar_t* fol2;
-        if (SUCCEEDED(SHGetKnownFolderPath(id, 0, NULL, &fol2))) {
-            *p = path(fol2);
+        wchar_t* fol;
+        if (SUCCEEDED(SHGetKnownFolderPath(id, 0, NULL, &fol))) {
+            *p = path(fol);
             return true;
         }
         return false;

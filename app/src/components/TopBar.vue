@@ -1,32 +1,47 @@
 ﻿<template>    
     <v-container fluid class="pa-0">
         <v-row no-gutters justify="start" class="pa-1">
-            <v-col cols="1">
-                <v-btn 
-                    icon="mdi-play" 
-                    density="compact" 
-                    @click="$emit('invoke')">
-                </v-btn>
-            </v-col>
-            <v-col cols="1">
-                <v-btn 
-                    icon="mdi-pause" 
+            <v-col cols="2">
+                <v-btn-group
                     density="compact"
-                    @click="">
-                </v-btn>
+                    class="ma-0 pa-0 h-auto">
+                    <v-btn
+                        flat
+                        stacked
+                        size="30"
+                        elevation="0"
+                        variant="text"
+                        @click="$emit('invoke')">
+                        <v-icon color="green-darken-3">mdi-play</v-icon>
+                    </v-btn>
+                    <v-btn
+                        flat
+                        stacked
+                        size="30"
+                        elevation="0"
+                        variant="text"
+                        @click="">
+                        <v-icon color="yellow-darken-1">mdi-pause</v-icon>
+                    </v-btn>
+                    <v-btn
+                        flat
+                        stacked
+                        size="30"
+                        elevation="0"
+                        variant="text"
+                        @click="">
+                        <v-icon color="red-darken-3">mdi-stop</v-icon>
+                    </v-btn>
+                </v-btn-group>
             </v-col>
             <v-col cols="1">
                 <v-btn 
-                    icon="mdi-stop" 
-                    density="compact"
-                    @click="">
-                </v-btn>
-            </v-col>
-            <v-col cols="1" offset="1">
-                <v-btn 
-                    icon="mdi-cog" 
-                    density="compact" 
+                    stacked
+                    size="30"
+                    elevation="0"
+                    variant="text"
                     @click="$emit('config')">
+                    <v-icon>mdi-cog</v-icon>
                 </v-btn>
             </v-col>
             <v-col cols="2" offset="1">
@@ -35,13 +50,18 @@
             <v-col cols="1">
                 <span>{{ queryName }}</span>
             </v-col>
-            <v-col cols="1" offset="2">
-                <v-btn
-                    icon="mdi-close"
-                    density="compact"
-                    @click="$emit('close-query')">
-                </v-btn>
-            </v-col>
+            <v-row no-gutters justify="end" class="h-auto">
+                <v-col cols="1">
+                    <v-btn
+                        stacked
+                        size="30"
+                        elevation="0"
+                        variant="text"
+                        @click="$emit('close-query')">
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-row>
         </v-row>
     </v-container>
 </template>

@@ -16,23 +16,24 @@
                 :align-tabs="'start'"
                 :height="20"
                 v-model="query"
-                :hide-slider="true">
-                <v-tab v-for="_tab in _tabs" :value="_tab.value" variant="plain" :border="true" style="border-color: white;">
+                :hide-slider="false">
+                <v-tab v-for="_tab in _tabs" :value="_tab.value" variant="plain">
                     {{ _tab.name }}
                 </v-tab>
-                <v-tab :border="true" style="border-color: white;" @click="postQueryNew">
-                    New Query
+                <v-tab @click="postNewQuery" varian="text">
+                    <!-- New Query -->
+                    <v-icon start>mdi-plus</v-icon>
                 </v-tab>
             </v-tabs>
             <v-window v-model="query" class="h-100">
                 <div class="query-surface">
                     <TopBar ref="topBar" :available-modules="availableLanguages" :query-name="query.query_name" :module-name="query.query_module" :module-version="query.query_module_version" v-model:active-module="currentLanguage"
-                        @update:active-language="listen" @invoke="onInvoke" @config="showSettingsWindow" />
+                        @update:active-language="listen" @invoke="invoke" @config="showSettingsWindow" />
                     <div class="surface">
                         <div class="editor" :style="{
                             height: `${(query.showResult ? resize.divider.vertical : 100)}%`
                         }">
-                            <EditorSurface ref="editorRef" :language="currentLanguage" @update:code="setCode" @loaded="postQueryInitialize" />
+                            <EditorSurface ref="editorRef" v-if="modulesInitialized" :language="currentLanguage" @update:code="setCode" @loaded="postInitQuery" />
                         </div>
                         <v-divider id="dividervertical" class="dividev" @mousedown="startDragging('vertical')" thickness="10"
                             v-if="query.showResult"></v-divider>
@@ -61,7 +62,7 @@ import Settings from './components/Settings.vue';
 //@ts-ignore
 import type { ILanguage } from '@/interface/ILanguage';
 import { postWebMessage, split } from './Utils';
-import type { CommandType, ModuleCommand, QueryCommand, Message, Query, ModuleMessage, QueryMessage } from './Utils';
+import type { CommandType, ModuleCommand, QueryCommand, Message, Query, Module, ModuleMessage, QueryMessage } from './Utils';
 
 //####TODO
 // wait for init message before creating editor
@@ -80,7 +81,7 @@ export default {
         const editorRef = ref<InstanceType<typeof EditorSurface> | null>(null);
         const resultRef = ref<InstanceType<typeof ResultSurface> | null>(null);
 
-        const availableLanguages: ILanguage[] = [
+        const availableModules: ILanguage[] = [
             { name: "JavaScript", id: "javascript", value: "function init() {\n\tconsole.log('hello')\n}" },
             { name: "TypeScript", id: "typescript", value: "function init(): void {\n\tconsole.log('hello')\n}" },
             { name: "HTML", id: "html", value: "<html>\n\t<head>\n\n</head>\n\r<body>\n\n</body>" },
@@ -89,11 +90,11 @@ export default {
             { name: "C++", id: "cplusplus", value: "int main(int argc, const** argv) {\nstd::cout << \"Hello, world!\"}" }
         ];
 
-        const defaultLanguage = availableLanguages[0];
-        const currentLanguage = toRef(defaultLanguage);
+        const defaultModule = availableModules[0];
+        const currentModule = toRef(defaultModule);
 
         const state = reactive({
-            code: currentLanguage.value.value as string,
+            code: currentModule.value.value as string,
             // showResult: false as boolean,
             // isRunning: false as boolean,
             // result: {} as any,
@@ -102,14 +103,17 @@ export default {
             editorHeight: 100 as number,
             resize: {
                 divider: {
-                    horizontal: 15,
-                    vertical: 70
+                    horizontal: 8,
+                    vertical: 75
                 },
                 direction: ""
             },
             showSettings: false,
             queries: [] as Query[],
-            query: {} as Query
+            query: {} as Query,
+            modules: [] as Module[],
+            modulesInitialized: false,
+            queriesInitialized: false
         });
 
         return {
@@ -117,9 +121,9 @@ export default {
             resultRef,
             actionBar,
             topBar,
-            availableLanguages,
-            defaultLanguage,
-            currentLanguage,
+            availableLanguages: availableModules,
+            defaultLanguage: defaultModule,
+            currentLanguage: currentModule,
             ...toRefs(state)
         };
     },
@@ -129,6 +133,23 @@ export default {
             const { cmdtype, modmsg, querymsg } = e.data;
             this.handleCommand(cmdtype, modmsg, querymsg);
         });
+
+        document.addEventListener(
+            "keydown",
+            (event) => {
+                const { key } = event;
+                switch(key) {
+                    case "F5":
+                        this.invoke();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
+    },
+    mounted() {
+        this.postGetModules();
     },
     methods: {
         showSettingsWindow(opt: any) {
@@ -139,9 +160,9 @@ export default {
         },
         getSizePercentage(left: number, right: number) {
             const percentage = (left / right) * 100;
-            if (percentage >= 10 && percentage <= 90)
+            if (percentage >= 5 && percentage <= 95)
                 return Number(percentage.toFixed(2));
-            return percentage <= 10 ? 10 : 90;
+            return percentage <= 5 ? 5 : 95;
         },
         handleResizeVertical(e: any) {
             const topBarHeight = this.topBar!.$el.clientHeight;
@@ -149,14 +170,6 @@ export default {
         },
         handleResizeHorizontal(e: any) {
             this.resize.divider.horizontal = this.getSizePercentage(e.pageX, window.innerWidth);
-        },
-        handleDragging(e: any) {
-            console.log(e);
-            const percentage = (e.pageX / window.innerWidth) * 100;
-
-            if (percentage >= 10 && percentage <= 90) {
-                this.resize.divider.horizontal = Number(percentage.toFixed(2));
-            }
         },
         startDragging(direction: string) {
             console.log(direction);
@@ -178,7 +191,7 @@ export default {
             this.currentLanguage = language;
             console.log("Causes error");
         },
-        onInvoke() {
+        invoke() {
             this.editorHeight = 50;
             this.query.showResult = true;
             this.query.result = {
@@ -188,13 +201,13 @@ export default {
             };
             this.query.error = {};
             this.query.showError = false;
-            this.postInvoke();
+            this.postInvokeQueryModule();
             this.query.isRunning = true;
             this.editorRef?.resizeEditor();
         },
         setCode(code: string) {
             this.query.query_source_content = code;
-            this.postCodeSync(code);
+            this.postCodeSyncQueryModule(code);
         },
         handleCommand(cmdtype: CommandType, modmsg: ModuleMessage, querymsg: QueryMessage) {
             switch (cmdtype) {
@@ -208,6 +221,12 @@ export default {
         },
         handleModuleCommand(message: ModuleMessage) {
             switch (message.cmd) {
+                case "get_modules":
+                    const modules = JSON.parse(message!.content!);
+                    this.modules = modules;
+                    this.modulesInitialized = true;
+                    console.log(modules);
+                    break;
                 case "init_module":
                     console.log(message);
                     this.code = message.content!;
@@ -231,7 +250,7 @@ export default {
                     let queries = JSON.parse(message.content!);
                     this.queries = queries;
                     this.query = queries[0];
-                    this.postModuleInitialize();
+                    this.postInitQueryModule();
                     break;
                 case "init_query_module":
                     this.query.query_source_content = message.content!;
@@ -312,7 +331,15 @@ export default {
                 }
             }
         },
-        postQueryInitialize() {
+        postGetModules() {
+            postWebMessage({
+                cmdtype: "module",
+                modmsg: {
+                    cmd: "get_modules"
+                }
+            });
+        },
+        postInitQuery() {
             postWebMessage({ 
                 cmdtype: "query", 
                 querymsg: { 
@@ -321,7 +348,7 @@ export default {
                 } 
             });
         },
-        postQueryNew() {
+        postNewQuery() {
             postWebMessage({ 
                 cmdtype: "query", 
                 querymsg: {
@@ -330,7 +357,7 @@ export default {
                 } 
             });
         },
-        postModuleInitialize() {
+        postInitQueryModule() {
             postWebMessage({ 
                 cmdtype: "query", 
                 querymsg: {
@@ -339,7 +366,7 @@ export default {
                 } 
             });
         },
-        postInvoke() {
+        postInvokeQueryModule() {
             postWebMessage({ 
                 cmdtype: "query", 
                 querymsg: { 
@@ -348,7 +375,7 @@ export default {
                 } 
             });
         },
-        postConfig() {
+        postConfigModule() {
             postWebMessage({ 
                 cmdtype: "module", 
                 modmsg: { 
@@ -357,7 +384,7 @@ export default {
                 } 
             });
         },
-        postCodeSync(content: string) {
+        postCodeSyncQueryModule(content: string) {
             postWebMessage({
                 cmdtype: "query", 
                 querymsg: { 

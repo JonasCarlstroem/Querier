@@ -4,7 +4,8 @@
         :modelValue="showDialog"
         @update:modelValue="$emit('update:modelValue', showDialog)">
         <v-sheet>
-            <v-toolbar>
+            <v-toolbar
+                :height="40">
                 <v-btn
                     icon
                     dark
@@ -21,19 +22,18 @@
                     </v-btn>
                 </v-toolbar-items>
             </v-toolbar>
-            <v-card>
-                <v-card-title>
-                    <span class="text-h5">Settings</span>
-                </v-card-title>
-                <v-card-text>
+            <v-tabs 
+                v-model="tab">
+                <v-tab v-for="_tab in tabs" :value="_tab.value">{{ _tab.title }}</v-tab>
+            </v-tabs>
+            <v-window
+                v-model="tab">
+                <v-sheet>
                     <v-container>
-                        <v-row>
-                            <v-col cols="12" sm="6" md="4">
-                            </v-col>
-                        </v-row>
+                        
                     </v-container>
-                </v-card-text>
-            </v-card>
+                </v-sheet>
+            </v-window>
         </v-sheet>
     </v-dialog>
 </template>
@@ -41,23 +41,45 @@
 export default {
     props: {
         modelValue: Boolean,
-        showDialog: Boolean
+        showDialog: Boolean,
+        querySettings: {
+            type: Object,
+            default: { }
+        },
+        moduleSettings: {
+            type: Object,
+            default: { }
+        }
     },
     emits: [
         'update:modelValue'
     ],
     data() {
         return {
-            _showDialog: false
+            _showDialog: false,
+            tabs: [
+                {
+                    title: "Query settings",
+                    value: "qsett"
+                },
+                {
+                    title: "Module settings",
+                    value: "msett"
+                }
+            ],
+            tab: { }
         }
     },
     mounted() {
         this._showDialog = this.showDialog;
+        this.tab = this.tabs[0]
     },
     watch: {
         showDialog(old, next) {
             this._showDialog = next;
         }
+    },
+    computed: {
     }
 }
 </script>
