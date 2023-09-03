@@ -3,17 +3,28 @@
 
 #include "Application.h"
 
-//####Todo####
-//###General###
-// support for multiple queries (mod handler)
-// integrate http library
+//--->Todo<---
+//-->General<--
+// - integrate http library (maybe)
+// - integrat zip library (when saving queries, 
+// zip files together, use custom file
+// extension which will be registered with
+// the operating system when instslled
+// - implement shared configuration class
+// for language modules with key value 
+// semantics which can be loaded and set
+// in the gui
+// - implement query configuration which
+// can be set inte the gui
 //
-//###Node###
-// implement npm with gui
-// implement version checking (including check to see if nvm is installed)
+//-->Node<--
+// - implement npm with gui
 // 
-//###CSharp###
-// imolement as module
+//-->C#<--
+// - implement as module
+//
+//-->C++<--
+// - implement as module
 
 using namespace querier;
 
