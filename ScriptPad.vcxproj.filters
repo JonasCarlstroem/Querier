@@ -13,18 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Modules">
-      <UniqueIdentifier>{c6119ac4-85bc-413d-a3fc-69e8e45d0fa2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Modules\Base">
-      <UniqueIdentifier>{2e56de09-4952-4723-9235-4d7ba6065aed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Modules\Base\Interface">
-      <UniqueIdentifier>{7d43b9f1-ea5b-45b9-8c64-b2329ec4bb58}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Queries">
-      <UniqueIdentifier>{50a806b7-803a-4263-9410-8d48bdb80fd0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Error.cpp">
@@ -54,22 +42,22 @@
     <ClCompile Include="Stopwatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ApplicationData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ModuleManager.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="interface/BaseModule.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="interface/CmdModule.cpp">
-      <Filter>Modules\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="interface/LanguageModule.cpp">
-      <Filter>Modules\Base</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="QueryManager.cpp">
-      <Filter>Queries</Filter>
-    </ClCompile>
-    <ClCompile Include="ApplicationData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,31 +93,31 @@
     <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleManager.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interface/BaseModule.h">
-      <Filter>Modules\Base</Filter>
+    <ClInclude Include="ApplicationData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interface/CmdModule.h">
-      <Filter>Modules\Base</Filter>
+    <ClInclude Include="BaseModule.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interface/LanguageModule.h">
-      <Filter>Modules\Base</Filter>
+    <ClInclude Include="CmdModule.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interface/ILanguage.h">
-      <Filter>Modules\Base\Interface</Filter>
+    <ClInclude Include="ILanguage.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interface/IModule.h">
-      <Filter>Modules\Base\Interface</Filter>
+    <ClInclude Include="IModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="QueryManager.h">
-      <Filter>Queries</Filter>
-    </ClInclude>
-    <ClInclude Include="ApplicationData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
