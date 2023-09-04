@@ -3,7 +3,7 @@
 //#include "interface/LanguageModule.h"
 //#include "Npm.h"
 
-#include "../../interface/LanguageModule.h"
+#include "../../LanguageModule.h"
 #include "Npm.h"
 #include <string>
 #include <vector>

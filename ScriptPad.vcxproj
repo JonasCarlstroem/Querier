@@ -134,9 +134,9 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="ApplicationData.cpp" />
-    <ClCompile Include="interface/BaseModule.cpp" />
-    <ClCompile Include="interface/CmdModule.cpp" />
-    <ClCompile Include="interface/LanguageModule.cpp" />
+    <ClCompile Include="BaseModule.cpp" />
+    <ClCompile Include="CmdModule.cpp" />
+    <ClCompile Include="LanguageModule.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -156,13 +156,13 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="ApplicationData.h" />
     <ClInclude Include="AppWindow.h" />
-    <ClInclude Include="interface/BaseModule.h" />
-    <ClInclude Include="interface/CmdModule.h" />
+    <ClInclude Include="BaseModule.h" />
+    <ClInclude Include="CmdModule.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="File.h" />
-    <ClInclude Include="interface/ILanguage.h" />
-    <ClInclude Include="interface/IModule.h" />
-    <ClInclude Include="interface/LanguageModule.h" />
+    <ClInclude Include="ILanguage.h" />
+    <ClInclude Include="IModule.h" />
+    <ClInclude Include="LanguageModule.h" />
     <ClInclude Include="ModuleManager.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Process.h" />
